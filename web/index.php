@@ -1,5 +1,7 @@
 <?php
 
+use VK\Client\VKApiClient;
+
 define("CONFIRMATION_TOKEN_VK_BOT", getenv("CONFIRMATION_TOKEN_VK_BOT")); //подтверждение
 define("TOKEN_VK_BOT", getenv("TOKEN_VK_BOT")); //Ключ доступа сообщества
 define("SECRET_KEY_VK_BOT", getenv("SECRET_KEY_VK_BOT")); //Secret key
@@ -51,7 +53,7 @@ switch ($data->type) {
                 'attachment' => '' //Вложение
             );
 
-            $vk = new \VK\Client\VKApiClient();
+            $vk = new VKApiClient();
 
             $vk->messages()->send(TOKEN_VK_BOT, $request_params);
 
