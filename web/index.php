@@ -56,7 +56,7 @@ switch ($data->type) {
             );
 
             $vk = new VK\Client\VKApiClient();
-            $text = " ";
+            error_log(gettype($data->object->text));
             $text = explode(' ', $data->object->text);
 
             if (strcasecmp($text[0], "/info") == 0 || strcasecmp($text[0], "/") == 0 || strcasecmp($text[0], "/инфо") == 0 || strcasecmp($text[0], "/инфа") == 0) {
