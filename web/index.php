@@ -55,9 +55,10 @@ switch ($data->type) {
 
             $vk = new VKApiClient();
 
-        $vk->messages()->send(TOKEN_VK_BOT, $request_params);
+            $vk->messages()->send(TOKEN_VK_BOT, $request_params);
+
+            echo "ok";
         break;
 
 }
-echo "ok";
 ?>
