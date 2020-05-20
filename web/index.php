@@ -1,5 +1,5 @@
 <?php
-
+require('../vendor/autoload.php');
 
 define("CONFIRMATION_TOKEN_VK_BOT", getenv("CONFIRMATION_TOKEN_VK_BOT")); //подтверждение
 define("TOKEN_VK_BOT", getenv("TOKEN_VK_BOT")); //Ключ доступа сообщества
@@ -42,7 +42,7 @@ switch ($data->type) {
 
         case 'message_new':
             $request_params = array(
-                'message' => "" , //сообщение
+                'message' => "Я ебал этот PHP" , //сообщение
                 'access_token' => TOKEN_VK_BOT, //токен для отправки от имени сообщества
                 'peer_id' => $data->object->message->peer_id, //айди чата
                 'random_id' => 0, //0 - не рассылка
@@ -52,7 +52,7 @@ switch ($data->type) {
                 'attachment' => '' //Вложение
             );
 
-            $vk = new VK\Client\VKApiClient('5.101');
+            $vk = new VK\Client\VKApiClient();
 
             $vk->messages()->send(TOKEN_VK_BOT, $request_params);
 
