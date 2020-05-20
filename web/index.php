@@ -18,7 +18,7 @@ $server = $url["host"];
 $username = $url["user"];
 $password = $url["pass"];
 $db = substr($url["path"],1); //база данных
-error_log($server.' <- сервер '.$username.' <- имя пользователя '.$password.' <- пароль '.$db.' <- база данных'); //Если нужно узнать данные бд
+//error_log($server.' <- сервер '.$username.' <- имя пользователя '.$password.' <- пароль '.$db.' <- база данных'); //Если нужно узнать данные бд
 $mysqli = new mysqli($server, $username, $password,$db); //Подключаемся
 
 if ($mysqli->connect_error) {//проверка подключились ли мы
@@ -56,6 +56,7 @@ switch ($data->type) {
             );
 
             $vk = new VK\Client\VKApiClient();
+            $text = " ";
             $text = explode(' ', $data->object->text);
 
             if (strcasecmp($text[0], "/info") == 0 || strcasecmp($text[0], "/") == 0 || strcasecmp($text[0], "/инфо") == 0 || strcasecmp($text[0], "/инфа") == 0) {
@@ -111,6 +112,6 @@ function createTabs($chat_id, $mysqli){
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`) VALUES (1, 5)");
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`) VALUES (2, 6, 2)");
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
-    $mysqli->query("INSERT INTO `". $chat_id ."_settings` (`autoremovepred`) VALUES (". time() + 2419200 .")");
+    $mysqli->query("INSERT INTO `". $chat_id ."_settings` (`autoremovepred`) VALUES (". (time() + 2419200) .")");
 }//2419200
 ?>
