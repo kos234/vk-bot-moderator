@@ -1,5 +1,6 @@
 <?php
 
+
 use VK\Client\VKApiClient;
 
 define("CONFIRMATION_TOKEN_VK_BOT", getenv("CONFIRMATION_TOKEN_VK_BOT")); //подтверждение

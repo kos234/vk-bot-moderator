@@ -817,7 +817,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "VK\\": "src/VK"
+                    "VK\\": "vkcom/vk-php-sdk"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
