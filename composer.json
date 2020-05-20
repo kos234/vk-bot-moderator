@@ -8,5 +8,11 @@
   },
   "require-dev": {
     "heroku/heroku-buildpack-php": "*"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "VK\\": "vkcom/vk-php-sdk"
+    }
   }
 }
