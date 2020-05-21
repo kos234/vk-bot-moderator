@@ -27,10 +27,6 @@ if ($mysqli->connect_error) {//проверка подключились ли м
 $mysqli->query("SET NAMES 'utf8'");
 
 $data = json_decode(file_get_contents('php://input'));
-ob_start();
-var_dump($data);
-error_log(ob_get_contents());
-ob_end_clean();
 //Проверяем secretKey
 if(strcmp($data->secret, SECRET_KEY_VK_BOT) !== 0 && strcmp($data->type, 'confirmation') !== 0)
     return;//Если не наш, выдаем ошибку серверу vk
@@ -57,7 +53,10 @@ switch ($data->type) {
                 'v' => VERSION_API_VK, //Версия API Vk
                 'attachment' => '' //Вложение
             );
-
+            ob_start();
+            var_dump($data->object->text);
+            error_log(ob_get_contents());
+            ob_end_clean();
             $vk = new VK\Client\VKApiClient();
             $text = explode(' ', $data->object->text);
 
