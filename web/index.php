@@ -106,7 +106,7 @@ switch ($data->type) {
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Info user") == 0 || strcasecmp($text[0] . " " .$text[1], "/Инфо пользователя") == 0){
                 if(isset($text[3]) || isset($data->object->message->reply_message)){
 
-                }else $request_params["message"] = "Вы должны"
+                }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
             }
 
 
