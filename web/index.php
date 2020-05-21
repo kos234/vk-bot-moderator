@@ -100,15 +100,17 @@ switch ($data->type) {
 
 function createTabs($chat_id, $mysqli, $vk){
 
-    if($mysqli->query("CREATE TABLE`" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL,`is_admin` TinyInt( 1 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;")){
+    if($mysqli->query("CREATE TABLE`" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;")){
         $res = json_decode(json_encode($vk->messages()->getConversationMembers(TOKEN_VK_BOT,array("peer_id" => $chat_id))));
-//        error_log("-----------------------------");
-//        ob_start();
-//        var_dump($res);
-//        error_log(ob_get_contents());
-//        ob_end_clean();
+        error_log("-----------------------------");
+        ob_start();
+        var_dump($res);
+        error_log(ob_get_contents());
+        ob_end_clean();
         for ($i = 0; isset($res->responce->items[$i]); $i++){
-            $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `is_admin`) VALUES ('". $res->responce->items[$i]->member_id ."', ". (int) $res->responce->items[$i]->is_admin .")");
+            $rang = 0;
+            if($res->responce->items[$i]->is_admin) $rang = 5;
+            $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->responce->items[$i]->member_id ."', ". $rang .")");
         }
     }
 
