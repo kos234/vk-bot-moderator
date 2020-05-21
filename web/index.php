@@ -101,7 +101,7 @@ switch ($data->type) {
 function createTabs($chat_id, $mysqli, $vk){
 
     if($mysqli->query("CREATE TABLE`" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL,`is_admin` TinyInt( 1 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;")){
-        $res = json_decode($vk->messages()->getConversationMembers(TOKEN_VK_BOT,array("peer_id" => $chat_id)));
+        $res = json_decode(json_encode($vk->messages()->getConversationMembers(TOKEN_VK_BOT,array("peer_id" => $chat_id))));
 //        error_log("-----------------------------");
 //        ob_start();
 //        var_dump($res);
