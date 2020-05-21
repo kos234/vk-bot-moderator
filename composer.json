@@ -6,7 +6,8 @@
     "symfony/twig-bridge": "^3",
     "vkcom/vk-php-sdk": "^5.101",
     "ext-mysqli": "*",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-sqlite": "*"
   },
   "require-dev": {
     "heroku/heroku-buildpack-php": "*"

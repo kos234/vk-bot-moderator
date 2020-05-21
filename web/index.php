@@ -100,12 +100,10 @@ switch ($data->type) {
 }
 
 function createTabs($chat_id, $mysqli){
-    try {
-        $mysqli->query("CREATE TABLE `" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
-        error_log("no");
-    }catch (SQLiteException $e){
-        error_log("eee");
-    }
+
+    $res =  $mysqli->query("CREATE TABLE `" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
+        error_log($res);
+
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
