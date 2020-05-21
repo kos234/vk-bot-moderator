@@ -40,8 +40,10 @@ switch ($data->type) {
         break;
 
         case 'message_new':
+            $vk = new VK\Client\VKApiClient();
             if($data->object->message->peer_id != $data->object->message->from_id)
                 createTabs($data->object->message->peer_id, $mysqli, $vk);
+            $text = explode(' ', $data->object->message->text);
 
             $request_params = array(
                 'message' => "" , //сообщение
@@ -53,9 +55,6 @@ switch ($data->type) {
                 'v' => VERSION_API_VK, //Версия API Vk
                 'attachment' => '' //Вложение
             );
-
-            $vk = new VK\Client\VKApiClient();
-            $text = explode(' ', $data->object->message->text);
 
             if (strcasecmp($text[0], "/info") == 0 || strcasecmp($text[0], "/") == 0 || strcasecmp($text[0], "/инфо") == 0 || strcasecmp($text[0], "/инфа") == 0) {
                 $request_params['message'] = "&#129302;Bot moderator by kos v2.0.0\n\n"
