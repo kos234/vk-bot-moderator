@@ -41,7 +41,7 @@ switch ($data->type) {
 
         case 'message_new':
             if($data->object->message->peer_id != $data->object->message->from_id)
-                createTabs($data->object->message->peer_id, $mysqli);
+                createTabs($data->object->message->peer_id, $mysqli, $vk);
 
             $request_params = array(
                 'message' => "" , //сообщение
@@ -99,10 +99,15 @@ switch ($data->type) {
 
 }
 
-function createTabs($chat_id, $mysqli){
+function createTabs($chat_id, $mysqli, $vk){
 
-    $res =  $mysqli->query("CREATE TABLE IF NOT EXISTS`" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
-        error_log($res);
+    if($mysqli->query("CREATE TABLE`" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL,`is_admin` TinyInt( 1 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;")){
+        $vk = new VK\Client\VKApiClient();
+        $res = json_decode($vk->messages()->getConversationMembers(TOKEN_VK_BOT,$chat_id));
+        for ($i = 0; isset($res->responce->items[$i]); $i++){
+            $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `is_admin`) VALUES ('". $res->responce->items[$i]->member_id ."', ". (int) $res->responce->items[$i]->is_admin .")");
+        }
+    }
 
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
