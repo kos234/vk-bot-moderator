@@ -5,6 +5,7 @@ define("CONFIRMATION_TOKEN_VK_BOT", getenv("CONFIRMATION_TOKEN_VK_BOT")); //по
 define("TOKEN_VK_BOT", getenv("TOKEN_VK_BOT")); //Ключ доступа сообщества
 define("SECRET_KEY_VK_BOT", getenv("SECRET_KEY_VK_BOT")); //Secret key
 define("VERSION_API_VK", 5.103); //Версия апи
+define("GROUP_ID", getenv("GROUP_ID")); //Айди группы С МИНУСОМ "-"
 
 
 ini_set('max_execution_time', 900);
@@ -40,6 +41,9 @@ switch ($data->type) {
         break;
 
         case 'message_new':
+            $vk = new VK\Client\VKApiClient();
+            $text = explode(' ', $data->object->message->text);
+
             $request_params = array(
                 'message' => "" , //сообщение
                 'access_token' => TOKEN_VK_BOT, //токен для отправки от имени сообщества
@@ -50,13 +54,6 @@ switch ($data->type) {
                 'v' => VERSION_API_VK, //Версия API Vk
                 'attachment' => '' //Вложение
             );
-
-            $vk = new VK\Client\VKApiClient();
-            if($data->object->message->peer_id != $data->object->message->from_id)
-                if(createTabs($data->object->message->peer_id, $mysqli, $vk)){
-                    $request_params = "Для моей работы мне необходимы права администратора. Выдайте мне права и напишите /Начать";
-                }
-            $text = explode(' ', $data->object->message->text);
 
             if (strcasecmp($text[0], "/info") == 0 || strcasecmp($text[0], "/") == 0 || strcasecmp($text[0], "/инфо") == 0 || strcasecmp($text[0], "/инфа") == 0) {
                 $request_params['message'] = "&#129302;Bot moderator by kos v2.0.0\n\n"
@@ -88,11 +85,31 @@ switch ($data->type) {
                     . "&#128214;Информация о проекте:\n"
                     . "&#128100;Создатель: https://vk.com/i_love_python\n"
                     . "&#128064;Исходные код проекта и гайд по подключению: https://github.com/kos234/Vk-bot-moderator\n";
-            }elseif (strcasecmp($text[0], "/начать") == 0){
-                start($data->object->message->peer_id, $mysqli, $vk);
+            }elseif (strcasecmp($text[0], "/начать") == 0 ||strcasecmp($text[0], "/start") == 0){
+                $res = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id."_users` WHERE `id` = '". $data->object->message->from_id ."'");
+                $resAdmin = $res->fetch_assoc();
+                if($resAdmin["rang"] == 5) {
+                    try {
+                        start($data->object->message->peer_id, $mysqli, $vk);
+                    } catch (\VK\Exceptions\Api\VKApiMessagesChatUserNoAccessException $e) {
+                        $request_params["message"] = "one";
+                    } catch (\VK\Exceptions\VKApiException $e) {
+                        $request_params["message"] = "two";
+                    } catch (\VK\Exceptions\VKClientException $e) {
+                        $request_params["message"] = "three";
+                    }
+                }else $request_params["message"] = "Начать может только администратор!";
             }
 
 
+        if(isset($data->object->message->action->type))//Инвайты
+            if($data->object->message->action->type == "chat_invite_user" || $data->object->message->action->type == "chat_invite_user_by_link"){
+                if($data->object->message->action->member_id == GROUP_ID){
+                    createTabs($data->object->message->peer_id, $mysqli, $vk);
+                    $request_params["message"] = "Для моей работы мне необходимы права администратора. Выдайте права и напишите /начать";
+                }
+
+            }
 
 
             $vk->messages()->send(TOKEN_VK_BOT, $request_params);
@@ -102,31 +119,25 @@ switch ($data->type) {
 
 }
 function start($chat_id, $mysqli, $vk){
-    try {
         $res = json_decode(json_encode($vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id))));
         for ($i = 0; isset($res->items[$i]); $i++){
             $rang = 0;
             if($res->items[$i]->is_admin) $rang = 5;
             $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->items[$i]->member_id ."', ". $rang .")");
         }
+
         $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`) VALUES (1, 5)");
         $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`) VALUES (2, 6, 2)");
         $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
         $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`) VALUES (". $chat_id .",". (time() + 2419200) .")");
-    } catch (\VK\Exceptions\Api\VKApiMessagesChatUserNoAccessException $e) {
-        error_log("one");
-    } catch (\VK\Exceptions\VKApiException $e) {
-        error_log("two");
-    } catch (\VK\Exceptions\VKClientException $e) {
-        error_log("three");
-    }
 }
+
 function createTabs($chat_id, $mysqli, $vk){
-    $resUser = $mysqli->query("CREATE TABLE `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
-    $resModers = $mysqli->query("CREATE TABLE `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
-    $resLeave = $mysqli->query("CREATE TABLE `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL,`autokick` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL, `tracking` VarChar( 255 ) NULL, `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
-    $resModersLimit = $mysqli->query("CREATE TABLE `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
-    return $resUser && $resModers && $resLeave && $resModersLimit;
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 }
 ?>
