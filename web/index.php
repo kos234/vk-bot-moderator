@@ -53,12 +53,9 @@ switch ($data->type) {
                 'v' => VERSION_API_VK, //Версия API Vk
                 'attachment' => '' //Вложение
             );
-            ob_start();
-            var_dump($data->object->text);
-            error_log(ob_get_contents());
-            ob_end_clean();
+
             $vk = new VK\Client\VKApiClient();
-            $text = explode(' ', $data->object->text);
+            $text = explode(' ', $data->object->message->text);
 
             if (strcasecmp($text[0], "/info") == 0 || strcasecmp($text[0], "/") == 0 || strcasecmp($text[0], "/инфо") == 0 || strcasecmp($text[0], "/инфа") == 0) {
                 $request_params['message'] = "&#129302;Bot moderator by kos v2.0.0\n\n"
