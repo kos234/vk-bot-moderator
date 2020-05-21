@@ -104,13 +104,13 @@ switch ($data->type) {
                 . "/Сообщать о наказаниях {@Айди|@домен|Пересланое сообщение} - люди, которым приходят уведомления о выдачи наказаний(если людей несколько, указывать через запятую без пробелов)\n"
                 . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Info user") == 0 || strcasecmp($text[0] . " " .$text[1], "/Инфо пользователя") == 0){
-                if(isset($text[3]) || isset($data->object->message->reply_message->from_id)){
+                if(isset($text[2]) || isset($data->object->message->reply_message->from_id)){
                     $id = "";
                     if(isset($data->object->message->reply_message->from_id)){
                         $id = $data->object->message->reply_message->from_id;
                     } else{
-                        $res = explode("|",$text[3]);
-                        $id = substr($res[0], 1);
+                        $id = substr(explode("|",$text[2])[0], 1);
+                        //$id = substr($res[0], 1);
                     }
 
                     $request_params["message"] = $id;
