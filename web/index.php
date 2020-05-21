@@ -107,10 +107,10 @@ function createTabs($chat_id, $mysqli, $vk){
         var_dump($res);
         error_log(ob_get_contents());
         ob_end_clean();
-        for ($i = 0; isset($res->responce->items[$i]); $i++){
+        for ($i = 0; isset($res->items[$i]); $i++){
             $rang = 0;
-            if($res->responce->items[$i]->is_admin) $rang = 5;
-            $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->responce->items[$i]->member_id ."', ". $rang .")");
+            if($res->items[$i]->is_admin) $rang = 5;
+            $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->items[$i]->member_id ."', ". $rang .")");
         }
     }
 
