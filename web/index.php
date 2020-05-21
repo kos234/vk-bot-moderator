@@ -101,7 +101,7 @@ switch ($data->type) {
 
 function createTabs($chat_id, $mysqli){
 
-    $res =  $mysqli->query("CREATE TABLE `" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
+    $res =  $mysqli->query("CREATE TABLE IF NOT EXISTS`" . $chat_id . "_users`(`id` VarChar( 255 ) NOT NULL, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `rang` TinyInt( 1 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
         error_log($res);
 
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
