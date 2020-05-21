@@ -106,8 +106,7 @@ switch ($data->type) {
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Info user") == 0 || strcasecmp($text[0] . " " .$text[1], "/Инфо пользователя") == 0){
                 if($id = substr(explode("|", $text[3])[0], 1) || $id = $data->object->message->reply_message->from_id){
 
-                    error_log($id);
-
+                    $request_params["message"] = $id;
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
             }
 
