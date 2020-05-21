@@ -51,7 +51,7 @@ switch ($data->type) {
                 'random_id' => 0, //0 - не рассылка
                 'read_state' => 1,
                 'user_ids' => 0, // Нет конкретного пользователя кому адресованно сообщение
-                'reply_to' => $data->object->message->conversation_message_id, //Версия API Vk
+                'reply_to' => $data->object->message->conversation_message_id, //Надеюсь что когда-то это будет работать
                 'attachment' => '' //Вложение
             );
 
@@ -104,7 +104,9 @@ switch ($data->type) {
                 . "/Сообщать о наказаниях {@Айди|@домен|Пересланое сообщение} - люди, которым приходят уведомления о выдачи наказаний(если людей несколько, указывать через запятую без пробелов)\n"
                 . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Info user") == 0 || strcasecmp($text[0] . " " .$text[1], "/Инфо пользователя") == 0){
-                if(isset($text[3]) || isset($data->object->message->reply_message)){
+                if($id = substr(explode("|", $text[3])[0], 1) || $id = $data->object->message->reply_message->from_id){
+
+                    error_log($id);
 
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
             }
