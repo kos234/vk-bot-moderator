@@ -27,7 +27,10 @@ if ($mysqli->connect_error) {//проверка подключились ли м
 $mysqli->query("SET NAMES 'utf8'");
 
 $data = json_decode(file_get_contents('php://input'));
-error_log(gettype($data));
+ob_start();
+var_dump($data);
+error_log(ob_get_contents());
+ob_end_clean();
 //Проверяем secretKey
 if(strcmp($data->secret, SECRET_KEY_VK_BOT) !== 0 && strcmp($data->type, 'confirmation') !== 0)
     return;//Если не наш, выдаем ошибку серверу vk
