@@ -27,7 +27,7 @@ if ($mysqli->connect_error) {//проверка подключились ли м
 $mysqli->query("SET NAMES 'utf8'");
 
 $data = json_decode(file_get_contents('php://input'));
-
+error_log(gettype($data));
 //Проверяем secretKey
 if(strcmp($data->secret, SECRET_KEY_VK_BOT) !== 0 && strcmp($data->type, 'confirmation') !== 0)
     return;//Если не наш, выдаем ошибку серверу vk
@@ -56,7 +56,6 @@ switch ($data->type) {
             );
 
             $vk = new VK\Client\VKApiClient();
-            error_log(gettype($data->object->text));
             $text = explode(' ', $data->object->text);
 
             if (strcasecmp($text[0], "/info") == 0 || strcasecmp($text[0], "/") == 0 || strcasecmp($text[0], "/инфо") == 0 || strcasecmp($text[0], "/инфа") == 0) {
