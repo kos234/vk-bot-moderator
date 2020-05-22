@@ -130,7 +130,46 @@ switch ($data->type) {
                     if(isset($res_user[0]->domain)){
                         $request_params["message"] .= "\nДомен: " . $res_user[0]->domain;
                     }if(isset($res_user[0]->last_seen)){
-                        $request_params["message"] .= "\nПоследний раз был онлайн: " . strtotime("G:i d/m/y", $res_user[0]->last_seen->time) . " c ";
+                        $request_params["message"] .= "\nПоследний раз был онлайн: " . date("G:i d", $res_user[0]->last_seen->time);
+                        switch (date(m,$res_user[0]->last_seen->time)){
+                            case 1:
+                                $request_params["message"] .= " января";
+                                break;
+                            case 2:
+                                $request_params["message"] .= " февраля";
+                                break;
+                            case 3:
+                                $request_params["message"] .= " марта";
+                                break;
+                            case 4:
+                                $request_params["message"] .= " апреля";
+                                break;
+                            case 5:
+                                $request_params["message"] .= " мая";
+                                break;
+                            case 6:
+                                $request_params["message"] .= " июня";
+                                break;
+                            case 7:
+                                $request_params["message"] .= " июля";
+                                break;
+                            case 8:
+                                $request_params["message"] .= " августа";
+                                break;
+                            case 9:
+                                $request_params["message"] .= " сентября";
+                                break;
+                            case 10:
+                                $request_params["message"] .= " октября";
+                                break;
+                            case 11:
+                                $request_params["message"] .= " ноября";
+                                break;
+                            case 12:
+                                $request_params["message"] .= " декабря";
+                                break;
+                        }
+                        $request_params["message"] .= " c ";
                         switch ($res_user[0]->last_seen->platform){
                             case 1:
                                 $request_params["message"] .= "мобильной версии сайта";
