@@ -128,7 +128,7 @@ switch ($data->type) {
                         $request_params["message"] .= "\nСтатус: " . $res_user[0]->status;
                     }if(isset($res_user[0]->last_seen)){
                         $request_params["message"] .= "\nПоследний раз был онлайн по UTC 0: " . date("G:i d", $res_user[0]->last_seen->time);
-                        switch (date(m,$res_user[0]->last_seen->time)){
+                        switch (date("m",$res_user[0]->last_seen->time)){
                             case 1:
                                 $request_params["message"] .= " января";
                                 break;
@@ -166,7 +166,7 @@ switch ($data->type) {
                                 $request_params["message"] .= " декабря";
                                 break;
                         }
-                        $request_params["message"] .= " ". date(Y,$res_user[0]->last_seen->time) ." c ";
+                        $request_params["message"] .= " ". date("Y",$res_user[0]->last_seen->time) ." c ";
                         switch ($res_user[0]->last_seen->platform){
                             case 1:
                                 $request_params["message"] .= "мобильной версии сайта";
@@ -436,7 +436,7 @@ switch ($data->type) {
                                 $request_params["message"] .= ", документов: " . $res_grop[0]->counters->docs;
                         }if(isset($res_grop[0]->fixed_post)){
                             $request_params["message"] .= "\n\nЗакреплённый пост:";
-                            $request_params["attachment"] = "wall-" . $res_grop[0]->id . "_" . $res_grop[0]->fixed_post;
+                            //$request_params["attachment"] = "wall-" . $res_grop[0]->id . "_" . $res_grop[0]->fixed_post;
                         }
                     }
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
@@ -452,6 +452,7 @@ switch ($data->type) {
             }
 
             error_log("Отправка");
+            error_log($request_params["message"]);
             $vk->messages()->send(TOKEN_VK_BOT, $request_params);
 
             echo "ok";
