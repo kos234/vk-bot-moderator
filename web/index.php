@@ -113,7 +113,10 @@ switch ($data->type) {
                 $res_user = json_decode(json_encode($vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id,
                     "fields" => "id,first_name,last_name,deactivated,is_closed,verified,domain,bdate,can_post,can_see_all_posts,can_send_friend_request,"
                 . "can_write_private_message,city,connections,country,contacts,counters,about,activities,education,career,last_seen,interests,home_town,games,has_photo", "name_case" => "abl"))));
-
+                    ob_start();
+                    var_dump($res_user);
+                    error_log(ob_get_contents());
+                    ob_end_clean();
                 $type = "";
                     if(isset($res_user[0]->deactivated)){
                         if($res_user[0]->deactivated == "deleted")
@@ -124,7 +127,9 @@ switch ($data->type) {
 
                     $request_params["message"] = "Информация о". $type ." [id". $res_user[0]->id . "|". $res_user[0]->first_name ." " .$res_user[0]->last_name ."]: \nАйди: " . $res_user[0]->id;
 
-                    if(isset($res_user[0]->last_seen)){
+                    if(isset($res_user[0]->domain)){
+                        $request_params["message"] .= "\nДомен: " . $res_user[0]->domain;
+                    }if(isset($res_user[0]->last_seen)){
                         $request_params["message"] .= "\nПоследний раз был онлайн: " . strtotime("G:i d/m/y", $res_user[0]->last_seen->time) . " c ";
                         switch ($res_user[0]->last_seen->platform){
                             case 1:
@@ -149,8 +154,6 @@ switch ($data->type) {
                                 $request_params["message"] .= "сайта";
                                 break;
                         }
-                    }if(isset($res_user[0]->domain)){
-                        $request_params["message"] .= "\nДомен: " . $res_user[0]->domain;
                     } if(isset($res_user[0]->is_closed)){
                         if($res_user[0]->is_closed == 1) $request_params["message"] .= "\nТип профиля: закрытый";
                         else $request_params["message"] .= "\nТип профиля: Открытый";
@@ -165,8 +168,14 @@ switch ($data->type) {
                         $request_params["message"] .= "\nСтрана: " . $res_user[0]->country->title;
                     }if(isset($res_user[0]->home_town)) {
                         $request_params["message"] .= "\nРодной город: " . $res_user[0]->home_town;
+                    }if(isset($res_user[0]->mobile_phone)){
+                        if($res_user[0]->mobile_phone != "")
+                        $request_params["message"] .= "\nМобильный телефон: " . $res_user[0]->mobile_phone;
+                    }if(isset($res_user[0]->home_phone)){
+                        if($res_user[0]->home_phone != "")
+                        $request_params["message"] .= "\nДомашний телефон: " . $res_user[0]->home_phone;
                     }if(isset($res_user[0]->can_post)){
-                            if ($res_user[0]->can_post == 1) $request_params["message"] .= "\nУ пользователя открыта стена";
+                            if ($res_user[0]->can_post == 1) $request_params["message"] .= "\n\nУ пользователя открыта стена";
                             else $request_params["message"] .= "\nУ пользователя закрыта закрыта стена";
                         if(isset($res_user[0]->can_see_all_posts)){
                             if ($res_user[0]->can_see_all_posts == 1) $request_params["message"] .= ", запрещен просмотр чужих записей";
@@ -177,9 +186,6 @@ switch ($data->type) {
                         }if(isset($res_user[0]->can_send_friend_request)){
                             if ($res_user[0]->can_send_friend_request == 1) $request_params["message"] .= ", включены уведомления о заявках в друзья";
                             else $request_params["message"] .= ", выключены уведомления о заявках в друзья";
-                        }if(isset($res_user[0]->can_write_private_message)){
-                            if ($res_user[0]->can_write_private_message == 1) $request_params["message"] .= ", открыты сообщения";
-                            else $request_params["message"] .= ", закрыты сообщения";
                         }if(isset($res_user[0]->can_write_private_message)){
                             if ($res_user[0]->can_write_private_message == 1) $request_params["message"] .= ", открыты сообщения";
                             else $request_params["message"] .= ", закрыты сообщения";
@@ -197,12 +203,8 @@ switch ($data->type) {
                         $request_params["message"] .= "\nLiveJournal: " . $res_user[0]->livejournal;
                     }if(isset($res_user[0]->instagram)){
                         $request_params["message"] .= "\nInstagram: " . $res_user[0]->instagram;
-                    }if(isset($res_user[0]->mobile_phone)){
-                        $request_params["message"] .= "\nМобильный телефон: " . $res_user[0]->mobile_phone;
-                    }if(isset($res_user[0]->home_phone)){
-                        $request_params["message"] .= "\nДомашний телефон: " . $res_user[0]->home_phone;
                     }if(isset($res_user[0]->counters)){
-                        $request_params["message"] .= "\nКоличество объектов: ";
+                        $request_params["message"] .= "\n\nКоличество объектов: ";
                         if(isset($res_user[0]->counters->albums))
                             $request_params["message"] .= " альбомов: " . $res_user[0]->counters->albums;
                         if(isset($res_user[0]->counters->videos))
@@ -226,22 +228,17 @@ switch ($data->type) {
                         if(isset($res_user[0]->counters->pages))
                             $request_params["message"] .= ", интересных страниц: " . $res_user[0]->counters->pages ;
                     }if(isset($res_user[0]->career)){
-                        $request_params["message"] .= "\nКарьера пользователя: ";
+                        $request_params["message"] .= "\n\nКарьера пользователя: ";
                         for ($i = 0; isset($res_user[0]->career[$i]); $i++){
                            $res_g = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $res_user[0]->career[$i]->group_id))));
-                            ob_start();
-                            var_dump($res_g[0]);
-                            error_log(ob_get_contents());
-                            ob_end_clean();
-
                            $request_params["message"] .= "[" . $res_g[0]->screen_name . "|" .$res_g[0]->name . "]";
 
                             if(isset($res_user[0]->career[$i]->from) && isset($res_user[0]->career[$i]->until))
                                 $request_params["message"] .= " " . $res_user[0]->career[$i]->from . " - " . $res_user[0]->career[$i]->until;
                             elseif (isset($res_user[0]->career[$i]->from) && !isset($res_user[0]->career[$i]->until))
-                                $request_params["message"] .= " с" . $res_user[0]->career[$i]->from;
+                                $request_params["message"] .= " с " . $res_user[0]->career[$i]->from;
                             elseif (!isset($res_user[0]->career[$i]->from) && isset($res_user[0]->career[$i]->until))
-                                $request_params["message"] .= " до" . $res_user[0]->career[$i]->until;
+                                $request_params["message"] .= " до " . $res_user[0]->career[$i]->until;
                             if ($res_user[0]->career[$i]->country_id) {
                                 $res_count = json_decode(json_encode($vk->database()->getCountriesById(SERVICE_KEY, array("country_ids" => $res_user[0]->career[$i]->country_id))));
                                 $request_params["message"] .= ", страна: " . $res_count[0]->title;
@@ -257,8 +254,9 @@ switch ($data->type) {
                                 $request_params["message"] .= "; ";
                         }
                     }if(isset($res_user[0]->university_name)){
-                        $request_params["message"] .= "\nВысшее образование: " . $res_user[0]->university_name;
+                        $request_params["message"] .= "\n\nВысшее образование: " . $res_user[0]->university_name;
                         if(isset($res_user[0]->faculty_name))
+                            if(!$res_user[0]->faculty_name == "")
                             $request_params["message"] .= ", " . $res_user[0]->faculty_name;
                         if(isset($res_user[0]->education_form))
                             $request_params["message"] .= ", форма обучения: " . $res_user[0]->education_form;
