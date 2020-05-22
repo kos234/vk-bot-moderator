@@ -108,6 +108,7 @@ switch ($data->type) {
                 $id = getId($text[2],$data->object->message->reply_message->from_id);
                 error_log("----------------------------------------------------------------АЙДИ");
                 error_log($id);
+                $request_params["message"] = "sss";
                 /*if($id != 0){
                     $type = "";
                     if($id > 0){
