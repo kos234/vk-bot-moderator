@@ -108,7 +108,7 @@ switch ($data->type) {
                 $id = getId($text[2],$data->object->message->reply_message->from_id);
                 error_log("----------------------------------------------------------------АЙДИ");
                 error_log($id);
-                if($id != 0){
+                /*if($id != 0){
                     $type = "";
                     if($id > 0){
                 $res_user = json_decode(json_encode($vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id,
@@ -443,7 +443,7 @@ switch ($data->type) {
                             //$request_params["attachment"] = "wall-" . $res_grop[0]->id . "_" . $res_grop[0]->fixed_post;
                         }
                     }
-                }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
+                }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!"; */
             }
 
 
