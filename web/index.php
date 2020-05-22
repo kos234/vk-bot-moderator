@@ -105,6 +105,7 @@ switch ($data->type) {
                 . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Info user") == 0 || strcasecmp($text[0] . " " .$text[1], "/Инфо пользователя") == 0){
                 $id = getId($text[2],$data->object->message->reply_message->from_id);
+                error_log("----------------------------------------------------------------АЙДИ");
                 error_log($id);
                 if($id != 0){
                     $type = "";
