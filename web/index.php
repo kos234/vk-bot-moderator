@@ -5,7 +5,7 @@ define("CONFIRMATION_TOKEN_VK_BOT", getenv("CONFIRMATION_TOKEN_VK_BOT")); //по
 define("TOKEN_VK_BOT", getenv("TOKEN_VK_BOT")); //Ключ доступа сообщества
 define("SECRET_KEY_VK_BOT", getenv("SECRET_KEY_VK_BOT")); //Secret key
 //define("VERSION_API_VK", 5.103); //Версия апи
-define("GROUP_ID", getenv("GROUP_ID")); //Айди группы С МИНУСОМ "-"
+define("SERVICE_KEY", getenv("SERVICE_KEY")); //Сервисный ключ
 
 
 ini_set('max_execution_time', 900);
@@ -282,13 +282,13 @@ switch ($data->type) {
 
         if(isset($data->object->message->action->type))//Инвайты
             if($data->object->message->action->type == "chat_invite_user" || $data->object->message->action->type == "chat_invite_user_by_link"){
-                if($data->object->message->action->member_id == GROUP_ID)
+                if($data->object->message->action->member_id == (int)("-".$data->group_id))
                     $request_params["message"] = "Для моей работы мне необходимы права администратора. Выдайте права и напишите /начать";
 
 
             }
 
-
+            error_log("Отправка");
             $vk->messages()->send(TOKEN_VK_BOT, $request_params);
 
             echo "ok";
