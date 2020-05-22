@@ -165,13 +165,13 @@ switch ($data->type) {
                         else $request_params["message"] .= "\nНеподтвержденный профиль";
                     } if(isset($res->bdate)){
                         $request_params["message"] .= "\nДата рождения: " . $res->bdate;
-                    }}if(isset($res->city->title)){
+                    }if(isset($res->city->title)){
                         $request_params["message"] .= "\nГород: " . $res->city->title;
                     }if(isset($res->city->country)){
                         $request_params["message"] .= "\nСтрана: " . $res->country->title;
-                    }if(isset($res->home_town)){
-                    $request_params["message"] .= "\nРодной город: " . $res->home_town;
-                    if(isset($res->can_post)){
+                    }if(isset($res->home_town)) {
+                        $request_params["message"] .= "\nРодной город: " . $res->home_town;
+                    }if(isset($res->can_post)){
                             if ($res->can_post == 1) $request_params["message"] .= "\nУ пользователя открыта стена";
                             else $request_params["message"] .= "\nУ пользователя закрыта закрыта стена";
                         if(isset($res->can_see_all_posts)){
