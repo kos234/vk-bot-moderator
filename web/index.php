@@ -243,11 +243,11 @@ switch ($data->type) {
                             elseif (!isset($res_user[0]->career[$i]->from) && isset($res_user[0]->career[$i]->until))
                                 $request_params["message"] .= " до" . $res_user[0]->career[$i]->until;
                             if ($res_user[0]->career[$i]->country_id) {
-                                $res_count = json_decode(json_encode($vk->database()->getCountriesById(TOKEN_VK_BOT, array("country_ids" => $res_user[0]->career[$i]->country_id))));
+                                $res_count = json_decode(json_encode($vk->database()->getCountriesById(SERVICE_KEY, array("country_ids" => $res_user[0]->career[$i]->country_id))));
                                 $request_params["message"] .= ", страна: " . $res_count[0]->title;
                             }
                             if ($res_user[0]->career[$i]->city_id) {
-                                $res_city = json_decode(json_encode($vk->database()->getCitiesById(TOKEN_VK_BOT, array("city_ids" => $res_user[0]->career[$i]->city_id))));
+                                $res_city = json_decode(json_encode($vk->database()->getCitiesById(SERVICE_KEY, array("city_ids" => $res_user[0]->career[$i]->city_id))));
                                 $request_params["message"] .= ", город: " . $res_city[0]->title;
                             }if ($res_user[0]->career[$i]->position){
                                 $request_params["message"] .= ", должность: " . $res_user[0]->career[$i]->position;
