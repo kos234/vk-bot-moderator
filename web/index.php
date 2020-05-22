@@ -114,12 +114,6 @@ switch ($data->type) {
                     "fields" => "id,first_name,last_name,deactivated,is_closed,verified,domain,bdate,can_post,can_see_all_posts,can_send_friend_request,"
                 . "can_write_private_message,city,connections,country,contacts,counters,about,activities,education,career,last_seen,interests,home_town,games,has_photo", "name_case" => "abl"))));
 
-                ob_start();
-                var_dump($res_user[0]);
-                error_log(ob_get_contents());
-                ob_end_clean();
-
-
                 $type = "";
                     if(isset($res_user[0]->deactivated)){
                         if($res_user[0]->deactivated == "deleted")
@@ -235,7 +229,12 @@ switch ($data->type) {
                         $request_params["message"] .= "\nКарьера пользователя: ";
                         for ($i = 0; isset($res_user[0]->career[$i]); $i++){
                            $res_g[0] = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $res_user[0]->career[$i]->group_id))));
-                            $request_params["message"] .= "[" . $res_g[0]->screen_name . "|" .$res_g[0]->name . "]";
+                            ob_start();
+                            var_dump($res_g);
+                            error_log(ob_get_contents());
+                            ob_end_clean();
+
+                           $request_params["message"] .= "[" . $res_g[0]->screen_name . "|" .$res_g[0]->name . "]";
 
                             if(isset($res_user[0]->career[$i]->from) && isset($res_user[0]->career[$i]->until))
                                 $request_params["message"] .= " " . $res_user[0]->career[$i]->from . " - " . $res_user[0]->career[$i]->until;
