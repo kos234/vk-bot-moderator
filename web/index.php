@@ -318,6 +318,11 @@ switch ($data->type) {
                         $res_grop = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $id,
                             "fields" => "id,name,screen_name,is_closed,deactivated,type,activity,addresses,age_limits,can_create_topic,can_message,can_post,can_see_all_posts,can_upload_doc,can_upload_video,city,contacts,counters,country,cover,description,fixed_post,has_photo"))));
 
+                        ob_start();
+                        var_dump($res_grop);
+                        error_log(ob_get_contents());
+                        ob_end_clean();
+
                         if(isset($res_grop[0]->deactivated)){
                             if($res_grop[0]->deactivated == "deleted")
                                 $type = " удаленном ";
