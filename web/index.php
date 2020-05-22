@@ -230,7 +230,7 @@ switch ($data->type) {
                         for ($i = 0; isset($res_user[0]->career[$i]); $i++){
                            $res_g[0] = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $res_user[0]->career[$i]->group_id))));
                             ob_start();
-                            var_dump($res_g);
+                            var_dump($res_g[0]);
                             error_log(ob_get_contents());
                             ob_end_clean();
 
