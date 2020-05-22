@@ -208,17 +208,29 @@ switch ($data->type) {
                     }if(isset($res_user[0]->home_phone)){
                         $request_params["message"] .= "\nДомашний телефон: " . $res_user[0]->home_phone;
                     }if(isset($res_user[0]->counters)){
-                        $request_params["message"] .= "\nКоличество объектов: альбомов: " . $res_user[0]->counters->albums
-                        . ", видеозаписей: " . $res_user[0]->counters->videos
-                        . ", аудиозаписей: " . $res_user[0]->counters->audios
-                        . ", фотографий: " . $res_user[0]->counters->photos
-                        . ", заметок: " . $res_user[0]->counters->notes
-                        . ", друзей: " . $res_user[0]->counters->friends
-                        . ", сообществ: " . $res_user[0]->counters->groups
-                        . ", друзей онлайн: " . $res_user[0]->counters->online_friends
-                        . ", видеозаписей с пользователем: " . $res_user[0]->counters->user_videos
-                        . ", подписчиков: " . $res_user[0]->counters->followers
-                        . ", интересных страниц: " . $res_user[0]->counters->pages ;
+                        $request_params["message"] .= "\nКоличество объектов: ";
+                        if(isset($res_user[0]->counters->albums))
+                            $request_params["message"] .= " альбомов: " . $res_user[0]->counters->albums;
+                        if(isset($res_user[0]->counters->videos))
+                            $request_params["message"] .= ", видеозаписей: " . $res_user[0]->counters->videos;
+                        if(isset($res_user[0]->counters->audios))
+                            $request_params["message"] .= ", аудиозаписей: " . $res_user[0]->counters->audios;
+                        if(isset($res_user[0]->counters->photos))
+                            $request_params["message"] .= ", фотографий: " . $res_user[0]->counters->photos;
+                        if(isset($res_user[0]->counters->notes))
+                            $request_params["message"] .= ", заметок: " . $res_user[0]->counters->notes;
+                        if(isset($res_user[0]->counters->friends))
+                            $request_params["message"] .= ", друзей: " . $res_user[0]->counters->friends;
+                        if(isset($res_user[0]->counters->groups))
+                            $request_params["message"] .= ", сообществ: " . $res_user[0]->counters->groups;
+                        if(isset($res_user[0]->counters->online_friends))
+                            $request_params["message"] .= ", друзей онлайн: " . $res_user[0]->counters->online_friends;
+                        if(isset($res_user[0]->counters->user_videos))
+                            $request_params["message"] .= ", видеозаписей с пользователем: " . $res_user[0]->counters->user_videos;
+                        if(isset($res_user[0]->counters->followers))
+                            $request_params["message"] .= ", подписчиков: " . $res_user[0]->counters->followers;
+                        if(isset($res_user[0]->counters->pages))
+                            $request_params["message"] .= ", интересных страниц: " . $res_user[0]->counters->pages ;
                     }if(isset($res_user[0]->career)){
                         $request_params["message"] .= "\nКарьера пользователя: ";
                         for ($i = 0; isset($res_user[0]->career[$i]); $i++){
