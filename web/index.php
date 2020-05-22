@@ -316,7 +316,7 @@ switch ($data->type) {
                 }else{
                         error_log("группа");
                         $id = (int)substr($id, 1);
-                        $res_grop = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $id,
+                        $res_grop = json_decode(json_encode($vk->groups()->getById("5aad73d875b5cf2143bef2e577bab67c43bbc40355f201574fa7ddaa9f16a33656f63db917c652167b4a5", array("group_id" => $id,
                             "fields" => "id,name,screen_name,is_closed,deactivated,type,activity,addresses,age_limits,can_create_topic,can_message,can_post,can_see_all_posts,can_upload_doc,can_upload_video,city,contacts,counters,country,cover,description,fixed_post,has_photo"))));
 
                         ob_start();
