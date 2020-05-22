@@ -234,8 +234,8 @@ switch ($data->type) {
                     }if(isset($res_user[0]->career)){
                         $request_params["message"] .= "\nКарьера пользователя: ";
                         for ($i = 0; isset($res_user[0]->career[$i]); $i++){
-                           $res_g = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $res_user[0]->career[$i]->group_id))));
-                            $request_params["message"] .= "[" . $res_g->screen_name . "|" .$res_g->name . "]";
+                           $res_g[0] = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $res_user[0]->career[$i]->group_id))));
+                            $request_params["message"] .= "[" . $res_g[0]->screen_name . "|" .$res_g[0]->name . "]";
 
                             if(isset($res_user[0]->career[$i]->from) && isset($res_user[0]->career[$i]->until))
                                 $request_params["message"] .= " " . $res_user[0]->career[$i]->from . " - " . $res_user[0]->career[$i]->until;
