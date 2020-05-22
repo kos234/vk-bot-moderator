@@ -413,7 +413,7 @@ switch ($data->type) {
                                 if($res_grop[0]->has_photo == 1) $request_params["message"] = "установлена аватарка, ";
                                 else $request_params["message"] .= "не установлена аватарка, ";
                             }
-                        $request_params["message"] = substr($request_params["message"], -2);
+                        //$request_params["message"] = substr($request_params["message"], -2);
 
                         if(isset($res_grop[0]->contacts)){
                             $request_params["message"] .= "\n\nКонтакты:\n";
@@ -461,7 +461,7 @@ switch ($data->type) {
                             if(isset($res_grop[0]->counters->docs))
                                 $request_params["message"] .= "документов: " . $res_grop[0]->counters->docs . ", ";
 
-                            $request_params["message"] = substr($request_params["message"], -2);
+                            //$request_params["message"] = substr($request_params["message"], -2);
                         }if(isset($res_grop[0]->fixed_post)){
                             $request_params["message"] .= "\n\nЗакреплённый пост:";
                             $request_params["attachment"] = "wall-" . $res_grop[0]->id . "_" . $res_grop[0]->fixed_post;
