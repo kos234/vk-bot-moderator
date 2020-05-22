@@ -106,14 +106,159 @@ switch ($data->type) {
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Info user") == 0 || strcasecmp($text[0] . " " .$text[1], "/Инфо пользователя") == 0){
                 if(isset($text[2]) || isset($data->object->message->reply_message->from_id)){
                     $id = "";
-                    if(isset($data->object->message->reply_message->from_id)){
+                    if(isset($data->object->message->reply_message->from_id))
                         $id = $data->object->message->reply_message->from_id;
-                    } else{
-                        $id = substr(explode("|",$text[2])[0], 1);
-                        //$id = substr($res[0], 1);
+                     else
+                        $id = substr(explode("|",$text[2])[0], 3);
+                $res = json_decode(json_encode($vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id,
+                    "fields" => "id,first_name,last_name,deactivated,is_closed,verified,domain,bdate,can_post,can_see_all_posts,can_send_friend_request,"
+                . "can_write_private_message,city,connections,country,contacts,counters,about,activities,education,career,last_seen,interests,home_town,games,has_photo", "name_case" => "abl"))));
+
+                $type = "";
+                    if(!isset($res->deactivated)){
+                        if($res->deactivated == "deleted")
+                            $type = " удаленном ";
+                        elseif ($res->deactivated == "banned")
+                            $type = " забаненном ";
                     }
 
-                    $request_params["message"] = $id;
+                    $request_params["message"] = "Информация о". $type ." [id". $res->id . "|". $res->first_name ." " .$res->last_name ."]: \nАйди: " . $res->id;
+
+                    if(isset($res->last_seen)){
+                        $request_params["message"] .= "\nПоследний раз был онлайн: " . strtotime("G:i d/m/y", $res->last_seen->time) . " c ";
+                        switch ($res->last_seen->platform){
+                            case 1:
+                                $request_params["message"] .= "мобильной версии сайта";
+                                break;
+                            case 2:
+                                $request_params["message"] .= "iPhone";
+                                break;
+                            case 3:
+                                $request_params["message"] .= "iPad";
+                                break;
+                            case 4:
+                                $request_params["message"] .= "Android";
+                                break;
+                            case 5:
+                                $request_params["message"] .= "Windows Phone";
+                                break;
+                            case 6:
+                                $request_params["message"] .= "Windows 10";
+                                break;
+                            case 7:
+                                $request_params["message"] .= "сайта";
+                                break;
+                        }
+                    }if(isset($res->domain)){
+                        $request_params["message"] .= "\nДомен: " . $res->domain;
+                    } if(isset($res->is_closed)){
+                        if($res->is_closed == 1) $request_params["message"] .= "\nТип профиля: закрытый";
+                        else $request_params["message"] .= "\nТип профиля: Открытый";
+                    } if(isset($res->verified)){
+                        if($res->verified == 1) $request_params["message"] .= "\nПодтвержденный профиль";
+                        else $request_params["message"] .= "\nНеподтвержденный профиль";
+                    } if(isset($res->bdate)){
+                        $request_params["message"] .= "\nДата рождения: " . $res->bdate;
+                    }}if(isset($res->city->title)){
+                        $request_params["message"] .= "\nГород: " . $res->city->title;
+                    }if(isset($res->city->country)){
+                        $request_params["message"] .= "\nСтрана: " . $res->country->title;
+                    }if(isset($res->home_town)){
+                    $request_params["message"] .= "\nРодной город: " . $res->home_town;
+                    if(isset($res->can_post)){
+                            if ($res->can_post == 1) $request_params["message"] .= "\nУ пользователя открыта стена";
+                            else $request_params["message"] .= "\nУ пользователя закрыта закрыта стена";
+                        if(isset($res->can_see_all_posts)){
+                            if ($res->can_see_all_posts == 1) $request_params["message"] .= ", запрещен просмотр чужих записей";
+                            else $request_params["message"] .= ", разрешен просмотр чужих записей";
+                        }if(isset($res->can_see_audio)){
+                            if ($res->can_see_audio == 1) $request_params["message"] .= ", у пользователя открыты аудиозаписи";
+                            else $request_params["message"] .= ", у пользователя закрыты аудиозаписи";
+                        }if(isset($res->can_send_friend_request)){
+                            if ($res->can_send_friend_request == 1) $request_params["message"] .= ", включены уведомления о заявках в друзья";
+                            else $request_params["message"] .= ", выключены уведомления о заявках в друзья";
+                        }if(isset($res->can_write_private_message)){
+                            if ($res->can_write_private_message == 1) $request_params["message"] .= ", открыты сообщения";
+                            else $request_params["message"] .= ", закрыты сообщения";
+                        }if(isset($res->can_write_private_message)){
+                            if ($res->can_write_private_message == 1) $request_params["message"] .= ", открыты сообщения";
+                            else $request_params["message"] .= ", закрыты сообщения";
+                        }if (isset($res->has_photo)){
+                            if ($res->has_photo == 1) $request_params["message"] .= ", установлена своя аватарка";
+                            else $request_params["message"] .= ", не установлена своя аватарка";
+                        }
+                    }if(isset($res->skype)){
+                        $request_params["message"] .= "\nSkype: " . $res->skype;
+                    }if(isset($res->facebook)){
+                        $request_params["message"] .= "\nFacebook: " . $res->facebook;
+                    }if(isset($res->twitter)){
+                        $request_params["message"] .= "\nTwitter: " . $res->twitter;
+                    }if(isset($res->livejournal)){
+                        $request_params["message"] .= "\nLiveJournal: " . $res->livejournal;
+                    }if(isset($res->instagram)){
+                        $request_params["message"] .= "\nInstagram: " . $res->instagram;
+                    }if(isset($res->mobile_phone)){
+                        $request_params["message"] .= "\nМобильный телефон: " . $res->mobile_phone;
+                    }if(isset($res->home_phone)){
+                        $request_params["message"] .= "\nДомашний телефон: " . $res->home_phone;
+                    }if(isset($res->counters)){
+                        $request_params["message"] .= "\nКоличество объектов: альбомов: " . $res->counters->albums
+                        . ", видеозаписей: " . $res->counters->videos
+                        . ", аудиозаписей: " . $res->counters->audios
+                        . ", фотографий: " . $res->counters->photos
+                        . ", заметок: " . $res->counters->notes
+                        . ", друзей: " . $res->counters->friends
+                        . ", сообществ: " . $res->counters->groups
+                        . ", друзей онлайн: " . $res->counters->online_friends
+                        . ", видеозаписей с пользователем: " . $res->counters->user_videos
+                        . ", подписчиков: " . $res->counters->followers
+                        . ", интересных страниц: " . $res->counters->pages ;
+                    }if(isset($res->career)){
+                        $request_params["message"] .= "\nКарьера пользователя: ";
+                        for ($i = 0; isset($res->career[$i]); $i++){
+                           $res_g = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $res->career[$i]->group_id))));
+                            $request_params["message"] .= "[" . $res_g->screen_name . "|" .$res_g->name . "]";
+
+                            if(isset($res->career[$i]->from) && isset($res->career[$i]->until))
+                                $request_params["message"] .= " " . $res->career[$i]->from . " - " . $res->career[$i]->until;
+                            elseif (isset($res->career[$i]->from) && !isset($res->career[$i]->until))
+                                $request_params["message"] .= " с" . $res->career[$i]->from;
+                            elseif (!isset($res->career[$i]->from) && isset($res->career[$i]->until))
+                                $request_params["message"] .= " до" . $res->career[$i]->until;
+                            if ($res->career[$i]->country_id) {
+                                $res_count = json_decode(json_encode($vk->database()->getCountriesById(TOKEN_VK_BOT, array("country_ids" => $res->career[$i]->country_id))));
+                                $request_params["message"] .= ", страна: " . $res_count[0]->title;
+                            }
+                            if ($res->career[$i]->city_id) {
+                                $res_city = json_decode(json_encode($vk->database()->getCitiesById(TOKEN_VK_BOT, array("city_ids" => $res->career[$i]->city_id))));
+                                $request_params["message"] .= ", город: " . $res_city[0]->title;
+                            }if ($res->career[$i]->position){
+                                $request_params["message"] .= ", должность: " . $res->career[$i]->position;
+                            }
+
+                            if(isset($res->career[$i + 1]))
+                                $request_params["message"] .= "; ";
+                        }
+                    }if(isset($res->university_name)){
+                        $request_params["message"] .= "\nВысшее образование: " . $res->university_name;
+                        if(isset($res->faculty_name))
+                            $request_params["message"] .= ", " . $res->faculty_name;
+                        if(isset($res->education_form))
+                            $request_params["message"] .= ", форма обучения: " . $res->education_form;
+                        if(isset($res->education_status))
+                            $request_params["message"] .= ", статус: " . $res->education_status;
+                        if(isset($res->graduation))
+                            $request_params["message"] .= ", выпуск: " . $res->graduation;
+                    }if(isset($res->activities)){
+                        $request_params["message"] .= "\nДеятельность пользователя: " . $res->activities;
+                    }if(isset($res->games)){
+                        $request_params["message"] .= "\nЛюбимые игры: " . $res->games;
+                    }if(isset($res->interests)){
+                        $request_params["message"] .= "\nИнтересы: " . $res->interests;
+                    }if(isset($res->about)){
+                        $request_params["message"] .= "\nО пользователе: " . $res->about;
+                    }
+
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
             }
 
