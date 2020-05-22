@@ -114,8 +114,14 @@ switch ($data->type) {
                     "fields" => "id,first_name,last_name,deactivated,is_closed,verified,domain,bdate,can_post,can_see_all_posts,can_send_friend_request,"
                 . "can_write_private_message,city,connections,country,contacts,counters,about,activities,education,career,last_seen,interests,home_town,games,has_photo", "name_case" => "abl"))));
 
+                ob_start();
+                var_dump($res);
+                error_log(ob_get_contents());
+                ob_end_clean();
+
+
                 $type = "";
-                    if(!isset($res->deactivated)){
+                    if(isset($res->deactivated)){
                         if($res->deactivated == "deleted")
                             $type = " удаленном ";
                         elseif ($res->deactivated == "banned")
