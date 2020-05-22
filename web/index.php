@@ -110,7 +110,7 @@ switch ($data->type) {
                         $id = $data->object->message->reply_message->from_id;
                      else
                         $id = substr(explode("|",$text[2])[0], 3);
-                $res_user = json_decode(json_encode($vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id,
+                $res_user = json_decode(json_encode($vk->users()->get(SERVICE_KEY, array("user_ids" => $id,
                     "fields" => "id,first_name,last_name,deactivated,is_closed,verified,domain,bdate,can_post,can_see_all_posts,can_send_friend_request,"
                 . "can_write_private_message,city,connections,country,contacts,counters,about,activities,education,career,last_seen,interests,home_town,games,has_photo", "name_case" => "abl"))));
                     ob_start();
@@ -176,7 +176,7 @@ switch ($data->type) {
                         $request_params["message"] .= "\nДомашний телефон: " . $res_user[0]->home_phone;
                     }if(isset($res_user[0]->can_post)){
                             if ($res_user[0]->can_post == 1) $request_params["message"] .= "\n\nУ пользователя открыта стена";
-                            else $request_params["message"] .= "\nУ пользователя закрыта закрыта стена";
+                            else $request_params["message"] .= "\n\nУ пользователя закрыта закрыта стена";
                         if(isset($res_user[0]->can_see_all_posts)){
                             if ($res_user[0]->can_see_all_posts == 1) $request_params["message"] .= ", запрещен просмотр чужих записей";
                             else $request_params["message"] .= ", разрешен просмотр чужих записей";
