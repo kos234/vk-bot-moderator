@@ -105,6 +105,7 @@ switch ($data->type) {
                 . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Info user") == 0 || strcasecmp($text[0] . " " .$text[1], "/Инфо пользователя") == 0){
                 $id = getId($text[2],$data->object->message->reply_message->from_id);
+                error_log($id);
                 if($id != 0){
                     $type = "";
                     if($id > 0){
@@ -311,6 +312,7 @@ switch ($data->type) {
                     }
 
                 }else{
+                        error_log("группа");
                         $res_grop = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $id,
                             "fields" => "id,name,screen_name,is_closed,deactivated,type,activity,addresses,age_limits,can_create_topic,can_message,can_post,can_see_all_posts,can_upload_doc,can_upload_video,city,contacts,counters,country,cover,description,fixed_post,has_photo"))));
 
@@ -452,7 +454,10 @@ switch ($data->type) {
             }
 
             error_log("Отправка");
-            error_log($request_params["message"]);
+            ob_start();
+            var_dump($request_params["message"]);
+            error_log(ob_get_contents());
+            ob_end_clean();
             $vk->messages()->send(TOKEN_VK_BOT, $request_params);
 
             echo "ok";
