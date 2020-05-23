@@ -417,6 +417,11 @@ switch ($data->type) {
                         //$request_params["message"] = substr($request_params["message"], -2);
 
                         if(isset($res_grop[0]->contacts)){
+                            error_log("gro-------------------------");
+                            ob_start();
+                            var_dump($res_grop[0]->contacts);
+                            error_log(ob_get_contents());
+                            ob_end_clean();
                             $request_params["message"] .= "\n\nКонтакты:\n";
                             for ($i = 0; isset($res_grop[0]->contacts[$i]); $i++){
                                 $res_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $res_grop[0]->contacts[$i]->user_id));
@@ -424,10 +429,6 @@ switch ($data->type) {
                                 error_log("user-------------------------");
                                 ob_start();
                                 var_dump($res_user);
-                                error_log(ob_get_contents());
-                                ob_end_clean();error_log("gro-------------------------");
-                                ob_start();
-                                var_dump($res_grop[0]->contacts);
                                 error_log(ob_get_contents());
                                 ob_end_clean();
 
