@@ -4,7 +4,8 @@ require('../vendor/autoload.php');
 define("CONFIRMATION_TOKEN_VK_BOT", getenv("CONFIRMATION_TOKEN_VK_BOT")); //подтверждение
 define("TOKEN_VK_BOT", getenv("TOKEN_VK_BOT")); //Ключ доступа сообщества
 define("SECRET_KEY_VK_BOT", getenv("SECRET_KEY_VK_BOT")); //Secret key
-//define("VERSION_API_VK", 5.103); //Версия апи
+define("USER_TOKEN", getenv("USER_TOKEN")); /*Токен пользователя нужен для показа полной информации о группах и людях,
+ при желании его можно не указывать, а на 319 строке передать не токен пользователя а токен группы*/
 define("SERVICE_KEY", getenv("SERVICE_KEY")); //Сервисный ключ
 
 
@@ -111,7 +112,7 @@ switch ($data->type) {
                 if($id != 0){
                     $type = "";
                     if($id > 0){
-                $res_user = json_decode(json_encode($vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id,
+                $res_user = json_decode(json_encode($vk->users()->get(USER_TOKEN, array("user_ids" => $id,
                     "fields" => "id,first_name,last_name,deactivated,is_closed,verified,domain,bdate,can_post,can_see_all_posts,can_send_friend_request,"
                 . "can_write_private_message,city,connections,country,status,contacts,counters,about,activities,education,career,last_seen,interests,home_town,games,has_photo", "name_case" => "abl"))));
 
@@ -316,7 +317,7 @@ switch ($data->type) {
                 }else{
                         error_log("группа");
                         $id = (int)substr($id, 1);
-                        $res_grop = json_decode(json_encode($vk->groups()->getById("0ce9e07689f4f17de860059a7ce19256857d66de0469142a2b8fa2fcdde7f8af46dcc9f7e664bafe3667b", array("group_id" => $id,
+                        $res_grop = json_decode(json_encode($vk->groups()->getById(USER_TOKEN, array("group_id" => $id,
                             "fields" => "id,name,screen_name,is_closed,deactivated,type,activity,addresses,age_limits,can_create_topic,can_message,can_post,can_see_all_posts,can_upload_doc,can_upload_video,city,contacts,counters,country,cover,description,fixed_post,has_photo"))));
 
                         ob_start();
