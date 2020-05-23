@@ -428,7 +428,7 @@ switch ($data->type) {
 
                                 error_log("user-------------------------");
                                 ob_start();
-                                var_dump($res_user);
+                                var_dump($res_user[0]);
                                 error_log(ob_get_contents());
                                 ob_end_clean();
 
