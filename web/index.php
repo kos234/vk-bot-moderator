@@ -416,21 +416,11 @@ switch ($data->type) {
                             }
                         //$request_params["message"] = substr($request_params["message"], -2);
 
-                        if(isset($res_grop[0]->contacts)){
-                            error_log("gro-------------------------");
-                            ob_start();
-                            var_dump($res_grop[0]->contacts);
-                            error_log(ob_get_contents());
-                            ob_end_clean();
+                        if(isset($res_grop[0]->contacts))
+                            if($res_grop[0]->contacts !=array()){
                             $request_params["message"] .= "\n\nКонтакты:\n";
                             for ($i = 0; isset($res_grop[0]->contacts[$i]); $i++){
-                                $res_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $res_grop[0]->contacts[$i]->user_id));
-
-                                error_log("user-------------------------");
-                                ob_start();
-                                var_dump($res_user[0]);
-                                error_log(ob_get_contents());
-                                ob_end_clean();
+                                $res_user = json_decode(json_encode($vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $res_grop[0]->contacts[$i]->user_id))));
 
                                 $request_params["message"] .= "[id". $res_user[0]->id . "|". $res_user[0]->first_name ." " .$res_user[0]->last_name ."]";
                                 if(isset($res_grop[0]->contacts->desc) || isset($res_grop[0]->contacts->phone) || isset($res_grop[0]->contacts->email)){
