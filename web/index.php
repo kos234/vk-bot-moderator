@@ -334,7 +334,7 @@ switch ($data->type) {
                         $request_params["message"] = "Информация о". $type ." сообществе [club". $res_grop[0]->id . "|". $res_grop[0]->name ."]: \nАйди: " . $res_grop[0]->id;
                         if(isset($res_grop[0]->screen_name)){
                             $request_params["message"] .= "\nДомен: " . $res_grop[0]->screen_name;
-                        }/*if(isset($res_grop[0]->is_closed) && isset($res_grop[0]->type)){
+                        }if(isset($res_grop[0]->is_closed) && isset($res_grop[0]->type)){
                             $request_params["message"] .= "\nТип: ";
 
                             if($res_grop[0]->type == "event"){
@@ -386,31 +386,31 @@ switch ($data->type) {
                             else $request_params["message"] .= "выключено добавление обсуждений пользователями, ";
                         }
                             if (isset($res_grop[0]->can_message)){
-                                if($res_grop[0]->can_message == 1) $request_params["message"] = "включены сообщения, ";
+                                if($res_grop[0]->can_message == 1) $request_params["message"] .= "включены сообщения, ";
                                 else $request_params["message"] .= "выключены сообщения, ";
                             }
                             if (isset($res_grop[0]->can_post)){
-                            if($res_grop[0]->can_post == 1) $request_params["message"] = "открыта стена, ";
+                            if($res_grop[0]->can_post == 1) $request_params["message"] .= "открыта стена, ";
                             else $request_params["message"] .= "закрыта стена, ";
                             }
                             if (isset($res_grop[0]->can_see_all_posts)){
-                                if($res_grop[0]->can_see_all_posts == 1) $request_params["message"] = "открыты чужие записи, ";
+                                if($res_grop[0]->can_see_all_posts == 1) $request_params["message"] .= "открыты чужие записи, ";
                                 else $request_params["message"] .= "скрыты чужие записи, ";
                             }
                             if (isset($res_grop[0]->can_upload_doc)){
-                                if($res_grop[0]->can_upload_doc == 1) $request_params["message"] = "включена загрузка документов пользователями, ";
+                                if($res_grop[0]->can_upload_doc == 1) $request_params["message"] .= "включена загрузка документов пользователями, ";
                                 else $request_params["message"] .= "выключена загрузка документов пользователями, ";
                             }
                             if (isset($res_grop[0]->can_upload_video)){
-                                if($res_grop[0]->can_upload_video == 1) $request_params["message"] = "включена загрузка видеозаписей пользователями, ";
+                                if($res_grop[0]->can_upload_video == 1) $request_params["message"] .= "включена загрузка видеозаписей пользователями, ";
                                 else $request_params["message"] .= "выключена загрузка видеозаписей пользователями, ";
                             }
                             if (isset($res_grop[0]->cover->enabled)){
-                                if($res_grop[0]->cover->enabled == 1) $request_params["message"] = "установлена обложка, ";
+                                if($res_grop[0]->cover->enabled == 1) $request_params["message"] .= "установлена обложка, ";
                                 else $request_params["message"] .= ", не установлена обложка";
                             }
                             if (isset($res_grop[0]->has_photo)){
-                                if($res_grop[0]->has_photo == 1) $request_params["message"] = "установлена аватарка, ";
+                                if($res_grop[0]->has_photo == 1) $request_params["message"] .= "установлена аватарка, ";
                                 else $request_params["message"] .= "не установлена аватарка, ";
                             }
                         //$request_params["message"] = substr($request_params["message"], -2);
@@ -465,7 +465,7 @@ switch ($data->type) {
                         }if(isset($res_grop[0]->fixed_post)){
                             $request_params["message"] .= "\n\nЗакреплённый пост:";
                             $request_params["attachment"] = "wall-" . $res_grop[0]->id . "_" . $res_grop[0]->fixed_post;
-                        }*/
+                        }
                     }
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
             }
