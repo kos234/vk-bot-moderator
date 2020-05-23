@@ -267,7 +267,8 @@ switch ($data->type) {
                             $request_params["message"] .= ", подписчиков: " . $res_user[0]->counters->followers;
                         if(isset($res_user[0]->counters->pages))
                             $request_params["message"] .= ", интересных страниц: " . $res_user[0]->counters->pages ;
-                    }if(isset($res_user[0]->career)){
+                    }if(isset($res_user[0]->career))
+                        if($res_user[0]->career == array()){
                         $request_params["message"] .= "\n\nКарьера пользователя: ";
                         for ($i = 0; isset($res_user[0]->career[$i]); $i++){
                            $res_g = json_decode(json_encode($vk->groups()->getById(TOKEN_VK_BOT, array("group_id" => $res_user[0]->career[$i]->group_id))));
@@ -318,7 +319,7 @@ switch ($data->type) {
                         error_log("группа");
                         $id = (int)substr($id, 1);
                         $res_grop = json_decode(json_encode($vk->groups()->getById(USER_TOKEN, array("group_id" => $id,
-                            "fields" => "id,name,screen_name,is_closed,deactivated,type,activity,addresses,age_limits,can_create_topic,can_message,can_post,can_see_all_posts,can_upload_doc,can_upload_video,city,contacts,counters,country,cover,description,fixed_post,has_photo"))));
+                            "fields" => "id,name,screen_name,is_closed,status,deactivated,type,activity,addresses,age_limits,can_create_topic,can_message,can_post,can_see_all_posts,can_upload_doc,can_upload_video,city,contacts,counters,country,cover,description,fixed_post,has_photo"))));
 
                         ob_start();
                         var_dump($res_grop);
@@ -335,6 +336,8 @@ switch ($data->type) {
                         $request_params["message"] = "Информация о". $type ." сообществе [club". $res_grop[0]->id . "|". $res_grop[0]->name ."]: \nАйди: " . $res_grop[0]->id;
                         if(isset($res_grop[0]->screen_name)){
                             $request_params["message"] .= "\nДомен: " . $res_grop[0]->screen_name;
+                        }if(isset($res_grop[0]->status)){
+                            $request_params["message"] .= "\nСтатус: " . $res_grop[0]->status;
                         }if(isset($res_grop[0]->is_closed) && isset($res_grop[0]->type)){
                             $request_params["message"] .= "\nТип: ";
 
@@ -414,7 +417,7 @@ switch ($data->type) {
                                 if($res_grop[0]->has_photo == 1) $request_params["message"] .= "установлена аватарка, ";
                                 else $request_params["message"] .= "не установлена аватарка, ";
                             }
-                        //$request_params["message"] = substr($request_params["message"], -2);
+                        $request_params["message"] = substr($request_params["message"],0, -2);
 
                         if(isset($res_grop[0]->contacts))
                             if($res_grop[0]->contacts !=array()){
@@ -453,7 +456,7 @@ switch ($data->type) {
                             if(isset($res_grop[0]->counters->docs))
                                 $request_params["message"] .= "документов: " . $res_grop[0]->counters->docs . ", ";
 
-                            //$request_params["message"] = substr($request_params["message"], -2);
+                            $request_params["message"] = substr($request_params["message"],0, -2);
                         }if(isset($res_grop[0]->fixed_post)){
                             $request_params["message"] .= "\n\nЗакреплённый пост:";
                             $request_params["attachment"] = "wall-" . $res_grop[0]->id . "_" . $res_grop[0]->fixed_post;
