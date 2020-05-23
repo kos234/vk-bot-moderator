@@ -334,7 +334,7 @@ switch ($data->type) {
                         $request_params["message"] = "Информация о". $type ." сообществе [club". $res_grop[0]->id . "|". $res_grop[0]->name ."]: \nАйди: " . $res_grop[0]->id;
                         if(isset($res_grop[0]->screen_name)){
                             $request_params["message"] .= "\nДомен: " . $res_grop[0]->screen_name;
-                        }if(isset($res_grop[0]->is_closed) && isset($res_grop[0]->type)){
+                        }/*if(isset($res_grop[0]->is_closed) && isset($res_grop[0]->type)){
                             $request_params["message"] .= "\nТип: ";
 
                             if($res_grop[0]->type == "event"){
@@ -465,7 +465,7 @@ switch ($data->type) {
                         }if(isset($res_grop[0]->fixed_post)){
                             $request_params["message"] .= "\n\nЗакреплённый пост:";
                             $request_params["attachment"] = "wall-" . $res_grop[0]->id . "_" . $res_grop[0]->fixed_post;
-                        }
+                        }*/
                     }
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
             }
