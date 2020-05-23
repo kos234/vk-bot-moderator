@@ -428,14 +428,14 @@ switch ($data->type) {
                                 $request_params["message"] .= "[id". $res_user[0]->id . "|". $res_user[0]->first_name ." " .$res_user[0]->last_name ."]";
                                 if(isset($res_grop[0]->contacts[$i]->desc) || isset($res_grop[0]->contacts[$i]->phone) || isset($res_grop[0]->contacts[$i]->email)){
                                     $request_params["message"] .= " - ";
-                                    if(isset($res_grop[0]->contacts->desc))
-                                        $request_params["message"] .= "должность: " . $res_grop[0]->contacts->desc;
-                                    if (isset($res_grop[0]->contacts->phone))
-                                        if (isset($res_grop[0]->contacts->desc)) $request_params["message"] .= ", телефон: " . $res_grop[0]->contacts->phone;
-                                        else $request_params["message"] .= "телефон: " . $res_grop[0]->contacts->phone;
-                                    if (isset($res_grop[0]->contacts->email))
-                                        if (isset($res_grop[0]->contacts->desc) || isset($res_grop[0]->contacts->phone)) $request_params["message"] .= ", Email: " . $res_grop[0]->contacts->email;
-                                        else $request_params["message"] .= "Email: " . $res_grop[0]->contacts->email;
+                                    if(isset($res_grop[0]->contacts[$i]->desc))
+                                        $request_params["message"] .= "должность: " . $res_grop[0]->contacts[$i]->desc;
+                                    if (isset($res_grop[0]->contacts[$i]->phone))
+                                        if (isset($res_grop[0]->contacts[$i]->desc)) $request_params["message"] .= ", телефон: " . $res_grop[0]->contacts[$i]->phone;
+                                        else $request_params["message"] .= "телефон: " . $res_grop[0]->contacts[$i]->phone;
+                                    if (isset($res_grop[0]->contacts[$i]->email))
+                                        if (isset($res_grop[0]->contacts[$i]->desc) || isset($res_grop[0]->contacts[$i]->phone)) $request_params["message"] .= ", Email: " . $res_grop[0]->contacts[$i]->email;
+                                        else $request_params["message"] .= "Email: " . $res_grop[0]->contacts[$i]->email;
                                 }
 
                                 if (isset($res_grop[0]->contacts[$i + 1]))
