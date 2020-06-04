@@ -498,10 +498,7 @@ switch ($data->type) {
                             for ($i = 0; isset($res_url["stats"][0]["sex_age"][$i]); $i++){
                                 $request_params["message"] .= "\n" . $res_url["stats"][0]["sex_age"][$i]["age_range"] . ", женщин: " . $res_url["stats"][0]["sex_age"][$i]["female"] . ", мужчин: " . $res_url["stats"][0]["sex_age"][$i]["male"];
                             }
-                            ob_start();
-                            var_dump($res_url);
-                            error_log(ob_get_contents());
-                            ob_end_clean();
+
                             $request_params["message"] .= "\n\nПросмотры по странам:";
 
                             for ($i = 0; isset($res_url["stats"][0]["countries"][$i]); $i++){
@@ -527,8 +524,8 @@ switch ($data->type) {
                 }else $request_params["message"] = "Вы не указали ссылку!";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Инвайт ссылка") == 0 || strcasecmp($text[0] . " " .$text[1], "/ссылка приглашения") == 0 || strcasecmp($text[0], "/Приглашение") == 0){
                 $res = $mysqli->query("SELECT `greeting` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
-                if($res){
-                    $res = $res->fetch_assoc();
+                $res = $res->fetch_assoc();
+                if(isset($res["greeting"])){
                     if(strcasecmp($res["greeting"], "") != 0 || $res["greeting"] != null)
                         $request_params["message"] = "Ссылка для приглашения: " . $res["greeting"];
                     else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
