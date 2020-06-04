@@ -473,7 +473,11 @@ switch ($data->type) {
                     if(strcasecmp($text[3], "on") == 0 || strcasecmp($text[3], "включить") == 0) $stat = 1;
                     else $stat = 0;
                     try {
-                        $res_url = $vk->utils()->getShortLink(TOKEN_VK_BOT, array("url" => $text[2], "private" => 1));
+                        $res_url = $vk->utils()->getShortLink(TOKEN_VK_BOT, array("url" => $text[2], "private" => $stat));
+                        ob_start();
+                        var_dump($res_url);
+                        error_log(ob_get_contents());
+                        ob_end_clean();
                     $request_params["message"] = "Ваша ссылка: " . $res_url["short_url"];
                     if($stat){
                         $request_params["message"] .= " токен для статистики отправлен вам в личные сообщения";
