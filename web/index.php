@@ -568,7 +568,7 @@ function getUrlParameters($url, $token){
                 $url = substr($url, 0, $i);
             }
             elseif ($domain == "") {
-                $domain = substr($url, $i + 1);
+                $domain = str_replace(".", "_", substr($url, $i + 1));
             }
         }
 
