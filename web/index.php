@@ -495,9 +495,13 @@ switch ($data->type) {
                             $res_url = $vk->utils()->getLinkStats(USER_TOKEN, getUrlParameters($text[2], $text[3]));
                         if(isset($res_url["stats"][0]["views"])){
                             $request_params["message"] = "Всего просмотров: " . $res_url["stats"][0]["views"] . "\n\nПросмотры по возрастным диапазонам:";
-                            //for ($i = 0; isset($res_url["stats"][0]["sex_age"][$i]); $i++){
-                                $request_params["message"] .= "\n" . $res_url["stats"][0]["sex_age"][0]["age_range"] . ", женщин: " . $res_url["stats"][0]["sex_age"][0]["female"] . ", мужчин: " . $res_url["stats"][0]["sex_age"][0]["male"];
-                            //}
+                            for ($i = 0; isset($res_url["stats"][0]["sex_age"][$i]); $i++){
+                                $request_params["message"] .= "\n" . $res_url["stats"][0]["sex_age"][$i]["age_range"] . ", женщин: " . $res_url["stats"][0]["sex_age"][$i]["female"] . ", мужчин: " . $res_url["stats"][0]["sex_age"][$i]["male"];
+                            }
+                            ob_start();
+                            var_dump($res_url);
+                            error_log(ob_get_contents());
+                            ob_end_clean();
                             $request_params["message"] .= "\n\nПросмотры по странам:";
 
                             for ($i = 0; isset($res_url["stats"][0]["countries"][$i]); $i++){
