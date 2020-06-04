@@ -470,8 +470,8 @@ switch ($data->type) {
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Сократить ссылку") == 0){
                 if(isset($text[2])){
-                    if(strcasecmp($text[3], "on") == 0 || strcasecmp($text[3], "включить") == 0) $stat = true;
-                    else $stat = false;
+                    if(strcasecmp($text[3], "on") == 0 || strcasecmp($text[3], "включить") == 0) $stat = 1;
+                    else $stat = 0;
                     try {
                         $res_url = $vk->utils()->getShortLink(TOKEN_VK_BOT, array("url" => $text[2], "private" => $stat));
                     $request_params["message"] = "Ваша ссылка: " . $res_url["short_url"];
