@@ -60,29 +60,34 @@ switch ($data->type) {
                 $request_params['message'] = "&#129302;Bot moderator by kos v2.0.0\n\n"
                     . "&#9999;Команды:\n"
                     . "&#128196;/ — информация о боте\n"
-                    . "/Info user|Инфо пользователя {@Айди|@домен|Пересланое сообщение} — информация пользователя в вк и чате\n"
-                    . "/Сократить ссылку {ссылка} — сокращает ссылку через сервис вк\n"
+                    . "/User info|Информация пользователя {@Айди|@домен|Пересланое сообщение} — информация пользователя в вк и чате\n"
+                    . "/Сократить ссылку {ссылка} [Включить|выключить|on|off] — сокращает ссылку через сервис вк, on - включает статистику\n"
+                    . "/Получить статистику {ссылка} {токен} — выводит статистику переходов по сокращенный ссылке (желательно использовать эту команду в личных сообщениях)\n"
                     . "/Инвайт ссылка|Приглашение|Ссылка приглашение - выводит ссылку на приглашение в этот чат\n"
                     . "/Пригласить {@Айди|@домен|Пересланое сообщение} [Сообщение] - отправляет приглашение пользователю в этот чат\n"
-                    . "/Список {Пользователей|забаненных|вышедших} - выводит указанный список пользователей\n"
+                    . "/Список {Пользователей|забаненных|вышедших|модераторов} - выводит указанный список пользователей\n"
+                    . "/Settings|настройки - показывает список настроек\n"
                     . "/Неактив - выводит список неактивных пользователей\n"
-                    . "/Онлайн - выводит список пользователей онлайн\n\n"
-                    . "Модерация:\n"
+                    . "/Онлайн - выводит список пользователей онлайн\n"
+                    . "/Лимит модераторов - выводит лимит для модераторов\n\n"
+                    . "Модерация и Администрация:\n"
                     . "/Предупреждение|Пред {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Выдать предупреждение\n"
                     . "/Кик|Исключить {@Айди|@домен|Пересланое сообщение} [Причина] - Исключить пользователя из чата\n"
                     . "/Временный бан {@Айди|@домен|Пересланое сообщение} {Время SS:MM:HH:DDD:MM} [Причина] - Временно забанить пользователя в беседе\n"
                     . "/Бан {@Айди|@домен|Пересланое сообщение} [Причина] - Забанить пользователя\n"
                     . "/Разбанить|Пардон {@Айди|@домен|Пересланое сообщение} [Причина] - Разбанить пользователя\n"
                     . "/Мега кик|мега исключение {Неактивных|вышедших|пользователей} - исключает пользователей из определённой группы\n"
-                    . "{} - обязательный параметр, [] - необязательный параметр, {] - тип зависит от задачи\n\n"
+                    . "/Назначит ранг|Сет ранг {@Айди|@домен|Пересланое сообщение} {0|1|2|3|4|5|Модератор 1 - 4|пользователь|администратор} - Разбанить пользователя\n\n"
                     . "&#9881;Настройки:\n"
                     . "/Лимит повышение рангов {Уровень 1 - 5} {Количество предупреждений} {Количество киков} {Количество временных баннов} - устанавливает лимит повышение рангов модераторам\n"
                     . "/Наказания за предупреждения {Тип: кик, временный бан, бан} {Количество} {Время, если тип: временный бан] - Установить наказание за достижение определенного количества предупреждений\n"
-                    . "/Очистить таблицу {Пользователей|забаненных|вышедших|модераторов|наказаний|всё} - очищает указанную таблицу\n"
+                    . "/Очистить таблицу {Пользователей|забаненных|вышедших|модераторов|наказаний|лимит|настроек|всё} - очищает указанную таблицу\n"
                     . "/Авто очистка предупреждений {Время SS:MM:HH:DDD:MM} - сбрасывает всё предупреждения через указанное время\n"
-                    . "/Приветствие {Текст} - Установить приветствие для новых пользователей\n"
+                    . "/Приветствие {Текст} - Устанавливает приветствие для новых пользователей\n"
+                    . "/Установить инвайт ссылку {Текст} - Устанавливает ссылку для подключение к беседе\n"
                     . "/Сообщать о наказаниях {@Айди|@домен|Пересланое сообщение} - люди, которым приходят уведомления о выдачи наказаний(если людей несколько, указывать через запятую без пробелов)\n"
-                    . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов\n\n"
+                    . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов\n"
+                    . "{} - обязательный параметр, [] - необязательный параметр, {] - тип зависит от задачи\n\n"
                     . "&#128214;Информация о проекте:\n"
                     . "&#128100;Создатель: https://vk.com/i_love_python\n"
                     . "&#128064;Исходные код проекта и гайд по подключению: https://github.com/kos234/Vk-bot-moderator\n";
@@ -104,11 +109,9 @@ switch ($data->type) {
                 . "/Приветствие {Текст} - Установить приветствие для новых пользователей\n"
                 . "/Сообщать о наказаниях {@Айди|@домен|Пересланое сообщение} - люди, которым приходят уведомления о выдачи наказаний(если людей несколько, указывать через запятую без пробелов)\n"
                 . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов";
-            }elseif (strcasecmp($text[0] . " " .$text[1], "/Info user") == 0 || strcasecmp($text[0] . " " .$text[1], "/Инфо пользователя") == 0){
-                error_log("----------------------------------------------------------------ХМ");
+            }elseif (strcasecmp($text[0] . " " .$text[1], "/user info") == 0 || strcasecmp($text[0] . " " .$text[1], "/Информация пользователя") == 0){
                 $id = getId($text[2],$data->object->message->reply_message->from_id);
-                error_log("----------------------------------------------------------------АЙДИ");
-                error_log($id);
+
                 if($id != 0){
                     $type = "";
                     if($id > 0){
@@ -214,7 +217,14 @@ switch ($data->type) {
                     }if(isset($res_user[0]->home_phone)){
                         if($res_user[0]->home_phone != "")
                         $request_params["message"] .= "\nДомашний телефон: " . $res_user[0]->home_phone;
-                    }if(isset($res_user[0]->can_post)){
+                    }if($data->object->message->peer_id != $data->object->message->from_id) {//Если сообщение в беседе добавляем
+                            $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                            $res_user = $res->fetch_assoc();
+                            if(isset($res["id"])){
+                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res["mes_count"];
+                            }
+                        }
+                        if(isset($res_user[0]->can_post)){
                             if ($res_user[0]->can_post == 1) $request_params["message"] .= "\n\nУ пользователя открыта стена";
                             else $request_params["message"] .= "\n\nУ пользователя закрыта закрыта стена";
                         if(isset($res_user[0]->can_see_all_posts)){
@@ -316,15 +326,9 @@ switch ($data->type) {
                     }
 
                 }else{
-                        error_log("группа");
                         $id = (int)substr($id, 1);
                         $res_grop = json_decode(json_encode($vk->groups()->getById(USER_TOKEN, array("group_id" => $id,
                             "fields" => "id,name,screen_name,is_closed,status,deactivated,type,activity,addresses,age_limits,can_create_topic,can_message,can_post,can_see_all_posts,can_upload_doc,can_upload_video,city,contacts,counters,country,cover,description,fixed_post,has_photo"))));
-
-                        ob_start();
-                        var_dump($res_grop);
-                        error_log(ob_get_contents());
-                        ob_end_clean();
 
                         if(isset($res_grop[0]->deactivated)){
                             if($res_grop[0]->deactivated == "deleted")
@@ -457,12 +461,58 @@ switch ($data->type) {
                                 $request_params["message"] .= "документов: " . $res_grop[0]->counters->docs . ", ";
 
                             $request_params["message"] = substr($request_params["message"],0, -2);
+
                         }if(isset($res_grop[0]->fixed_post)){
                             $request_params["message"] .= "\n\nЗакреплённый пост:";
                             $request_params["attachment"] = "wall-" . $res_grop[0]->id . "_" . $res_grop[0]->fixed_post;
                         }
                     }
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
+            }elseif (strcasecmp($text[0] . " " .$text[1], "/Сократить ссылку") == 0){
+                if(isset($text[2])){
+                    if(strcasecmp($text[3], "on") == 0 || strcasecmp($text[3], "включить") == 0) $stat = true;
+                    else $stat = false;
+                    try {
+                        $res_url = $vk->utils()->getShortLink(TOKEN_VK_BOT, array("url" => $text[2], "private" => $stat));
+                    $request_params["message"] = "Ваша ссылка: " . $res_url["short_url"];
+                    if($stat){
+                        $request_params["message"] .= " токен для статистики отправлен вам в личные сообщения";
+                        $vk->messages()->send(TOKEN_VK_BOT, $request_params);
+                        $request_params["peer_id"] = $data->object->message->from_id;
+                        $request_params["message"] = "Ваш токен " . $res_url["access_key"] ." для просмотра статистики ссылки: " . $res_url["short_url"];
+                    }
+                    } catch (\VK\Exceptions\VKApiException $e) {
+                        $request_params["message"] = "Что-то не так с ссылкой!";
+                    } catch (\VK\Exceptions\VKClientException $e) {
+                        $request_params["message"] = "Что-то не так с ссылкой!";
+                    }
+                }else $request_params["message"] = "Вы не указали ссылку!";
+
+            }elseif (strcasecmp($text[0] . " " .$text[1], "/Получить статистику") == 0){
+                if(isset($text[2])) {
+                    if(isset($text[3])) {
+                        $res_url = $vk->utils()->getLinkStats(TOKEN_VK_BOT, getUrlParameters($text[2], $text[3]));
+
+                        if(isset($res_url["stats"][0]["views"])){
+                            $request_params["message"] = "Всего просмотров: " . $res_url["stats"][0]["views"] . "\n\nПросмотры по возрастным диапазонам:";
+                            for ($i = 0; isset($res_url["stats"][0]["sex_age"][$i]); $i++){
+                                $request_params["message"] .= "\n" . $res_url["stats"][0]["sex_age"][$i]["age_range"] . ", женщин: " . $res_url["stats"][0]["sex_age"][$i]["female"] . ", мужчин: " . $res_url["stats"][0]["sex_age"][$i]["male"];
+                            }
+                            $request_params["message"] .= "\n\nПросмотры по странам:";
+
+                            for ($i = 0; isset($res_url["stats"][0]["countries"][$i]); $i++){
+                                $res_count = $vk->database()->getCountriesById(SERVICE_KEY, array("country_ids" => $res_url["stats"][0]["countries"][$i]["country_id"]));
+                                $request_params["message"] .= "\n" . $res_count[0]["title"] . ": " . $res_url["stats"][0]["countries"][$i]["views"];
+                            }
+                            $request_params["message"] .= "\n\nПросмотры по городам:";
+
+                            for ($i = 0; isset($res_url["stats"][0]["cities"][$i]); $i++){
+                                $res_count = $vk->database()->getCitiesById(SERVICE_KEY, array("city_ids" => $res_url["stats"][0]["cities"][$i]["city_id"]));
+                                $request_params["message"] .= "\n" . $res_count[0]["title"] . ": " . $res_url["stats"][0]["cities"][$i]["views"];
+                            }
+                        }else $request_params["message"] = "Пока не было переходов по этой ссылке!";
+                    }else $request_params["message"] = "Вы не указали токен для просмотра статистики!";
+                }else $request_params["message"] = "Вы не указали ссылку!";
             }
 
 
@@ -474,14 +524,12 @@ switch ($data->type) {
 
             }
 
-            error_log("Отправка");
-            ob_start();
-            var_dump($request_params["message"]);
-            error_log(ob_get_contents());
-            ob_end_clean();
             $vk->messages()->send(TOKEN_VK_BOT, $request_params);
 
             echo "ok";
+
+            if($data->object->message->peer_id != $data->object->message->from_id) //Если сообщение в беседе добавляем + 1 к количеству сообщений
+                $mysqli->query("UPDATE `". $data->object->message->peer_id ."_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '". $data->object->message->from_id ."'");
         break;
 
 }
@@ -496,6 +544,25 @@ if(isset($text) || isset($reply_to)){
         else return (int)substr(explode("|",$text)[0], 3);
 
 }else return 0;
+}
+function getUrlParameters($url, $token){
+    $key = ""; $domain = "";
+    for ($i = strlen($url) - 1; $i >= 0; $i--){
+        if($url[$i] == "/"){
+            if($i == strlen($url) - 1)
+                $url = substr($url, 0, $i);
+            elseif($key == "" ){
+                $key = substr($url, $i + 1);
+                $url = substr($url, 0, $i);
+            }
+            elseif ($domain == "") {
+                $domain = substr($url, $i + 1);
+            }
+        }
+
+    }
+
+    return array("access_key" => $token, "key" => $key, "source" => $domain, "interval" => "forever");
 }
 
 function createTabs($chat_id, $mysqli, $vk){
