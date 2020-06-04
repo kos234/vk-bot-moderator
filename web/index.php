@@ -582,7 +582,7 @@ function getUrlParameters($url, $token){
 
     }
 
-    return array("access_key" => $token, "key" => $key, "source" => $domain, "interval" => "forever");
+    return array("access_key" => $token, "key" => $key, "source" => $domain, "interval" => "forever", "extended" => 1);
 }
 
 function createTabs($chat_id, $mysqli, $vk){
