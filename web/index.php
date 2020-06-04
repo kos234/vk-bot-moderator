@@ -486,9 +486,9 @@ switch ($data->type) {
                         $request_params["message"] = "Ваш токен " . $res_url["access_key"] ." для просмотра статистики ссылки: " . $res_url["short_url"];
                     }
                     } catch (\VK\Exceptions\VKApiException $e) {
-                        $request_params["message"] = "Что-то не так с ссылкой!1";
+                        $request_params["message"] = "Что-то не так с ссылкой!";
                     } catch (\VK\Exceptions\VKClientException $e) {
-                        $request_params["message"] = "Что-то не так с ссылкой2!";
+                        $request_params["message"] = "Что-то не так с ссылкой!";
                     }
                 }else $request_params["message"] = "Вы не указали ссылку!";
 
@@ -496,7 +496,7 @@ switch ($data->type) {
                 if(isset($text[2])) {
                     if(isset($text[3])) {
                         try {
-                            $res_url = $vk->utils()->getLinkStats(TOKEN_VK_BOT, getUrlParameters($text[2], $text[3]));
+                            $res_url = $vk->utils()->getLinkStats(USER_TOKEN, getUrlParameters($text[2], $text[3]));
                         if(isset($res_url["stats"][0]["views"])){
                             $request_params["message"] = "Всего просмотров: " . $res_url["stats"][0]["views"] . "\n\nПросмотры по возрастным диапазонам:";
                             for ($i = 0; isset($res_url["stats"][0]["sex_age"][$i]); $i++){
@@ -517,11 +517,11 @@ switch ($data->type) {
 
                         }else $request_params["message"] = "Пока не было переходов по этой ссылке!";
                         } catch (\VK\Exceptions\Api\VKApiNotFoundException $e) {
-                            $request_params["message"] = "Что-то не так с ссылкой!1";
+                            $request_params["message"] = "Что-то не так с ссылкой!";
                         } catch (\VK\Exceptions\VKApiException $e) {
-                            $request_params["message"] = "Что-то не так с ссылкой2!";
+                            $request_params["message"] = "Что-то не так с ссылкой!";
                         } catch (\VK\Exceptions\VKClientException $e) {
-                            $request_params["message"] = "Что-то не так с ссылкой!3";
+                            $request_params["message"] = "Что-то не так с ссылкой!";
                         }
                     }else $request_params["message"] = "Вы не указали токен для просмотра статистики!";
                 }else $request_params["message"] = "Вы не указали ссылку!";
