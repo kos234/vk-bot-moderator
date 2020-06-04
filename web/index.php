@@ -474,10 +474,6 @@ switch ($data->type) {
                     else $stat = 0;
                     try {
                         $res_url = $vk->utils()->getShortLink(USER_TOKEN, array("url" => $text[2], "private" => $stat));
-                        ob_start();
-                        var_dump($res_url);
-                        error_log(ob_get_contents());
-                        ob_end_clean();
                     $request_params["message"] = "Ваша ссылка: " . $res_url["short_url"];
                     if($stat){
                         $request_params["message"] .= " токен для статистики отправлен вам в личные сообщения";
@@ -496,6 +492,7 @@ switch ($data->type) {
                 if(isset($text[2])) {
                     if(isset($text[3])) {
                         try {
+                            error_log(getUrlParameters($text[2], $text[3]));
                             $res_url = $vk->utils()->getLinkStats(USER_TOKEN, getUrlParameters($text[2], $text[3]));
                         if(isset($res_url["stats"][0]["views"])){
                             $request_params["message"] = "Всего просмотров: " . $res_url["stats"][0]["views"] . "\n\nПросмотры по возрастным диапазонам:";
