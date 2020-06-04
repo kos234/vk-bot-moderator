@@ -492,10 +492,6 @@ switch ($data->type) {
                 if(isset($text[2])) {
                     if(isset($text[3])) {
                         try {
-                            ob_start();
-                            var_dump(getUrlParameters($text[2], $text[3]));
-                            error_log(ob_get_contents());
-                            ob_end_clean();
                             $res_url = $vk->utils()->getLinkStats(USER_TOKEN, getUrlParameters($text[2], $text[3]));
                         if(isset($res_url["stats"][0]["views"])){
                             $request_params["message"] = "Всего просмотров: " . $res_url["stats"][0]["views"] . "\n\nПросмотры по возрастным диапазонам:";
@@ -525,6 +521,14 @@ switch ($data->type) {
                         }
                     }else $request_params["message"] = "Вы не указали токен для просмотра статистики!";
                 }else $request_params["message"] = "Вы не указали ссылку!";
+            }elseif (strcasecmp($text[0] . " " .$text[1], "/Инвайт ссылка") == 0 || strcasecmp($text[0] . " " .$text[1], "/ссылка приглашения") == 0 || strcasecmp($text[0], "/Приглашение") == 0){
+                $res = $mysqli->query("SELECT `greeting` FROM `chat_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                if($res){
+                    $res = $res->fetch_assoc();
+                    if(strcasecmp($res["greeting"], "") != 0 || $res["greeting"] != null)
+                        $request_params["message"] = "Ссылка для приглашения: " . $res["greeting"];
+                    else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
+                }else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
             }
 
 
