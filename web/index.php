@@ -472,6 +472,7 @@ switch ($data->type) {
                 if(isset($text[2])){
                     if(strcasecmp($text[3], "on") == 0 || strcasecmp($text[3], "включить") == 0) $stat = 1;
                     else $stat = 0;
+                    error_log($stat);
                     try {
                         $res_url = $vk->utils()->getShortLink(TOKEN_VK_BOT, array("url" => $text[2], "private" => $stat));
                     $request_params["message"] = "Ваша ссылка: " . $res_url["short_url"];
@@ -482,17 +483,17 @@ switch ($data->type) {
                         $request_params["message"] = "Ваш токен " . $res_url["access_key"] ." для просмотра статистики ссылки: " . $res_url["short_url"];
                     }
                     } catch (\VK\Exceptions\VKApiException $e) {
-                        $request_params["message"] = "Что-то не так с ссылкой!";
+                        $request_params["message"] = "Что-то не так с ссылкой!1";
                     } catch (\VK\Exceptions\VKClientException $e) {
-                        $request_params["message"] = "Что-то не так с ссылкой!";
+                        $request_params["message"] = "Что-то не так с ссылкой2!";
                     }
                 }else $request_params["message"] = "Вы не указали ссылку!";
 
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Получить статистику") == 0){
                 if(isset($text[2])) {
                     if(isset($text[3])) {
-                        $res_url = $vk->utils()->getLinkStats(TOKEN_VK_BOT, getUrlParameters($text[2], $text[3]));
-
+                        try {
+                            $res_url = $vk->utils()->getLinkStats(TOKEN_VK_BOT, getUrlParameters($text[2], $text[3]));
                         if(isset($res_url["stats"][0]["views"])){
                             $request_params["message"] = "Всего просмотров: " . $res_url["stats"][0]["views"] . "\n\nПросмотры по возрастным диапазонам:";
                             for ($i = 0; isset($res_url["stats"][0]["sex_age"][$i]); $i++){
@@ -510,7 +511,15 @@ switch ($data->type) {
                                 $res_count = $vk->database()->getCitiesById(SERVICE_KEY, array("city_ids" => $res_url["stats"][0]["cities"][$i]["city_id"]));
                                 $request_params["message"] .= "\n" . $res_count[0]["title"] . ": " . $res_url["stats"][0]["cities"][$i]["views"];
                             }
+
                         }else $request_params["message"] = "Пока не было переходов по этой ссылке!";
+                        } catch (\VK\Exceptions\Api\VKApiNotFoundException $e) {
+                            $request_params["message"] = "Что-то не так с ссылкой!1";
+                        } catch (\VK\Exceptions\VKApiException $e) {
+                            $request_params["message"] = "Что-то не так с ссылкой2!";
+                        } catch (\VK\Exceptions\VKClientException $e) {
+                            $request_params["message"] = "Что-то не так с ссылкой!3";
+                        }
                     }else $request_params["message"] = "Вы не указали токен для просмотра статистики!";
                 }else $request_params["message"] = "Вы не указали ссылку!";
             }
