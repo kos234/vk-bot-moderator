@@ -525,6 +525,10 @@ switch ($data->type) {
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Инвайт ссылка") == 0 || strcasecmp($text[0] . " " .$text[1], "/ссылка приглашения") == 0 || strcasecmp($text[0], "/Приглашение") == 0){
                 $res = $mysqli->query("SELECT `greeting` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
                 $res = $res->fetch_assoc();
+                ob_start();
+                var_dump($res);
+                error_log(ob_get_contents());
+                ob_end_clean();
                 if(isset($res["greeting"])){
                     if(strcasecmp($res["greeting"], "") != 0 || $res["greeting"] != null)
                         $request_params["message"] = "Ссылка для приглашения: " . $res["greeting"];
