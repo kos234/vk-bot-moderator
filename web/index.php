@@ -548,8 +548,12 @@ switch ($data->type) {
                             if(isset($data->object->message->reply_message->from_id))
                                 $mes = 1;
                             else $mes = 2;
-                            if(isset($text[$mes]))
-                                $request_params["message"] .= "\nКомментарий: " .  $text[$mes];
+                            if(isset($text[$mes])) {
+                                $request_params["message"] .= "\nКомментарий:";
+                                for ($i = $mes; isset($text[$i]); $i++) {
+                                    $request_params["message"] .= " " . $text[$mes];
+                                }
+                            }
                             $request_params["peer_id"] = $id;
                             try {
                                 $vk->messages()->send(TOKEN_VK_BOT, $request_params);
