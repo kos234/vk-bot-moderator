@@ -551,7 +551,7 @@ switch ($data->type) {
                             if(isset($text[$mes])) {
                                 $request_params["message"] .= "\nКомментарий:";
                                 for ($i = $mes; isset($text[$i]); $i++) {
-                                    $request_params["message"] .= " " . $text[$mes];
+                                    $request_params["message"] .= " " . $text[$i];
                                 }
                             }
                             $request_params["peer_id"] = $id;
