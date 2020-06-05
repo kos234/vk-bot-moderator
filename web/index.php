@@ -608,12 +608,12 @@ switch ($data->type) {
 
 function getName($vk, $id){
     if($id>0){
-        $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id));
-        return "[id".$id."|".$vk[0]["first_name"] . " " . $vk[0]["last_name"] . "]";
+        $res = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id));
+        return "[id".$id."|".$res[0]["first_name"] . " " . $res[0]["last_name"] . "]";
     }else{
         $id = (int)substr($id,1);
-        $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => $id));
-        return "[club".$id."|".$vk[0]["name"] . "]";
+        $res = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => $id));
+        return "[club".$id."|".$res[0]["name"] . "]";
     }
 
 }
