@@ -544,6 +544,10 @@ switch ($data->type) {
                                 $request_params["message"] = "Пользователь ";
                             } else $request_params["message"] = "Сообщество ";
                             $res_title = $vk->messages()->getConversationsById(TOKEN_VK_BOT, array("peer_ids" => $data->object->message->peer_id));
+                            ob_start();
+                            var_dump($res_title);
+                            error_log(ob_get_contents());
+                            ob_end_clean();
                             $request_params["message"] .= getName($vk,$data->object->message->from_id) . " приглашает вас вступить в беседу: \"" . $res_title["items"][0]["chat_settings"]["title"] . "\", ссылка для вступления - " . $res["invite_link"];
                             if(isset($data->object->message->reply_message->from_id))
                                 $mes = 1;
