@@ -525,18 +525,66 @@ switch ($data->type) {
                     }else $request_params["message"] = "Вы не указали токен для просмотра статистики!";
                 }else $request_params["message"] = "Вы не указали ссылку!";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Инвайт ссылка") == 0 || strcasecmp($text[0] . " " .$text[1], "/ссылка приглашения") == 0 || strcasecmp($text[0], "/Приглашение") == 0){
-                $res = $mysqli->query("SELECT `greeting` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                $res = $mysqli->query("SELECT `invite_link` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
                 $res = $res->fetch_assoc();
-                ob_start();
-                var_dump($res);
-                error_log(ob_get_contents());
-                ob_end_clean();
-                error_log(isset($res["greeting"]));
-                if(isset($res["greeting"])){
-                    if(strcasecmp($res["greeting"], "") != 0 || $res["greeting"] != null)
-                        $request_params["message"] = "Ссылка для приглашения: " . $res["greeting"];
+                if(isset($res["invite_link"])){
+                    if(strcasecmp($res["invite_link"], "") != 0 || $res["invite_link"] != null)
+                        $request_params["message"] = "Ссылка для приглашения: " . $res["invite_link"];
                     else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
                 }else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
+
+            }elseif(strcasecmp($text[0], "/Пригласить") == 0){
+                $id = getId($text[1],$data->object->message->reply_message->from_id);
+                if($id != 0) {
+                    $res = $mysqli->query("SELECT `invite_link` FROM `chats_settings` WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                    $res = $res->fetch_assoc();
+                    if (isset($res["invite_link"])) {
+                        if (strcasecmp($res["invite_link"], "") != 0 || $res["invite_link"] != null) {
+                            if ($id > 0) {
+                                $request_params["message"] = "Пользователь ";
+                            } else $request_params["message"] = "Сообщество ";
+                            $res_title = $vk->messages()->getConversationsById(TOKEN_VK_BOT, array("peer_ids" => $data->object->message->peer_id));
+                            $request_params["message"] .= getName($vk,$data->object->message->from_id) . " приглашает вас вступить в беседу: \"" . $res_title["items"][0]["chat_settings"]["title"] . "\", ссылка для вступления - " . $res["invite_link"];
+                            if(isset($data->object->message->reply_message->from_id))
+                                $mes = 1;
+                            else $mes = 2;
+                            if(isset($text[$mes]))
+                                $request_params["message"] .= "\nКомментарий: " .  $text[$mes];
+                            $request_params["peer_id"] = $id;
+                            try {
+                                $vk->messages()->send(TOKEN_VK_BOT, $request_params);
+                                $request_params["message"] = "Приглашение успешно отправлено!";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesCantFwdException $e) {
+                                $request_params["message"] = "VKApiMessagesCantFwdException";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesChatBotFeatureException $e) {
+                                $request_params["message"] = "VKApiMessagesChatBotFeatureException";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesChatUserNoAccessException $e) {
+                                $request_params["message"] = "Пользователь не предоставил доступ к личным сообщениям";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesContactNotFoundException $e) {
+                                $request_params["message"] = "VKApiMessagesContactNotFoundException";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesDenySendException $e) {
+                                $request_params["message"] = "VKApiMessagesDenySendException";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesKeyboardInvalidException $e) {
+                                $request_params["message"] = "VKApiMessagesKeyboardInvalidException";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesPrivacyException $e) {
+                                $request_params["message"] = "Пользователю ограничил отправку сообщений";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesTooLongForwardsException $e) {
+                                $request_params["message"] = "VKApiMessagesTooLongForwardsException";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesTooLongMessageException $e) {
+                                $request_params["message"] = "VKApiMessagesTooLongMessageException";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesTooManyPostsException $e) {
+                                $request_params["message"] = "VKApiMessagesTooManyPostsException";
+                            } catch (\VK\Exceptions\Api\VKApiMessagesUserBlockedException $e) {
+                                $request_params["message"] = "Пользователь заблокирован";
+                            } catch (\VK\Exceptions\VKApiException $e) {
+                                $request_params["message"] = "VKApiException";
+                            } catch (\VK\Exceptions\VKClientException $e) {
+                                $request_params["message"] = "VKClientException";
+                            }
+                            $request_params["peer_id"] = $data->object->message->peer_id;
+                        }else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
+                    } else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
+                } else $request_params["message"] = "Вы не указали айди пользователя";
             }
 
 
@@ -555,6 +603,18 @@ switch ($data->type) {
             if($data->object->message->peer_id != $data->object->message->from_id) //Если сообщение в беседе добавляем + 1 к количеству сообщений
                 $mysqli->query("UPDATE `". $data->object->message->peer_id ."_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '". $data->object->message->from_id ."'");
         break;
+
+}
+
+function getName($vk, $id){
+    if($id>0){
+        $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id));
+        return "[id".$id."|".$vk[0]["first_name"] . " " . $vk[0]["last_name"] . "]";
+    }else{
+        $id = (int)substr($id,1);
+        $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => $id));
+        return "[club".$id."|".$vk[0]["name"] . "]";
+    }
 
 }
 
@@ -594,7 +654,7 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL,`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL, `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL, `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
     $res = json_decode(json_encode($vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id))));
