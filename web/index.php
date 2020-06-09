@@ -536,15 +536,18 @@ switch ($data->type) {
             }elseif(strcasecmp($text[0], "/Пригласить") == 0){
                 $id = getId($text[1],$data->object->message->reply_message->from_id);
                 if($id != 0) {
+                    error_log("not null");
                     $res = $mysqli->query("SELECT `invite_link` FROM `chats_settings` WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                     $res = $res->fetch_assoc();
                     if (isset($res["invite_link"])) {
                         if (strcasecmp($res["invite_link"], "") != 0 || $res["invite_link"] != null) {
+                            error_log("not aga");
                             if ($id > 0) {
                                 $request_params["message"] = "Пользователь ";
                             } else $request_params["message"] = "Сообщество ";
                             $res_title = $vk->messages()->getConversationsById(TOKEN_VK_BOT, array("peer_ids" => $data->object->message->peer_id));
                             if(isset($res_title["items"][0]["chat_settings"])) {
+                                error_log("title");
                                 $request_params["message"] .= getName($vk, $data->object->message->from_id) . " приглашает вас вступить в беседу: \"" . $res_title["items"][0]["chat_settings"]["title"] . "\", ссылка для вступления - " . $res["invite_link"];
                                 if (isset($data->object->message->reply_message->from_id))
                                     $mes = 1;
