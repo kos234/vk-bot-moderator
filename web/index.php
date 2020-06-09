@@ -601,7 +601,7 @@ switch ($data->type) {
                                     $request_params["message"] = "VKApiMessagesTooManyPostsException";
                                 } catch (\VK\Exceptions\Api\VKApiMessagesUserBlockedException $e) {
                                     $request_params["message"] = "Пользователь заблокирован";
-                                } catch (\VK\Exceptions\VKApiException $e) {
+                                } catch (VK\Exceptions\VKApiException $e) {
                                     $request_params["message"] = "VKApiException";
                                 } catch (\VK\Exceptions\VKClientException $e) {
                                     $request_params["message"] = "VKClientException";
