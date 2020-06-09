@@ -309,7 +309,7 @@ switch ($data->type) {
                             if(isset($res_user[0]->career[$i + 1]))
                                 $request_params["message"] .= "; ";
                         }
-                    }if(isset($res_user[0]->university_name)){
+                    }if($res_user[0]->university_name != ""){
                         $request_params["message"] .= "\n\nВысшее образование: " . $res_user[0]->university_name;
                         if(isset($res_user[0]->faculty_name))
                             if(!$res_user[0]->faculty_name == "")
@@ -320,13 +320,13 @@ switch ($data->type) {
                             $request_params["message"] .= ", статус: " . $res_user[0]->education_status;
                         if(isset($res_user[0]->graduation))
                             $request_params["message"] .= ", выпуск: " . $res_user[0]->graduation;
-                    }if(isset($res_user[0]->activities)){
+                    }if($res_user[0]->activities != ""){
                         $request_params["message"] .= "\nДеятельность пользователя: " . $res_user[0]->activities;
-                    }if(isset($res_user[0]->games)){
+                    }if($res_user[0]->games != ""){
                         $request_params["message"] .= "\nЛюбимые игры: " . $res_user[0]->games;
-                    }if(isset($res_user[0]->interests)){
+                    }if($res_user[0]->interests != ""){
                         $request_params["message"] .= "\nИнтересы: " . $res_user[0]->interests;
-                    }if(isset($res_user[0]->about)){
+                    }if($res_user[0]->about != ""){
                         $request_params["message"] .= "\nО пользователе: " . $res_user[0]->about;
                     }
                         error_log("fsfdd");
