@@ -545,68 +545,42 @@ switch ($data->type) {
                             } else $request_params["message"] = "Сообщество ";
                             $res_title = $vk->messages()->getConversationsById(TOKEN_VK_BOT, array("peer_ids" => $data->object->message->peer_id));
                             if(isset($res_title["items"][0]["chat_settings"])) {
-                                error_log("title");
-                                $request_params["message"] .= getName($vk, $data->object->message->from_id) . " приглашает вас вступить в беседу: \"" . $res_title["items"][0]["chat_settings"]["title"] . "\", ссылка для вступления - " . $res["invite_link"];
-                                if (isset($data->object->message->reply_message->from_id))
-                                    $mes = 1;
-                                else $mes = 2;
-                                if (isset($text[$mes])) {
-                                    $request_params["message"] .= "\nКомментарий:";
-                                    for ($i = $mes; isset($text[$i]); $i++) {
-                                        $request_params["message"] .= " " . $text[$i];
-                                    }
-                                }
-                                error_log("server");
-                                $upload_server = $vk->photos()->getMessagesUploadServer(TOKEN_VK_BOT, array("peer_id" => $id));
-                                if(!is_dir("temp")) {
-                                    mkdir("temp", 0777, true);
-                                }
-                                file_put_contents('temp/photo.jpg', file_get_contents($res_title["items"][0]["chat_settings"]["photo"]["photo_200"]));
-                                error_log(realpath('temp/photo.jpg'));
-                                $photo = $vk->getRequest()->upload($upload_server["upload_url"], 'photo', realpath('temp/photo.jpg'));
-                                $res_photo = $vk->photos()->saveMessagesPhoto(TOKEN_VK_BOT, array(
-                                    'server' => $photo['server'],
-                                    'photo' => $photo['photo'],
-                                    'hash' => $photo['hash']
-                                ));
-                                unlink(realpath('temp/photo.jpg'));
-                                ob_start();
-                                var_dump($res_photo);
-                                error_log(ob_get_contents());
-                                ob_end_clean();
-                                $request_params["attachment"] = "photo" . $res_photo[0]["owner_id"] . "_" . $res_photo[0]["id"] . "_" . $res_photo[0]["access_key"];
-                                $request_params["message"] .= "\nАватарка:";
-                                $request_params["peer_id"] = $id;
                                 try {
-                                    error_log("fuf");
+                                    $request_params["message"] .= getName($vk, $data->object->message->from_id) . " приглашает вас вступить в беседу: \"" . $res_title["items"][0]["chat_settings"]["title"] . "\", ссылка для вступления - " . $res["invite_link"];
+                                    if (isset($data->object->message->reply_message->from_id))
+                                        $mes = 1;
+                                    else $mes = 2;
+                                    if (isset($text[$mes])) {
+                                        $request_params["message"] .= "\nКомментарий:";
+                                        for ($i = $mes; isset($text[$i]); $i++) {
+                                            $request_params["message"] .= " " . $text[$i];
+                                        }
+                                    }
+                                    $upload_server = $vk->photos()->getMessagesUploadServer(TOKEN_VK_BOT, array("peer_id" => $id));
+                                    if(!is_dir("temp")) {
+                                        mkdir("temp", 0777, true);
+                                    }
+                                    file_put_contents('temp/photo.jpg', file_get_contents($res_title["items"][0]["chat_settings"]["photo"]["photo_200"]));
+                                    $photo = $vk->getRequest()->upload($upload_server["upload_url"], 'photo', realpath('temp/photo.jpg'));
+                                    $res_photo = $vk->photos()->saveMessagesPhoto(TOKEN_VK_BOT, array(
+                                        'server' => $photo['server'],
+                                        'photo' => $photo['photo'],
+                                        'hash' => $photo['hash']
+                                    ));
+                                    unlink(realpath('temp/photo.jpg'));
+                                    $request_params["attachment"] = "photo" . $res_photo[0]["owner_id"] . "_" . $res_photo[0]["id"] . "_" . $res_photo[0]["access_key"];
+                                    $request_params["message"] .= "\nАватарка:";
+                                    $request_params["peer_id"] = $id;
                                     $vk->messages()->send(TOKEN_VK_BOT, $request_params);
                                     $request_params["message"] = "Приглашение успешно отправлено!";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesCantFwdException $e) {
-                                    $request_params["message"] = "VKApiMessagesCantFwdException";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesChatBotFeatureException $e) {
-                                    $request_params["message"] = "VKApiMessagesChatBotFeatureException";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesChatUserNoAccessException $e) {
+                                } catch (VK\Exceptions\Api\VKApiMessagesChatUserNoAccessException $e) {
                                     $request_params["message"] = "Пользователь не предоставил доступ к личным сообщениям";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesContactNotFoundException $e) {
-                                    $request_params["message"] = "VKApiMessagesContactNotFoundException";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesDenySendException $e) {
-                                    $request_params["message"] = "VKApiMessagesDenySendException";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesKeyboardInvalidException $e) {
-                                    $request_params["message"] = "VKApiMessagesKeyboardInvalidException";
                                 } catch (\VK\Exceptions\Api\VKApiMessagesPrivacyException $e) {
                                     $request_params["message"] = "Пользователю ограничил отправку сообщений";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesTooLongForwardsException $e) {
-                                    $request_params["message"] = "VKApiMessagesTooLongForwardsException";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesTooLongMessageException $e) {
-                                    $request_params["message"] = "VKApiMessagesTooLongMessageException";
-                                } catch (\VK\Exceptions\Api\VKApiMessagesTooManyPostsException $e) {
-                                    $request_params["message"] = "VKApiMessagesTooManyPostsException";
                                 } catch (\VK\Exceptions\Api\VKApiMessagesUserBlockedException $e) {
                                     $request_params["message"] = "Пользователь заблокирован";
                                 } catch (VK\Exceptions\VKApiException $e) {
-                                    $request_params["message"] = "VKApiException";
-                                } catch (\VK\Exceptions\VKClientException $e) {
-                                    $request_params["message"] = "VKClientException";
+                                    $request_params["message"] = "Пользователь не разрешил отправку личных сообщений";
                                 }
                                 $request_params["peer_id"] = $data->object->message->peer_id;
                                 $request_params["attachment"] = "";
