@@ -605,6 +605,7 @@ switch ($data->type) {
                                     $request_params["message"] = "VKClientException";
                                 }
                                 $request_params["peer_id"] = $data->object->message->peer_id;
+                                $request_params["attachment"] = "";
                             }else $request_params["message"] = "Для этой функции мне необходимы права администратора!";
                         }else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
                     } else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
