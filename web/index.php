@@ -127,7 +127,10 @@ switch ($data->type) {
                         elseif ($res_user[0]->deactivated == "banned")
                             $type = " забаненном ";
                     }
-
+                        ob_start();
+                        var_dump($res_user);
+                        error_log(ob_get_contents());
+                        ob_end_clean();
                     $request_params["message"] = "Информация о". $type ." [id". $res_user[0]->id . "|". $res_user[0]->first_name ." " .$res_user[0]->last_name ."]: \nАйди: " . $res_user[0]->id;
 
                     if(isset($res_user[0]->domain)){
@@ -226,10 +229,6 @@ switch ($data->type) {
                                 $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_user["mes_count"];
                             }
                         }
-                    ob_start();
-                    var_dump($res_user[0]);
-                    error_log(ob_get_contents());
-                    ob_end_clean();
                         if(isset($res_user[0]->can_post)){
                             error_log("anotga");
                             if ($res_user[0]->can_post == 1) $request_params["message"] .= "\n\nУ пользователя открыта стена";
