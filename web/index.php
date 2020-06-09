@@ -226,7 +226,9 @@ switch ($data->type) {
                                 $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_user["mes_count"];
                             }
                         }
+                    error_log("aga");
                         if(isset($res_user[0]->can_post)){
+                            error_log("anotga");
                             if ($res_user[0]->can_post == 1) $request_params["message"] .= "\n\nУ пользователя открыта стена";
                             else $request_params["message"] .= "\n\nУ пользователя закрыта закрыта стена";
                         if(isset($res_user[0]->can_see_all_posts)){
@@ -326,7 +328,7 @@ switch ($data->type) {
                     }if(isset($res_user[0]->about)){
                         $request_params["message"] .= "\nО пользователе: " . $res_user[0]->about;
                     }
-
+                        error_log("fsfdd");
                 }else{
                         $id = (int)substr($id, 1);
                         $res_grop = json_decode(json_encode($vk->groups()->getById(USER_TOKEN, array("group_id" => $id,
