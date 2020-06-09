@@ -536,12 +536,10 @@ switch ($data->type) {
             }elseif(strcasecmp($text[0], "/Пригласить") == 0){
                 $id = getId($text[1],$data->object->message->reply_message->from_id);
                 if($id != 0) {
-                    error_log("not null");
                     $res = $mysqli->query("SELECT `invite_link` FROM `chats_settings` WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                     $res = $res->fetch_assoc();
                     if (isset($res["invite_link"])) {
                         if (strcasecmp($res["invite_link"], "") != 0 || $res["invite_link"] != null) {
-                            error_log("not aga");
                             if ($id > 0) {
                                 $request_params["message"] = "Пользователь ";
                             } else $request_params["message"] = "Сообщество ";
@@ -558,6 +556,7 @@ switch ($data->type) {
                                         $request_params["message"] .= " " . $text[$i];
                                     }
                                 }
+                                error_log("server");
                                 $upload_server = $vk->photos()->getMessagesUploadServer(TOKEN_VK_BOT, array("peer_id" => $id));
                                 if(!is_dir("temp")) {
                                     mkdir("temp", 0777, true);
