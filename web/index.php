@@ -226,7 +226,10 @@ switch ($data->type) {
                                 $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_user["mes_count"];
                             }
                         }
-                    error_log("aga");
+                    ob_start();
+                    var_dump($res_user[0]);
+                    error_log(ob_get_contents());
+                    ob_end_clean();
                         if(isset($res_user[0]->can_post)){
                             error_log("anotga");
                             if ($res_user[0]->can_post == 1) $request_params["message"] .= "\n\nУ пользователя открыта стена";
