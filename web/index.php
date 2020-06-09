@@ -599,7 +599,10 @@ switch ($data->type) {
 
             }
 
-            $vk->messages()->send(TOKEN_VK_BOT, $request_params);
+            try {
+                $vk->messages()->send(TOKEN_VK_BOT, $request_params);
+            } catch (\VK\Exceptions\VKClientException $e) {
+            }
 
             echo "ok";
 
