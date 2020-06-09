@@ -556,16 +556,22 @@ switch ($data->type) {
                                     }
                                 }
                                 $upload_server = $vk->photos()->getMessagesUploadServer(TOKEN_VK_BOT, array("peer_id" => $id));
-                                error_log($res_title["items"][0]["chat_settings"]["photo"]["photo_200"]);
-                                file_put_contents('photo.jpg', file_get_contents($res_title["items"][0]["chat_settings"]["photo"]["photo_200"]));
-                                error_log(realpath('photo.jpg'));
-                                $photo = $vk->getRequest()->upload($upload_server["upload_url"], 'photo', realpath('photo.jpg'));
+                                if(!is_dir("temp")) {
+                                    mkdir("temp", 0777, true);
+                                }
+                                file_put_contents('temp\photo.jpg', file_get_contents($res_title["items"][0]["chat_settings"]["photo"]["photo_200"]));
+                                error_log(realpath('temp\photo.jpg'));
+                                $photo = $vk->getRequest()->upload($upload_server["upload_url"], 'photo', realpath('temp\photo.jpg'));
                                 $res_photo = $vk->photos()->saveMessagesPhoto(TOKEN_VK_BOT, array(
                                     'server' => $photo['server'],
                                     'photo' => $photo['photo'],
                                     'hash' => $photo['hash']
                                 ));
-                                unlink(realpath('photo.jpg'));
+                                unlink(realpath('temp\photo.jpg'));
+                                ob_start();
+                                var_dump($res_photo);
+                                error_log(ob_get_contents());
+                                ob_end_clean();
                                 $request_params["attachment"] = "photo" . $res_photo["owner_id"] . "_" . $res_photo["id"] . "_" . $res_photo["access_key"];
                                 $request_params["peer_id"] = $id;
                                 try {
