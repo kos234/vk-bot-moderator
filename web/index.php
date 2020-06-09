@@ -224,12 +224,11 @@ switch ($data->type) {
                         $request_params["message"] .= "\nДомашний телефон: " . $res_user[0]->home_phone;
                     }if($data->object->message->peer_id != $data->object->message->from_id) {//Если сообщение в беседе добавляем
                             $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
-                            $res_user = $res->fetch_assoc();
-                            if(isset($res_user["id"])){
-                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_user["mes_count"];
+                            $res_mes = $res->fetch_assoc();
+                            if(isset($res_mes["id"])){
+                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"];
                             }
                     }
-                    error_log($res_user[0]->can_post);
                         if(isset($res_user[0]->can_post)){
                             if ($res_user[0]->can_post == 1) $request_params["message"] .= "\n\nУ пользователя открыта стена";
                             else $request_params["message"] .= "\n\nУ пользователя закрыта закрыта стена";
@@ -387,6 +386,13 @@ switch ($data->type) {
                         }if(isset($res_grop[0]->addresses->main_address_id)){
                             if($res_grop[0]->addresses->is_enabled)
                                 $request_params["message"] .= "\nАдрес: " . $res_grop[0]->addresses->main_address_id . " (Я не знаю как это расшифровать)";
+                        }
+                        if($data->object->message->peer_id != $data->object->message->from_id) {//Если сообщение в беседе добавляем
+                            $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                            $res_mes = $res->fetch_assoc();
+                            if(isset($res_mes["id"])){
+                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"];
+                            }
                         }
                         if(isset($res_grop[0]->description)) {
                             if($res_grop[0]->description != "")
