@@ -573,8 +573,10 @@ switch ($data->type) {
                                 error_log(ob_get_contents());
                                 ob_end_clean();
                                 $request_params["attachment"] = "photo" . $res_photo[0]["owner_id"] . "_" . $res_photo[0]["id"] . "_" . $res_photo[0]["access_key"];
+                                $request_params["message"] .= "\nАватарка:";
                                 $request_params["peer_id"] = $id;
                                 try {
+                                    error_log("fuf");
                                     $vk->messages()->send(TOKEN_VK_BOT, $request_params);
                                     $request_params["message"] = "Приглашение успешно отправлено!";
                                 } catch (\VK\Exceptions\Api\VKApiMessagesCantFwdException $e) {
