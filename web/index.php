@@ -228,9 +228,9 @@ switch ($data->type) {
                             if(isset($res_user["id"])){
                                 $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_user["mes_count"];
                             }
-                        }
+                    }
+                    error_log($res_user[0]->can_post);
                         if(isset($res_user[0]->can_post)){
-                            error_log("anotga");
                             if ($res_user[0]->can_post == 1) $request_params["message"] .= "\n\nУ пользователя открыта стена";
                             else $request_params["message"] .= "\n\nУ пользователя закрыта закрыта стена";
                         if(isset($res_user[0]->can_see_all_posts)){
