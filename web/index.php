@@ -677,6 +677,7 @@ switch ($data->type) {
                             break;
                         default:
                             $request_params["message"] = "Не верно указан список! Возможные значения: пользователей, забаненных, вышедших, модераторов";
+                            $empty_list = false;
                             break;
                     }
 
