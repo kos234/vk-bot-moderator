@@ -556,7 +556,7 @@ switch ($data->type) {
                             $res_title = $vk->messages()->getConversationsById(TOKEN_VK_BOT, array("peer_ids" => $data->object->message->peer_id));
                             if(isset($res_title["items"][0]["chat_settings"])) {
                                 try {
-                                    $request_params["message"] .= getName($vk, $data->object->message->from_id) . " приглашает вас вступить в беседу: \"" . $res_title["items"][0]["chat_settings"]["title"] . "\", ссылка для вступления - " . $res["invite_link"];
+                                    $request_params["message"] .= getName($vk, $data->object->message->from_id)[0] . " приглашает вас вступить в беседу: \"" . $res_title["items"][0]["chat_settings"]["title"] . "\", ссылка для вступления - " . $res["invite_link"];
                                     if (isset($data->object->message->reply_message->from_id))
                                         $mes = 1;
                                     else $mes = 2;
@@ -598,6 +598,44 @@ switch ($data->type) {
                         }else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
                     } else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
                 } else $request_params["message"] = "Вы не указали айди пользователя";
+            }elseif(strcasecmp($text[0], "/Список ") == 0){
+                if (isset($text[1])){
+                    $empty_list = true;
+                    switch (mb_strtolower($text[1])){
+                        case "пользователей":
+                            $request_params["message"] = "Список пользователей в чате:";
+                            $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users`");
+                            $res_ids = array();
+                            $res_fields = array();
+                            while($res_users = $res->fetch_assoc()){
+                                $empty_list = false;
+                                $res_ids[] = $res_users["id"];
+                                $res_fields[] = array($res_users["rang"], $res_users["mes_count"]);
+                            }
+                            if(!$empty_list){
+                                foreach (getName($vk, $res_ids, false) as $key => $name){
+                                    $request_params["message"] .= "\n" . $name . ", ранг: " . getRang($res_fields[$key][0]) . ", количество сообщений в беседе: " . $res_fields[$key][1];
+                                }
+                            }
+                            
+                            break;
+                        case "забаненных":
+                                //Сделать таблицу
+                            break;
+                        case "вышедших":
+
+                            break;
+                        case "модераторов":
+
+                            break;
+                        default:
+                            $request_params["message"] = "Не верно указан список! Возможные значения: пользователей, забаненных, вышедших, модераторов";
+                            break;
+                    }
+
+                    if($empty_list)
+                        $request_params["message"] = "Список пуст";
+                }else $request_params["message"] = "Вы не указали список!";
             }
 
 
@@ -621,16 +659,68 @@ switch ($data->type) {
         break;
 
 }
-
-function getName($vk, $id){
-    if($id>0){
-        $res = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $id));
-        return "[id".$id."|".$res[0]["first_name"] . " " . $res[0]["last_name"] . "]";
-    }else{
-        $id = (int)substr($id,1);
-        $res = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => $id));
-        return "[club".$id."|".$res[0]["name"] . "]";
+function getRang($id){
+    switch ($id){
+        case 0:
+            return "пользователь";
+            break;
+        case 1:
+            return "модератор 1 уровня";
+            break;
+        case 2:
+            return "модератор 2 уровня";
+            break;
+        case 3:
+            return "модератор 3 уровня";
+            break;
+        case 4:
+            return "модератор 4 уровня";
+            break;
+        case 5:
+            return "администратор";
+            break;
+        default:
+            return "Неизвестный ранг";
+            break;
     }
+}
+
+function getName($vk, $ids, $notify = true){
+    $user_ids = array(); $group_ids = array(); $names = array();
+    foreach ($ids as $num => $id){
+        if($id>0)
+            $user_ids[$num] = $id;
+        else
+            $group_ids[$num] = $id;
+    }
+    $res_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => implode(",", $user_ids)));
+    $res_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => implode(",", $group_ids)));
+    $ifor = 0;
+    foreach ($user_ids as $key => $id) {
+        $user_ids[$key] = $res_user[$ifor];
+        $ifor++;
+    }
+    $ifor = 0;
+    foreach ($group_ids as $key => $id) {
+        $group_ids[$key] = $res_group[$ifor];
+        $ifor++;
+    }
+
+    for($i = 0; $i < count($ids); $i++){
+        if(isset($user_ids[$i])){
+            if ($notify)
+                $names[] = "[id" . $user_ids[$i]["id"] . "|" . $user_ids[$i]["first_name"] . " " . $user_ids[$i]["last_name"] . "]";
+            else
+                $names[] = $user_ids[$i]["first_name"] . " " . $user_ids[$i]["last_name"];
+        }else{
+            if ($notify)
+                $names[] = "[club" . $group_ids[$i]["id"] . "|" . $group_ids[$i]["name"] . "]";
+            else
+                $names[] = $group_ids[$i]["name"];
+        }
+    }
+
+    return $names;
 
 }
 
@@ -670,6 +760,7 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_bans`(`id` VarChar( 255 ) NOT NULL, `ban` Int( 255 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL, `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
