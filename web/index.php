@@ -611,11 +611,11 @@ switch ($data->type) {
                             while($res_users = $res->fetch_assoc()){
                                 $empty_list = false;
                                 $res_ids[] = $res_users["id"];
-                                $res_fields[] = array($res_users["rang"], $res_users["mes_count"]);
+                                $res_fields[] = array($res_users["rang"],$res_users["pred"], $res_users["mes_count"]);
                             }
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
-                                    $request_params["message"] .= "\n" . $name . ", ранг: " . getRang($res_fields[$key][0]) . ", количество сообщений в беседе: " . $res_fields[$key][1];
+                                    $request_params["message"] .= "\n" . $name . ", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2];
                                 }
                             }
                             
@@ -641,10 +641,39 @@ switch ($data->type) {
                             }
                             break;
                         case "вышедших":
-
+                            $request_params["message"] = "Список вышедших из чата пользователей:";
+                            $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_leave`");
+                            $res_ids = array();
+                            while($res_users = $res->fetch_assoc()){
+                                $empty_list = false;
+                                $res_ids[] = $res_users["id"];
+                            }
+                            if(!$empty_list){
+                                foreach (getName($vk, $res_ids, false) as $key => $name){
+                                    $request_params["message"] .= "\n" . $name;
+                                }
+                            }
                             break;
                         case "модераторов":
-
+                            $request_params["message"] = "Список модераторов чата:";
+                            $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_moders`");
+                            $res_ids = array();
+                            $res_fields = array();
+                            $mysqli_query = "SELECT `rang`,`pred` FROM `". $data->object->message->peer_id ."_users` WHERE ";
+                            while($res_users = $res->fetch_assoc()){
+                                $empty_list = false;
+                                $res_ids[] = $res_users["id"];
+                                $mysqli_query .= "`id` = " . $res_users["id"] . " OR ";
+                                $res_fields[] = array($res_users["preds"],$res_users["kicks"], $res_users["tempbans"], $res_users["bans"]);
+                            }
+                            if(!$empty_list){
+                                $res_rang = $mysqli->query(mb_substr($mysqli_query,0,-4));
+                                foreach (getName($vk, $res_ids, false) as $key => $name){
+                                    $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users`");
+                                    $res_rang_id = $res_rang->fetch_assoc();
+                                    $request_params["message"] .= "\n" . $name . ", ранг: " . getRang($res_rang_id["rang"]) . ", количество предупреждений: " . $res_rang_id["pred"] . ", количество выданных предупреждений: " . $res_fields[$key][0] . ", количество исключенных пользователей: " . $res_fields[$key][1] . ", количество временно забаненных пользователей: " . $res_fields[$key][2] . ", количество забанных пользователей: " . $res_fields[$key][3];
+                                }
+                            }
                             break;
                         default:
                             $request_params["message"] = "Не верно указан список! Возможные значения: пользователей, забаненных, вышедших, модераторов";
@@ -673,8 +702,7 @@ switch ($data->type) {
             echo "ok";
 
             if($data->object->message->peer_id != $data->object->message->from_id) { //Если сообщение в беседе добавляем + 1 к количеству сообщений пользователя и бота
-                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
-                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '" . (int)("-" . $data->group_id) . "'");
+                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '" . $data->object->message->from_id . "' OR `id` = '" . (int)("-" . $data->group_id) . "'");
             }
         break;
 
@@ -776,7 +804,7 @@ function getUrlParameters($url, $token){
 }
 
 function createTabs($chat_id, $mysqli, $vk){
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` TinyInt( 255 ) NOT NULL DEFAULT 0, `pred` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
