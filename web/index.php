@@ -770,6 +770,10 @@ function createTabs($chat_id, $mysqli, $vk){
     for ($i = 0; isset($res->items[$i]); $i++){
         $rang = 0;
         if($res->items[$i]->is_admin) $rang = 5;
+        if($res->items[$i]->member_id > 0)
+            $id = $res->items[$i]->member_id;
+        else
+            $id = (int)substr($res->items[$i]->member_id, 1);
         $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->items[$i]->member_id ."', ". $rang .")");
     }
 
