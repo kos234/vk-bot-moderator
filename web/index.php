@@ -503,7 +503,10 @@ switch ($data->type) {
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Получить статистику") == 0){
                 if(isset($text[2])) {
                     if(isset($text[3])) {
-                        try {
+                                ob_start();
+                                var_dump(getUrlParameters($text[2], $text[3]));
+                                error_log(ob_get_contents());
+                                ob_end_clean();
                             $res_url = $vk->utils()->getLinkStats(USER_TOKEN, getUrlParameters($text[2], $text[3]));
                         if(isset($res_url["stats"][0]["views"])){
                             $request_params["message"] = "Всего просмотров: " . $res_url["stats"][0]["views"] . "\n\nПросмотры по возрастным диапазонам:";
@@ -525,13 +528,7 @@ switch ($data->type) {
                             }
 
                         }else $request_params["message"] = "Пока не было переходов по этой ссылке!";
-                        } catch (\VK\Exceptions\Api\VKApiNotFoundException $e) {
-                            $request_params["message"] = "Что-то не так с ссылкой!";
-                        } catch (\VK\Exceptions\VKApiException $e) {
-                            $request_params["message"] = "Что-то не так с ссылкой!";
-                        } catch (\VK\Exceptions\VKClientException $e) {
-                            $request_params["message"] = "Что-то не так с ссылкой!";
-                        }
+
                     }else $request_params["message"] = "Вы не указали токен для просмотра статистики!";
                 }else $request_params["message"] = "Вы не указали ссылку!";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Инвайт ссылка") == 0 || strcasecmp($text[0] . " " .$text[1], "/ссылка приглашения") == 0 || strcasecmp($text[0], "/Приглашение") == 0){
