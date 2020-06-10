@@ -599,6 +599,7 @@ switch ($data->type) {
                     } else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
                 } else $request_params["message"] = "Вы не указали айди пользователя";
             }elseif(strcasecmp($text[0], "/Список ") == 0){
+                error_log("tack");
                 if (isset($text[1])){
                     $empty_list = true;
                     switch (mb_strtolower($text[1])){
