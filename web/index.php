@@ -655,8 +655,9 @@ switch ($data->type) {
 
             echo "ok";
 
-            if($data->object->message->peer_id != $data->object->message->from_id) //Если сообщение в беседе добавляем + 1 к количеству сообщений
-                $mysqli->query("UPDATE `". $data->object->message->peer_id ."_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '". $data->object->message->from_id ."'");
+            if($data->object->message->peer_id != $data->object->message->from_id) { //Если сообщение в беседе добавляем + 1 к количеству сообщений пользователя и бота
+                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '" . $data->object->message->from_id . "' AND '". $data->group_id ."'");
+            }
         break;
 
 }
