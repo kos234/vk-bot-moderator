@@ -656,7 +656,7 @@ switch ($data->type) {
             echo "ok";
 
             if($data->object->message->peer_id != $data->object->message->from_id) { //Если сообщение в беседе добавляем + 1 к количеству сообщений пользователя и бота
-                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '" . $data->object->message->from_id . "' AND '". $data->group_id ."'");
+                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '" . $data->object->message->from_id . "' AND '". (int)("-" . $data->group_id) ."'");
             }
         break;
 
@@ -770,10 +770,6 @@ function createTabs($chat_id, $mysqli, $vk){
     for ($i = 0; isset($res->items[$i]); $i++){
         $rang = 0;
         if($res->items[$i]->is_admin) $rang = 5;
-        if($res->items[$i]->member_id > 0)
-            $id = $res->items[$i]->member_id;
-        else
-            $id = (int)substr($res->items[$i]->member_id, 1);
         $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->items[$i]->member_id ."', ". $rang .")");
     }
 
