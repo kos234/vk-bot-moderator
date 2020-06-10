@@ -635,7 +635,7 @@ switch ($data->type) {
                                     if($res_fields[$key][0] == 0)
                                         $type = " навсегда";
                                     else
-                                        $type = " до " . date("d.m.Y G:i", $res_fields[$key][0]);
+                                        $type = " до " . date("d.m.Y G:i", $res_fields[$key]);
                                     $request_params["message"] .= "\n" . $name . ", забанен" . $type;
                                 }
                             }
