@@ -621,7 +621,24 @@ switch ($data->type) {
                             
                             break;
                         case "забаненных":
-                                //Сделать таблицу
+                            $request_params["message"] = "Список забаненных пользователей в чате:";
+                            $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_bans`");
+                            $res_ids = array();
+                            $res_fields = array();
+                            while($res_users = $res->fetch_assoc()){
+                                $empty_list = false;
+                                $res_ids[] = $res_users["id"];
+                                $res_fields[] = $res_users["ban"];
+                            }
+                            if(!$empty_list){
+                                foreach (getName($vk, $res_ids, false) as $key => $name){
+                                    if($res_fields[$key][0] == 0)
+                                        $type = " навсегда";
+                                    else
+                                        $type = " до " . date("d.m.Y G:i", $res_fields[$key][0]);
+                                    $request_params["message"] .= "\n" . $name . ", забанен" . $type;
+                                }
+                            }
                             break;
                         case "вышедших":
 
