@@ -771,27 +771,28 @@ switch ($data->type) {
                     $request_params["message"] .= "Для $i уровня: ";
                     if ($res["pred"] != 0) {
                         if (($res["pred"] >= 11 && $res["pred"] <= 19) || (endNumber($res["pred"]) >= 5 && endNumber($res["pred"]) <= 9) || endNumber($res["pred"]) == 0)
-                            $request_params["message"] .= ", ". $res["pred"] . " предупреждений";
+                            $request_params["message"] .= " ". $res["pred"] . " предупреждений,";
                         elseif (endNumber($res["pred"]) == 1)
-                            $request_params["message"] .= ", ". $res["pred"] . " предупреждение";
+                            $request_params["message"] .= " ". $res["pred"] . " предупреждение,";
                         elseif (endNumber($res["pred"]) >= 2 && endNumber($res["pred"]) <= 4)
-                            $request_params["message"] .= ", ". $res["pred"] . " предупреждения";
+                            $request_params["message"] .= " ". $res["pred"] . " предупреждения,";
                     }
                     if ($res["kick"] != 0) {
                         if (($res["kick"] >= 11 && $res["kick"] <= 19) || (endNumber($res["kick"]) >= 5 && endNumber($res["kick"]) <= 9) || endNumber($res["kick"]) == 0)
-                            $request_params["message"] .= ", ". $res["kick"] . " исключений";
+                            $request_params["message"] .= " ". $res["kick"] . " исключений,";
                         elseif (endNumber($res["kick"]) == 1)
-                            $request_params["message"] .= ", ". $res["kick"] . " исключение";
+                            $request_params["message"] .= " ". $res["kick"] . " исключение,";
                         elseif (endNumber($res["kick"]) >= 2 && endNumber($res["kick"]) <= 4)
-                            $request_params["message"] .= ", ". $res["kick"] . " исключения";
+                            $request_params["message"] .= " ". $res["kick"] . " исключения,";
                     }if ($res["tempban"] != 0) {
                         if (($res["tempban"] >= 11 && $res["tempban"] <= 19) || (endNumber($res["tempban"]) >= 5 && endNumber($res["tempban"]) <= 9) || endNumber($res["tempban"]) == 0)
-                            $request_params["message"] .= ", ". $res["tempban"] . " временных блокировок";
+                            $request_params["message"] .= " ". $res["tempban"] . " временных блокировок,";
                         elseif (endNumber($res["tempban"]) == 1)
-                            $request_params["message"] .= ", ". $res["tempban"] . " временная блокировка";
+                            $request_params["message"] .= " ". $res["tempban"] . " временная блокировка,";
                         elseif (endNumber($res["tempban"]) >= 2 && endNumber($res["tempban"]) <= 4)
-                            $request_params["message"] .= ", ". $res["tempban"] . " временных блокировки";
+                            $request_params["message"] .= " ". $res["tempban"] . " временных блокировки,";
                     }
+                    $request_params["message"] = mb_substr($request_params["message"], 0 ,-1);
                     $request_params["message"] .= "\n";
                 }
                 $request_params["message"] = mb_substr($request_params["message"], 0 ,-2);
