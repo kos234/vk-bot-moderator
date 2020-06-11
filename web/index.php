@@ -764,7 +764,35 @@ switch ($data->type) {
                     if($empty_list)
                         $request_params["message"] = "Список пуст";
                 }else $request_params["message"] = "Вы не указали список!";
-            }elseif(mb_strcasecmp($text[0], "/Неактив") == 0){
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/Лимит модераторов") == 0){
+                for ($i = 0; $i < 4; $i++) {
+                    $res = $mysqli->query("SELECT * FROM `" . $data->object->message->peer_id . "_moders_limit` WHERE `rang` = " . $i);
+                    $res = $res->fetch_assoc();
+                    $request_params["message"] .= "Для $i уровня: ";
+                    if ($res["pred"] != 0) {
+                        if (($res["pred"] >= 11 && $res["pred"] <= 19) || (endNumber($res["pred"]) >= 5 && endNumber($res["pred"]) <= 9) || endNumber($res["pred"]) == 0)
+                            $request_params["message"] .= " ". $res["pred"] . " предупреждений,";
+                        elseif (endNumber($res["pred"]) == 1)
+                            $request_params["message"] .= " ". $res["pred"] . " предупреждение,";
+                        elseif (endNumber($res["pred"]) >= 2 && endNumber($res["pred"]) <= 4)
+                            $request_params["message"] .= " ". $res["pred"] . " предупреждения,";
+                    }
+                    if ($res["kick"] != 0) {
+                        if (($res["kick"] >= 11 && $res["kick"] <= 19) || (endNumber($res["kick"]) >= 5 && endNumber($res["kick"]) <= 9) || endNumber($res["kick"]) == 0)
+                            $request_params["message"] .= " ". $res["kick"] . " исключений,";
+                        elseif (endNumber($res["kick"]) == 1)
+                            $request_params["message"] .= " ". $res["kick"] . " исключение,";
+                        elseif (endNumber($res["kick"]) >= 2 && endNumber($res["kick"]) <= 4)
+                            $request_params["message"] .= " ". $res["kick"] . " исключения,";
+                    }if ($res["tempban"] != 0) {
+                        if (($res["tempban"] >= 11 && $res["tempban"] <= 19) || (endNumber($res["tempban"]) >= 5 && endNumber($res["tempban"]) <= 9) || endNumber($res["tempban"]) == 0)
+                            $request_params["message"] .= " ". $res["tempban"] . " временных блокировок,";
+                        elseif (endNumber($res["tempban"]) == 1)
+                            $request_params["message"] .= " ". $res["tempban"] . " временная блокировка,";
+                        elseif (endNumber($res["tempban"]) >= 2 && endNumber($res["tempban"]) <= 4)
+                            $request_params["message"] .= " ". $res["tempban"] . " временных блокировки,";
+                    }
+                }
 
             }elseif(mb_strcasecmp($text[0], "/Онлайн") == 0 || mb_strcasecmp($text[0], "/Online") == 0){
 
@@ -792,7 +820,7 @@ switch ($data->type) {
         break;
 
 }
-function mb_strcasecmp($str1, $str2, $encoding = null) {
+function mb_strcasecmp($str1, $str2, $encoding = null) { //https://www.php.net/manual/en/function.strcasecmp.php#107016 взято от сюда
     if (null === $encoding) { $encoding = mb_internal_encoding(); }
     return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
 }
@@ -1005,8 +1033,8 @@ function createTabs($chat_id, $mysqli, $vk){
         $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->items[$i]->member_id ."', ". $rang .")");
     }
 
-    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`) VALUES (1, 5)");
-    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`) VALUES (2, 6, 2)");
+    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
+    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 6, 2, 0)");
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
     $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (". $chat_id .",". 2678400 . "," . time() .")");
 }
