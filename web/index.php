@@ -818,7 +818,7 @@ switch ($data->type) {
                         else
                             $greeting_temp .=  $greeting_temps[$i] . explode(" ", getName($vk, array($data->object->message->action->member_id))[0])[0];
                     }
-                    $greeting_temps = explode("{first_name}", $greeting_temp);
+                    $greeting_temps = explode("{last_name}", $greeting_temp);
                     for ($i = 0; isset($greeting_temps[$i]); $i++){
                         if (!isset($greeting_temps[$i + 1]))
                             $greeting .=  $greeting_temps[$i];
