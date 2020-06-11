@@ -56,7 +56,7 @@ switch ($data->type) {
                 'attachment' => '' //Вложение
             );
 
-            if (strcasecmp($text[0], "/") == 0) {
+            if (mb_strcasecmp($text[0], "/") == 0) {
                 $request_params['message'] = "&#129302;Bot moderator by kos v2.0.0\n\n"
                     . "&#9999;Команды:\n"
                     . "&#128196;/ — информация о боте\n"
@@ -89,7 +89,7 @@ switch ($data->type) {
                     . "&#128214;Информация о проекте:\n"
                     . "&#128100;Создатель: https://vk.com/i_love_python\n"
                     . "&#128064;Исходные код проекта и гайд по подключению: https://github.com/kos234/Vk-bot-moderator\n";
-            }elseif (strcasecmp($text[0], "/начать") == 0 ||strcasecmp($text[0], "/start") == 0){
+            }elseif (mb_strcasecmp($text[0], "/начать") == 0 ||mb_strcasecmp($text[0], "/start") == 0){
                 $res = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id."_users` WHERE `id` = '". $data->object->message->from_id ."'");
                 $resAdmin = $res->fetch_assoc();
                 if($resAdmin["rang"] == "5") {
@@ -100,8 +100,8 @@ switch ($data->type) {
                         $request_params["message"] = "Вы не предоставили права!";
                     }
                 }
-            }elseif (strcasecmp($text[0], "/настройки") == 0 ||strcasecmp($text[0], "/settings") == 0){
-                if(isset($text[1]) && (strcasecmp($text[1], "беседы") == 0 || strcasecmp($text[1], "чата") == 0 || strcasecmp($text[1], "chat") == 0)){
+            }elseif (mb_strcasecmp($text[0], "/настройки") == 0 ||mb_strcasecmp($text[0], "/settings") == 0){
+                if(isset($text[1]) && (mb_strcasecmp($text[1], "беседы") == 0 || mb_strcasecmp($text[1], "чата") == 0 || mb_strcasecmp($text[1], "chat") == 0)){
                     $res = $mysqli->query("SELECT * FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
                     $res = $res->fetch_assoc();
                     $request_params["message"] = "Настройки беседы: \nАвто исключение вышедших пользователей: ";
@@ -148,7 +148,7 @@ switch ($data->type) {
                 . "/Приветствие {Текст} - Установить приветствие для новых пользователей\n"
                 . "/Сообщать о наказаниях {@Айди|@домен|Пересланое сообщение} - люди, которым приходят уведомления о выдачи наказаний(если людей несколько, указывать через запятую без пробелов)\n"
                 . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов";
-            }elseif (strcasecmp($text[0] . " " .$text[1], "/user info") == 0 || strcasecmp($text[0] . " " .$text[1], "/Информация пользователя") == 0){
+            }elseif (mb_strcasecmp($text[0] . " " .$text[1], "/user info") == 0 || mb_strcasecmp($text[0] . " " .$text[1], "/Информация пользователя") == 0){
                 $id = getId($text[2],$data->object->message->reply_message->from_id);
 
                 if($id != 0){
@@ -517,9 +517,9 @@ switch ($data->type) {
                         }
                     }
                 }else $request_params["message"] = "Вы должны указать айди или переслать сообщение!";
-            }elseif (strcasecmp($text[0] . " " .$text[1], "/Сократить ссылку") == 0){
+            }elseif (mb_strcasecmp($text[0] . " " .$text[1], "/Сократить ссылку") == 0){
                 if(isset($text[2])){
-                    if(strcasecmp($text[3], "on") == 0 || strcasecmp($text[3], "включить") == 0) $stat = 1;
+                    if(mb_strcasecmp($text[3], "on") == 0 || mb_strcasecmp($text[3], "включить") == 0) $stat = 1;
                     else $stat = 0;
                     try {
                         $res_url = $vk->utils()->getShortLink(USER_TOKEN, array("url" => $text[2], "private" => $stat));
@@ -541,7 +541,7 @@ switch ($data->type) {
                     }
                 }else $request_params["message"] = "Вы не указали ссылку!";
 
-            }elseif (strcasecmp($text[0] . " " .$text[1], "/Получить статистику") == 0){
+            }elseif (mb_strcasecmp($text[0] . " " .$text[1], "/Получить статистику") == 0){
                 if(isset($text[2])) {
                     if(isset($text[3])) {
                         try {
@@ -575,22 +575,22 @@ switch ($data->type) {
                         }
                     }else $request_params["message"] = "Вы не указали токен для просмотра статистики!";
                 }else $request_params["message"] = "Вы не указали ссылку!";
-            }elseif (strcasecmp($text[0] . " " .$text[1], "/Инвайт ссылка") == 0 || strcasecmp($text[0] . " " .$text[1], "/ссылка приглашения") == 0 || strcasecmp($text[0], "/Приглашение") == 0){
+            }elseif (mb_strcasecmp($text[0] . " " .$text[1], "/Инвайт ссылка") == 0 || mb_strcasecmp($text[0] . " " .$text[1], "/ссылка приглашения") == 0 || mb_strcasecmp($text[0], "/Приглашение") == 0){
                 $res = $mysqli->query("SELECT `invite_link` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
                 $res = $res->fetch_assoc();
                 if(isset($res["invite_link"])){
-                    if(strcasecmp($res["invite_link"], "") != 0 || $res["invite_link"] != null)
+                    if(mb_strcasecmp($res["invite_link"], "") != 0 || $res["invite_link"] != null)
                         $request_params["message"] = "Ссылка для приглашения: " . $res["invite_link"];
                     else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
                 }else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
 
-            }elseif(strcasecmp($text[0], "/Пригласить") == 0){
+            }elseif(mb_strcasecmp($text[0], "/Пригласить") == 0){
                 $id = getId($text[1],$data->object->message->reply_message->from_id);
                 if($id != 0) {
                     $res = $mysqli->query("SELECT `invite_link` FROM `chats_settings` WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                     $res = $res->fetch_assoc();
                     if (isset($res["invite_link"])) {
-                        if (strcasecmp($res["invite_link"], "") != 0 || $res["invite_link"] != null) {
+                        if (mb_strcasecmp($res["invite_link"], "") != 0 || $res["invite_link"] != null) {
                             if ($id > 0) {
                                 $request_params["message"] = "Пользователь ";
                             } else $request_params["message"] = "Сообщество ";
@@ -639,7 +639,7 @@ switch ($data->type) {
                         }else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
                     } else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
                 } else $request_params["message"] = "Вы не указали айди пользователя";
-            }elseif(strcasecmp($text[0], "/список") == 0){
+            }elseif(mb_strcasecmp($text[0], "/список") == 0){
                 error_log("tack");
                 if (isset($text[1])){
                     $empty_list = true;
@@ -764,9 +764,9 @@ switch ($data->type) {
                     if($empty_list)
                         $request_params["message"] = "Список пуст";
                 }else $request_params["message"] = "Вы не указали список!";
-            }elseif(strcasecmp($text[0], "/Неактив") == 0){
+            }elseif(mb_strcasecmp($text[0], "/Неактив") == 0){
 
-            }elseif(strcasecmp($text[0], "/Онлайн") == 0 || strcasecmp($text[0], "/Online") == 0){
+            }elseif(mb_strcasecmp($text[0], "/Онлайн") == 0 || mb_strcasecmp($text[0], "/Online") == 0){
 
             }
 
@@ -792,6 +792,11 @@ switch ($data->type) {
         break;
 
 }
+function mb_strcasecmp($str1, $str2, $encoding = null) {
+    if (null === $encoding) { $encoding = mb_internal_encoding(); }
+    return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
+}
+
 function convertTime($times){
     $time_return = 0;
     $times = explode(":", $times);
