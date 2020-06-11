@@ -138,7 +138,7 @@ switch ($data->type) {
                         }
                     }
                     $request_params["message"] .= "\nОчистка предупреждений происходит каждые: " . getTime($res["autoremovepred"]);
-                    $request_params["message"] .= "\nПослеждняя очистка была " . date("d.m.Y G:i", $res["lastRemovePred"]);
+                    $request_params["message"] .= "\nПослеждняя очистка была " . date("d.m.Y G:i", $res["lastRemovePred"]) . "по UTC 0";
                 }else
                 $request_params["message"] = "&#9881;Настройки:\n"
                 . "/Лимит повышение рангов {Уровень 1 - 5} {Количество предупреждений} {Количество киков} {Количество временных баннов} - устанавливает лимит повышение рангов модераторам\n"
@@ -176,7 +176,7 @@ switch ($data->type) {
                         if($res_user[0]->status != "")
                         $request_params["message"] .= "\nСтатус: " . $res_user[0]->status;
                     }if(isset($res_user[0]->last_seen)){
-                        $request_params["message"] .= "\nПоследний раз был онлайн по UTC 0: " . date("G:i d", $res_user[0]->last_seen->time);
+                        $request_params["message"] .= "\nПоследний раз был онлайн: " . date("G:i d", $res_user[0]->last_seen->time);
                         switch (date("m",$res_user[0]->last_seen->time)){
                             case 1:
                                 $request_params["message"] .= " января";
@@ -215,7 +215,7 @@ switch ($data->type) {
                                 $request_params["message"] .= " декабря";
                                 break;
                         }
-                        $request_params["message"] .= " ". date("Y",$res_user[0]->last_seen->time) ." c ";
+                        $request_params["message"] .= " ". date("Y",$res_user[0]->last_seen->time) ." по UTC 0 c ";
                         switch ($res_user[0]->last_seen->platform){
                             case 1:
                                 $request_params["message"] .= "мобильной версии сайта";
@@ -263,7 +263,7 @@ switch ($data->type) {
                             $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                             $res_mes = $res->fetch_assoc();
                             if(isset($res_mes["id"])){
-                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"] . "\nПоследняя активность: " . date("d.m.Y G:i", $res_mes["lastMes"]);
+                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"] . "\nПоследняя активность: " . date("d.m.Y G:i", $res_mes["lastMes"]) . "по UTC 0";
                             }
                     }
                         if(isset($res_user[0]->can_post)){
@@ -428,7 +428,7 @@ switch ($data->type) {
                             $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                             $res_mes = $res->fetch_assoc();
                             if(isset($res_mes["id"])){
-                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"] . "\nПоследняя активность: " . date("d.m.Y G:i", $res_mes["lastMes"]);
+                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"] . "\nПоследняя активность: " . date("d.m.Y G:i", $res_mes["lastMes"]) . "по UTC 0";
                             }
                         }
                         if(isset($res_grop[0]->description)) {
@@ -639,7 +639,7 @@ switch ($data->type) {
                         }else $request_params["message"] = "Администрация беседы не указала ссылку для приглашения";
                     } else $request_params["message"] = "Эта команда не для личных сообщений или вашей беседы нету в базе данных!";
                 } else $request_params["message"] = "Вы не указали айди пользователя";
-            }elseif(strcasecmp($text[0], "/Список") == 0){
+            }elseif(strcasecmp($text[0], "/список") == 0){
                 error_log("tack");
                 if (isset($text[1])){
                     $empty_list = true;
@@ -656,7 +656,7 @@ switch ($data->type) {
                             }
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]);
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
                                 }
                             }
                             
@@ -676,7 +676,7 @@ switch ($data->type) {
                                     if($res_fields[$key][0] == 0)
                                         $type = " навсегда";
                                     else
-                                        $type = " до " . date("d.m.Y G:i", $res_fields[$key]);
+                                        $type = " до " . date("d.m.Y G:i", $res_fields[$key]) . "по UTC 0";
                                     $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", забанен" . $type;
                                 }
                             }
@@ -728,7 +728,7 @@ switch ($data->type) {
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
                                     if(time() - $res_fields[$key][3] > 604800) //604800 - одна неделя
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]);
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
                                 }
                             }
                             break;
@@ -751,7 +751,7 @@ switch ($data->type) {
                             }
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]);
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
                                 }
                             }
                             break;
