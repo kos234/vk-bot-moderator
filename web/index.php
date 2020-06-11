@@ -795,7 +795,6 @@ switch ($data->type) {
                     $request_params["message"] = mb_substr($request_params["message"], 0 ,-1);
                     $request_params["message"] .= "\n";
                 }
-                //$request_params["message"] = mb_substr($request_params["message"], 0 ,-1);
             }elseif(mb_strcasecmp($text[0], "/Онлайн") == 0 || mb_strcasecmp($text[0], "/Online") == 0){
 
             }
@@ -805,6 +804,33 @@ switch ($data->type) {
             if($data->object->message->action->type == "chat_invite_user" || $data->object->message->action->type == "chat_invite_user_by_link"){
                 if($data->object->message->action->member_id == (int)("-".$data->group_id))
                     $request_params["message"] = "Для моей работы мне необходимы права администратора. Выдайте права и напишите /начать";
+
+                $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_users` (`id`) VALUES ('". $data->object->message->action->member_id ."')");
+                $res = $mysqli->query("SELECT `greeting` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                $res = $res->fetch_assoc();
+                if($res["greeting"] != ""){
+                    $greeting = "";
+                    $greeting_temp = "";
+                    $greeting_temps = explode("{first_name}", $res["greeting"]);
+                    for ($i = 0; isset($greeting_temps[$i]); $i++){
+                        if (!isset($greeting_temps[$i + 1]))
+                            $greeting_temp .=  $greeting_temps[$i];
+                        else
+                            $greeting_temp .=  $greeting_temps[$i] . explode(" ", getName($vk, array($data->object->message->action->member_id))[0])[0];
+                    }
+                    $greeting_temps = explode("{first_name}", $greeting_temp);
+                    for ($i = 0; isset($greeting_temps[$i]); $i++){
+                        if (!isset($greeting_temps[$i + 1]))
+                            $greeting .=  $greeting_temps[$i];
+                        else {
+                            $temp = explode(" ", getName($vk, array($data->object->message->action->member_id))[0]);
+                            if(isset($temp[1]))
+                            $greeting .= $greeting_temps[$i] . $temp[1];
+                            else $greeting .= $greeting_temps[$i] . $temp[0];
+                        }
+                    }
+                    $request_params["message"] = $greeting;
+                }
 
 
             }
