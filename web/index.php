@@ -795,7 +795,7 @@ switch ($data->type) {
                     $request_params["message"] = mb_substr($request_params["message"], 0 ,-1);
                     $request_params["message"] .= "\n";
                 }
-                $request_params["message"] = mb_substr($request_params["message"], 0 ,-2);
+                //$request_params["message"] = mb_substr($request_params["message"], 0 ,-1);
             }elseif(mb_strcasecmp($text[0], "/Онлайн") == 0 || mb_strcasecmp($text[0], "/Online") == 0){
 
             }
