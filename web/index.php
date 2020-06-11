@@ -139,7 +139,7 @@ switch ($data->type) {
                                 break;
                         }
                     }
-                    $request_params["message"] .= "\nОчистка предупреждений происходит каждые: " . getTime($res["predsvarn"]);
+                    $request_params["message"] .= "\nОчистка предупреждений происходит каждые: " . getTime($res["autoremovepred"]);
                     $request_params["message"] .= "\nПослеждняя очистка была " . date("d.m.Y G:i", $res["lastRemovePred"]);
                 }else
                 $request_params["message"] = "&#9881;Настройки:\n"
