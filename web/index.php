@@ -807,7 +807,10 @@ switch ($data->type) {
                         if (isset($data->object->message->reply_message->from_id))
                             $num_num = 1;
                         if (isset($text[$num_num])) $num = (int)$text[$num_num]; else $num = 1;
-                        if (isset($text[$num_num + 1])) $reason = $text[$num_num + 1]; else $reason = "";
+                        $reason = "";
+                        for ($i = 1; isset($text[$num_num + $i]); $i++){
+                            $reason .= $text[$num_num + $i];
+                        }
 
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` + ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `preds` = `preds` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
