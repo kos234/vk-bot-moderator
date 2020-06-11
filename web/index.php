@@ -809,15 +809,13 @@ switch ($data->type) {
                         if (isset($text[$num_num])) $num = (int)$text[$num_num]; else $num = 1;
                         $reason = "";
                         for ($i = 1; isset($text[$num_num + $i]); $i++){
-                            if (isset($text[$num_num + $i + 1]))
-                            $reason .= $text[$num_num + $i];
-                            else
                             $reason .= $text[$num_num + $i] . " ";
                         }
+                        $reason = mb_substr($reason, 0 , -1);
 
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` + ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `preds` = `preds` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
-                        $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`id`,`id_moder`, `type`, `text`, `parametr`) VALUES ('". $id ."', '". $data->object->message->action->member_id ."', 'kick', '". $reason ."', '". $num ."')");
+                        $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`id`,`id_moder`, `type`, `text`, `parametr`) VALUES ('". $id ."', '". $data->object->message->from_id ."', 'kick', '". $reason ."', '". $num ."')");
                         track($mysqli, $id, $data->object->message->from_id, $num, $reason);
                         $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
