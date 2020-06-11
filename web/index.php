@@ -816,7 +816,7 @@ switch ($data->type) {
                         if (!isset($greeting_temps[$i + 1]))
                             $greeting_temp .=  $greeting_temps[$i];
                         else
-                            $greeting_temp .=  $greeting_temps[$i] . explode(" ", getName($vk, array($data->object->message->action->member_id))[0])[0];
+                            $greeting_temp .=  $greeting_temps[$i] . explode(" ", getName($vk, array($data->object->message->action->member_id))[0])[0] . "]";
                     }
                     $greeting_temps = explode("{last_name}", $greeting_temp);
                     for ($i = 0; isset($greeting_temps[$i]); $i++){
@@ -824,9 +824,12 @@ switch ($data->type) {
                             $greeting .=  $greeting_temps[$i];
                         else {
                             $temp = explode(" ", getName($vk, array($data->object->message->action->member_id))[0]);
-                            if(isset($temp[1]))
-                            $greeting .= $greeting_temps[$i] . $temp[1];
-                            else $greeting .= $greeting_temps[$i] . $temp[0];
+                            if(isset($temp[1])) {
+                                $var = explode("|", $temp[0]);
+
+                                $greeting .= $greeting_temps[$i] . $var[0] . "|" .$temp[1];
+                            }
+                            else $greeting .= $greeting_temps[$i] . $temp[0] . "]";
                         }
                     }
                     $request_params["message"] = $greeting;
