@@ -792,8 +792,9 @@ switch ($data->type) {
                         elseif (endNumber($res["tempban"]) >= 2 && endNumber($res["tempban"]) <= 4)
                             $request_params["message"] .= " ". $res["tempban"] . " временных блокировки,";
                     }
+                    $request_params["message"] .= "\n";
                 }
-
+                $request_params["message"] = mb_substr($request_params["message"], 0 ,-2);
             }elseif(mb_strcasecmp($text[0], "/Онлайн") == 0 || mb_strcasecmp($text[0], "/Online") == 0){
 
             }
