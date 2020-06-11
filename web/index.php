@@ -69,7 +69,8 @@ switch ($data->type) {
                     . "/Settings|настройки [chat|беседы|чата] - показывает либо возможный, либо текущий список настроек\n"
                     . "/Лимит модераторов - выводит лимит для модераторов\n\n"
                     . "Модерация и Администрация:\n"
-                    . "/Предупреждение|Пред {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Выдать предупреждение\n"
+                    . "/Предупреждение|Пред {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Выдать предупреждение, по умолчанию 1 предупреждение\n"
+                    . "/Удалить предупреждение|пред {@Айди|@домен|Пересланое сообщение} [Количество] - Удалить предупреждения, по умолчанию всё предупреждения\n"
                     . "/Кик|Исключить {@Айди|@домен|Пересланое сообщение} [Причина] - Исключить пользователя из чата\n"
                     . "/Временный бан {@Айди|@домен|Пересланое сообщение} {Время SS:MM:HH:DDD:MM} [Причина] - Временно забанить пользователя в беседе\n"
                     . "/Бан {@Айди|@домен|Пересланое сообщение} [Причина] - Забанить пользователя\n"
@@ -77,11 +78,12 @@ switch ($data->type) {
                     . "/Мега кик|мега исключение {Неактивных|вышедших|пользователей} - исключает пользователей из определённой группы\n"
                     . "/Назначит ранг|Сет ранг {@Айди|@домен|Пересланое сообщение} {0|1|2|3|4|5|Модератор 1 - 4|пользователь|администратор} - Разбанить пользователя\n\n"
                     . "&#9881;Настройки:\n"
+                    . "/Выдать ранг {0|1|2|3|4|5|пользователь|модератор1|модератор2|модератор3|модератор4|администратор} {@Айди|@домен|Пересланое сообщение} - Выдать предупреждение\n"
                     . "/Лимит повышение рангов {Уровень 1 - 5} {Количество предупреждений} {Количество киков} {Количество временных баннов} - устанавливает лимит повышение рангов модераторам\n"
                     . "/Наказания за предупреждения {Тип: кик, временный бан, бан} {Количество} {Время, если тип: временный бан] - Установить наказание за достижение определенного количества предупреждений\n"
                     . "/Очистить таблицу {Пользователей|забаненных|вышедших|модераторов|наказаний|лимит|настроек|всё} - очищает указанную таблицу\n"
                     . "/Авто очистка предупреждений {Время SS:MM:HH:DDD:MM} - сбрасывает всё предупреждения через указанное время\n"
-                    . "/Приветствие {Текст} - Устанавливает приветствие для новых пользователей\n"
+                    . "/Приветствие {Текст {first_name} {last_name}} - Устанавливает приветствие для новых пользователей, {first_name} - чтобы указать имя, {last_name} - чтобы указать фамилию\n"
                     . "/Установить инвайт ссылку {Текст} - Устанавливает ссылку для подключение к беседе\n"
                     . "/Сообщать о наказаниях {@Айди|@домен|Пересланое сообщение} - люди, которым приходят уведомления о выдачи наказаний(если людей несколько, указывать через запятую без пробелов)\n"
                     . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов\n"
@@ -795,8 +797,38 @@ switch ($data->type) {
                     $request_params["message"] = mb_substr($request_params["message"], 0 ,-1);
                     $request_params["message"] .= "\n";
                 }
-            }elseif(mb_strcasecmp($text[0], "/Онлайн") == 0 || mb_strcasecmp($text[0], "/Online") == 0){
+            }elseif(mb_strcasecmp($text[0], "/Предупреждение") == 0 || mb_strcasecmp($text[0], "/пред") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 1){
+                    $id = getId($text[1],$data->object->message->reply_message->from_id);
+                    if($id != 0){
+                        $num_num = 2;
+                        if (isset($data->object->message->reply_message->from_id))
+                            $num_num = 1;
+                        if (isset($text[$num_num])) $num = (int)$text[$num_num]; else $num = 1;
+                        if (isset($text[$num_num + 1])) $reason = $text[$num_num + 1]; else $reason = "";
 
+                        $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` + ". $num ." WHERE `id` = '" . $id . "'");
+                        $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `preds` = `preds` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
+                        $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`id`,`id_moder`, `type`, `text`, `parametr`) VALUES ('". $id ."''". $data->object->message->action->member_id ."', 'kick', '". $reason ."', '". $num ."')");
+                        track($mysqli, $id, $data->object->message->from_id, $num, $reason);
+                        $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
+                        if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
+                            $request_params["message"] .= $num . " предупреждений";
+                        elseif (endNumber($num) == 1)
+                            $request_params["message"] .= $num . " предупреждение";
+                        elseif (endNumber($num) >= 2 && endNumber($num) <= 4)
+                            $request_params["message"] .= $num . " предупреждения";
+                        if($reason != "") $request_params["message"] .= ", по причине: " . $reason;
+                    }else $request_params["message"] = "Вы не указали айди пользователя!";
+                }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
+            }elseif(mb_strcasecmp($text[0], "/Онлайн") == 0 || mb_strcasecmp($text[0], "/Online") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 1){
+
+                }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
             }
 
 
@@ -851,6 +883,10 @@ switch ($data->type) {
         break;
 
 }
+function track($mysqli, $id_warn, $id_moder, $num, $reason){
+
+}
+
 function mb_strcasecmp($str1, $str2, $encoding = null) { //https://www.php.net/manual/en/function.strcasecmp.php#107016 взято от сюда
     if (null === $encoding) { $encoding = mb_internal_encoding(); }
     return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
@@ -1050,10 +1086,10 @@ function getUrlParameters($url, $token){
 
 function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` TinyInt( 255 ) NOT NULL DEFAULT 0, `pred` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `lastMes` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `id_moder` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL DEFAULT '', `parametr` Int( 255 ) NOT NULL DEFAULT '') ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_bans`(`id` VarChar( 255 ) NOT NULL, `ban` Int( 255 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_bans`(`id` VarChar( 255 ) NOT NULL, `reason` VarChar( 255 ) NOT NULL DEFAULT '', `ban` Int( 255 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL DEFAULT '', `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL, `lastRemovePred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
