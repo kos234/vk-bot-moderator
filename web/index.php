@@ -503,10 +503,7 @@ switch ($data->type) {
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Получить статистику") == 0){
                 if(isset($text[2])) {
                     if(isset($text[3])) {
-                                ob_start();
-                                var_dump(getUrlParameters($text[2], $text[3]));
-                                error_log(ob_get_contents());
-                                ob_end_clean();
+                        try {
                             $res_url = $vk->utils()->getLinkStats(USER_TOKEN, getUrlParameters($text[2], $text[3]));
                         if(isset($res_url["stats"][0]["views"])){
                             $request_params["message"] = "Всего просмотров: " . $res_url["stats"][0]["views"] . "\n\nПросмотры по возрастным диапазонам:";
@@ -528,7 +525,13 @@ switch ($data->type) {
                             }
 
                         }else $request_params["message"] = "Пока не было переходов по этой ссылке!";
-
+                        } catch (\VK\Exceptions\Api\VKApiNotFoundException $e) {
+                            $request_params["message"] = "Что-то не так с ссылкой или токеном!1";
+                        } catch (\VK\Exceptions\VKApiException $e) {
+                            $request_params["message"] = "Что-то не так с ссылкой или токеном!2";
+                        } catch (\VK\Exceptions\VKClientException $e) {
+                            $request_params["message"] = "Что-то не так с ссылкой или токеном!3";
+                        }
                     }else $request_params["message"] = "Вы не указали токен для просмотра статистики!";
                 }else $request_params["message"] = "Вы не указали ссылку!";
             }elseif (strcasecmp($text[0] . " " .$text[1], "/Инвайт ссылка") == 0 || strcasecmp($text[0] . " " .$text[1], "/ссылка приглашения") == 0 || strcasecmp($text[0], "/Приглашение") == 0){
@@ -681,6 +684,46 @@ switch ($data->type) {
                     if($empty_list)
                         $request_params["message"] = "Список пуст";
                 }else $request_params["message"] = "Вы не указали список!";
+            }elseif (strcasecmp($text[0], "/Settings") == 0 || strcasecmp($text[0], "/настройки") == 0){
+                $res = $mysqli->query("SELECT * FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                $res = $res->fetch_assoc();
+                $request_params["message"] = "Настройки беседы: авто исключение вышедших пользователей: ";
+                if ($res["autokickLeave"] == 1) $request_params["message"] .= "включено"; else $request_params["message"] .= "выключено";
+                $request_params["message"] .= ", авто исключение новых ботов: ";
+                if ($res["autokickBot"] == 1) $request_params["message"] .= "включено"; else $request_params["message"] .= "выключено";
+                $request_params["message"] .= ", приветствие: ";
+                if ($res["greeting"] == "") $request_params["message"] .= "выключено"; else $request_params["message"] .= "\"" . $res["greeting"] . "\"";
+                $request_params["message"] .= ", следящие за выдачей наказаний: ";
+                if ($res["tracking"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= implode(", ",getName($vk, explode(",", $res["tracking"])));
+                $request_params["message"] .= ", ссылка для приглашения в чат: ";
+                if ($res["invite_link"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= $res["invite_link"];
+                $request_params["message"] .= ", наказание за какое-то количество предупреждений: ";
+                if ($res["predsvarn"] == "") $request_params["message"] .= "отсутствуют"; else{
+                    $fields = explode(":",$res["predsvarn"]);
+                    $request_params["message"] .= "за ";
+                    if(($fields[1] >= 11 && $fields[1] <= 19) || (endNumber($fields[1]) >= 5 && endNumber($fields[1]) <= 9) || endNumber($fields[1]) == 0)
+                        $request_params["message"] .= "предупреждений";
+                    elseif (endNumber($fields[1]) == 1)
+                        $request_params["message"] .= "предупреждение";
+                    elseif (endNumber($fields[1]) >= 2 && endNumber($fields[1]) <= 4)
+                        $request_params["message"] .= "предупреждения";
+                    $request_params["message"] .= " вы будете ";
+                    switch ($fields[0]){
+                        case "kick":
+                            $request_params["message"] .= "исключены из беседы";
+                            break;
+                        case "tempban":
+                            $request_params["message"] .= "забанены на " . getTime($fields[2]);
+                            break;
+                        case "ban":
+                            $request_params["message"] .= "забанены";
+                            break;
+                    }
+                }
+                $request_params["message"] .= ", очистка предупреждений происходит каждые: " . getTime($res["predsvarn"]);
+                $request_params["message"] .= ", послеждняя очистка была " . date("d.m.Y G:i", $res["lastRemovePred"]);
+
+
             }
 
 
@@ -705,6 +748,90 @@ switch ($data->type) {
         break;
 
 }
+function convertTime($times){
+    $time_return = 0;
+    $times = explode(":", $times);
+    if(isset($times[0]))
+        $time_return += (int)$times[0];
+    if(isset($times[1]))
+        $time_return += (int)$times[1] * 60;
+    if(isset($times[2]))
+        $time_return += (int)$times[2] * 60 * 60;
+    if(isset($times[3]))
+        $time_return += (int)$times[3] * 24 * 60 * 60;
+    if(isset($times[4]))
+        $time_return += (int)$times[4] * 31 * 24 * 60 * 60;
+
+    return $time_return;
+}
+
+function getTime($time){
+    $time_string = "";
+    if ($time != 0) {
+        $time = array(intdiv($time,60), $time%60);
+        if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+            $time_string .= $time[1] ." секунд ";
+        elseif (endNumber((int)$time[1]) == 1)
+            $time_string .= $time[1] . " секунду ";
+        elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+            $time_string .= $time[1] . " секунды ";
+
+        if ($time[0] != 0){
+            $time = array(intdiv($time[0],60), $time[0]%60);
+            if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                $time_string .= $time[1] ." минут ";
+            elseif (endNumber((int)$time[1]) == 1)
+                $time_string .= $time[1] . " минуту ";
+            elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                $time_string .= $time[1] . " минуты ";
+
+            if ($time[0] != 0){
+                $time = array(intdiv($time[0],24), $time[0]%24);
+                if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                    $time_string .= $time[1] ." часов ";
+                elseif (endNumber((int)$time[1]) == 1)
+                    $time_string .= $time[1] . " час ";
+                elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                    $time_string .= $time[1] . " часа ";
+
+                if ($time[0] != 0){
+                    $time = array(intdiv($time[0],31), $time[0]%31);
+                    if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                        $time_string .= $time[1] ." дней ";
+                    elseif (endNumber((int)$time[1]) == 1)
+                        $time_string .= $time[1] . " день ";
+                    elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                        $time_string .= $time[1] . " дня ";
+
+                    if ($time[0] != 0){
+                        $time = array(intdiv($time[0],12), $time[0]%12);
+                        if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                            $time_string .= $time[1] ." месяцев ";
+                        elseif (endNumber((int)$time[1]) == 1)
+                            $time_string .= $time[1] . " месяц ";
+                        elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                            $time_string .= $time[1] . " месяца ";
+
+                        if ($time[0] != 0){
+                            if(((int)$time[0] >= 11 && (int)$time[0] <= 19) || (endNumber((int)$time[0]) >= 5 && endNumber((int)$time[0]) <= 9) || endNumber((int)$time[0]) == 0)
+                                $time_string .= $time[0] ." лет ";
+                            elseif (endNumber((int)$time[0]) == 1)
+                                $time_string .= $time[0] . " год ";
+                            elseif (endNumber((int)$time[0]) >= 2 && endNumber((int)$time[0]) <= 4)
+                                $time_string .= $time[0] . " года ";
+                        }
+                    }
+                }
+            }
+        }
+    }else $time_string = "0 секунд";
+    return $time_string;
+}
+
+function endNumber($number){
+    return round(($number/10 - intdiv($number, 10)) * 10);
+}
+
 function getRang($id){
     switch ($id){
         case 0:
@@ -807,7 +934,7 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_bans`(`id` VarChar( 255 ) NOT NULL, `ban` Int( 255 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL, `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL DEFAULT '', `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL, `lastRemovePred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
     $res = json_decode(json_encode($vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id))));
@@ -820,6 +947,6 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`) VALUES (1, 5)");
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`) VALUES (2, 6, 2)");
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
-    $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`) VALUES (". $chat_id .",". (time() + 2419200) .")");
+    $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (". $chat_id .",". 2678400 . "," . time() .")");
 }
 ?>
