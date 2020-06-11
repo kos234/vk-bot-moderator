@@ -66,7 +66,7 @@ switch ($data->type) {
                     . "/Инвайт ссылка|Приглашение|Ссылка приглашение - выводит ссылку на приглашение в этот чат\n"
                     . "/Пригласить {@Айди|@домен|Пересланое сообщение} [Сообщение] - отправляет приглашение пользователю в этот чат\n"
                     . "/Список {Пользователей|забаненных|вышедших|модераторов} - выводит указанный список пользователей\n"
-                    . "/Settings|настройки - показывает список настроек\n"
+                    . "/Settings|настройки [chat|беседы|чата] - показывает либо возможный, либо текущий список настроек\n"
                     . "/Неактив - выводит список неактивных пользователей\n"
                     . "/Онлайн - выводит список пользователей онлайн\n"
                     . "/Лимит модераторов - выводит лимит для модераторов\n\n"
@@ -103,6 +103,45 @@ switch ($data->type) {
                     }
                 }
             }elseif (strcasecmp($text[0], "/настройки") == 0 ||strcasecmp($text[0], "/settings") == 0){
+                if(isset($text[1]) && (strcasecmp($text[1], "беседы") == 0 || strcasecmp($text[1], "чата") == 0 || strcasecmp($text[1], "chat") == 0)){
+                    $res = $mysqli->query("SELECT * FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                    $res = $res->fetch_assoc();
+                    $request_params["message"] = "Настройки беседы: авто исключение вышедших пользователей: ";
+                    if ($res["autokickLeave"] == 1) $request_params["message"] .= "включено"; else $request_params["message"] .= "выключено";
+                    $request_params["message"] .= ", авто исключение новых ботов: ";
+                    if ($res["autokickBot"] == 1) $request_params["message"] .= "включено"; else $request_params["message"] .= "выключено";
+                    $request_params["message"] .= ", приветствие: ";
+                    if ($res["greeting"] == "") $request_params["message"] .= "выключено"; else $request_params["message"] .= "\"" . $res["greeting"] . "\"";
+                    $request_params["message"] .= ", следящие за выдачей наказаний: ";
+                    if ($res["tracking"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= implode(", ",getName($vk, explode(",", $res["tracking"])));
+                    $request_params["message"] .= ", ссылка для приглашения в чат: ";
+                    if ($res["invite_link"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= $res["invite_link"];
+                    $request_params["message"] .= ", наказание за какое-то количество предупреждений: ";
+                    if ($res["predsvarn"] == "") $request_params["message"] .= "отсутствуют"; else{
+                        $fields = explode(":",$res["predsvarn"]);
+                        $request_params["message"] .= "за ";
+                        if(($fields[1] >= 11 && $fields[1] <= 19) || (endNumber($fields[1]) >= 5 && endNumber($fields[1]) <= 9) || endNumber($fields[1]) == 0)
+                            $request_params["message"] .= "предупреждений";
+                        elseif (endNumber($fields[1]) == 1)
+                            $request_params["message"] .= "предупреждение";
+                        elseif (endNumber($fields[1]) >= 2 && endNumber($fields[1]) <= 4)
+                            $request_params["message"] .= "предупреждения";
+                        $request_params["message"] .= " вы будете ";
+                        switch ($fields[0]){
+                            case "kick":
+                                $request_params["message"] .= "исключены из беседы";
+                                break;
+                            case "tempban":
+                                $request_params["message"] .= "забанены на " . getTime($fields[2]);
+                                break;
+                            case "ban":
+                                $request_params["message"] .= "забанены";
+                                break;
+                        }
+                    }
+                    $request_params["message"] .= ", очистка предупреждений происходит каждые: " . getTime($res["predsvarn"]);
+                    $request_params["message"] .= ", послеждняя очистка была " . date("d.m.Y G:i", $res["lastRemovePred"]);
+                }else
                 $request_params["message"] = "&#9881;Настройки:\n"
                 . "/Лимит повышение рангов {Уровень 1 - 5} {Количество предупреждений} {Количество киков} {Количество временных баннов} - устанавливает лимит повышение рангов модераторам\n"
                 . "/Наказания за предупреждения {Тип: кик, временный бан, бан} {Количество} {Время, если тип: временный бан] - Установить наказание за достижение определенного количества предупреждений\n"
@@ -684,46 +723,6 @@ switch ($data->type) {
                     if($empty_list)
                         $request_params["message"] = "Список пуст";
                 }else $request_params["message"] = "Вы не указали список!";
-            }elseif (strcasecmp($text[0], "/Settings") == 0 || strcasecmp($text[0], "/настройки") == 0){
-                $res = $mysqli->query("SELECT * FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
-                $res = $res->fetch_assoc();
-                $request_params["message"] = "Настройки беседы: авто исключение вышедших пользователей: ";
-                if ($res["autokickLeave"] == 1) $request_params["message"] .= "включено"; else $request_params["message"] .= "выключено";
-                $request_params["message"] .= ", авто исключение новых ботов: ";
-                if ($res["autokickBot"] == 1) $request_params["message"] .= "включено"; else $request_params["message"] .= "выключено";
-                $request_params["message"] .= ", приветствие: ";
-                if ($res["greeting"] == "") $request_params["message"] .= "выключено"; else $request_params["message"] .= "\"" . $res["greeting"] . "\"";
-                $request_params["message"] .= ", следящие за выдачей наказаний: ";
-                if ($res["tracking"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= implode(", ",getName($vk, explode(",", $res["tracking"])));
-                $request_params["message"] .= ", ссылка для приглашения в чат: ";
-                if ($res["invite_link"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= $res["invite_link"];
-                $request_params["message"] .= ", наказание за какое-то количество предупреждений: ";
-                if ($res["predsvarn"] == "") $request_params["message"] .= "отсутствуют"; else{
-                    $fields = explode(":",$res["predsvarn"]);
-                    $request_params["message"] .= "за ";
-                    if(($fields[1] >= 11 && $fields[1] <= 19) || (endNumber($fields[1]) >= 5 && endNumber($fields[1]) <= 9) || endNumber($fields[1]) == 0)
-                        $request_params["message"] .= "предупреждений";
-                    elseif (endNumber($fields[1]) == 1)
-                        $request_params["message"] .= "предупреждение";
-                    elseif (endNumber($fields[1]) >= 2 && endNumber($fields[1]) <= 4)
-                        $request_params["message"] .= "предупреждения";
-                    $request_params["message"] .= " вы будете ";
-                    switch ($fields[0]){
-                        case "kick":
-                            $request_params["message"] .= "исключены из беседы";
-                            break;
-                        case "tempban":
-                            $request_params["message"] .= "забанены на " . getTime($fields[2]);
-                            break;
-                        case "ban":
-                            $request_params["message"] .= "забанены";
-                            break;
-                    }
-                }
-                $request_params["message"] .= ", очистка предупреждений происходит каждые: " . getTime($res["predsvarn"]);
-                $request_params["message"] .= ", послеждняя очистка была " . date("d.m.Y G:i", $res["lastRemovePred"]);
-
-
             }
 
 
