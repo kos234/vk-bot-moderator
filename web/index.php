@@ -106,26 +106,26 @@ switch ($data->type) {
                 if(isset($text[1]) && (strcasecmp($text[1], "беседы") == 0 || strcasecmp($text[1], "чата") == 0 || strcasecmp($text[1], "chat") == 0)){
                     $res = $mysqli->query("SELECT * FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
                     $res = $res->fetch_assoc();
-                    $request_params["message"] = "Настройки беседы: авто исключение вышедших пользователей: ";
+                    $request_params["message"] = "Настройки беседы: \nАвто исключение вышедших пользователей: ";
                     if ($res["autokickLeave"] == 1) $request_params["message"] .= "включено"; else $request_params["message"] .= "выключено";
-                    $request_params["message"] .= ", авто исключение новых ботов: ";
+                    $request_params["message"] .= "\nАвто исключение новых ботов: ";
                     if ($res["autokickBot"] == 1) $request_params["message"] .= "включено"; else $request_params["message"] .= "выключено";
-                    $request_params["message"] .= ", приветствие: ";
+                    $request_params["message"] .= "\nПриветствие: ";
                     if ($res["greeting"] == "") $request_params["message"] .= "выключено"; else $request_params["message"] .= "\"" . $res["greeting"] . "\"";
-                    $request_params["message"] .= ", следящие за выдачей наказаний: ";
+                    $request_params["message"] .= "\nСледящие за выдачей наказаний: ";
                     if ($res["tracking"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= implode(", ",getName($vk, explode(",", $res["tracking"])));
-                    $request_params["message"] .= ", ссылка для приглашения в чат: ";
+                    $request_params["message"] .= "\nСсылка для приглашения в чат: ";
                     if ($res["invite_link"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= $res["invite_link"];
-                    $request_params["message"] .= ", наказание за какое-то количество предупреждений: ";
+                    $request_params["message"] .= "\nНаказание за какое-то количество предупреждений: ";
                     if ($res["predsvarn"] == "") $request_params["message"] .= "отсутствуют"; else{
                         $fields = explode(":",$res["predsvarn"]);
-                        $request_params["message"] .= "за ";
+                        $request_params["message"] .= "за " . $fields[1];
                         if(($fields[1] >= 11 && $fields[1] <= 19) || (endNumber($fields[1]) >= 5 && endNumber($fields[1]) <= 9) || endNumber($fields[1]) == 0)
-                            $request_params["message"] .= "предупреждений";
+                            $request_params["message"] .= " предупреждений";
                         elseif (endNumber($fields[1]) == 1)
-                            $request_params["message"] .= "предупреждение";
+                            $request_params["message"] .= " предупреждение";
                         elseif (endNumber($fields[1]) >= 2 && endNumber($fields[1]) <= 4)
-                            $request_params["message"] .= "предупреждения";
+                            $request_params["message"] .= " предупреждения";
                         $request_params["message"] .= " вы будете ";
                         switch ($fields[0]){
                             case "kick":
@@ -139,8 +139,8 @@ switch ($data->type) {
                                 break;
                         }
                     }
-                    $request_params["message"] .= ", очистка предупреждений происходит каждые: " . getTime($res["predsvarn"]);
-                    $request_params["message"] .= ", послеждняя очистка была " . date("d.m.Y G:i", $res["lastRemovePred"]);
+                    $request_params["message"] .= "\nОчистка предупреждений происходит каждые: " . getTime($res["predsvarn"]);
+                    $request_params["message"] .= "\nПослеждняя очистка была " . date("d.m.Y G:i", $res["lastRemovePred"]);
                 }else
                 $request_params["message"] = "&#9881;Настройки:\n"
                 . "/Лимит повышение рангов {Уровень 1 - 5} {Количество предупреждений} {Количество киков} {Количество временных баннов} - устанавливает лимит повышение рангов модераторам\n"
