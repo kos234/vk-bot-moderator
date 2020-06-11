@@ -65,10 +65,8 @@ switch ($data->type) {
                     . "/Получить статистику {ссылка} {токен} — выводит статистику переходов по сокращенный ссылке (желательно использовать эту команду в личных сообщениях)\n"
                     . "/Инвайт ссылка|Приглашение|Ссылка приглашение - выводит ссылку на приглашение в этот чат\n"
                     . "/Пригласить {@Айди|@домен|Пересланое сообщение} [Сообщение] - отправляет приглашение пользователю в этот чат\n"
-                    . "/Список {Пользователей|забаненных|вышедших|модераторов} - выводит указанный список пользователей\n"
+                    . "/Список {Пользователей|забаненных|вышедших|модераторов|неактивных|онлайна} - выводит указанный список пользователей\n"
                     . "/Settings|настройки [chat|беседы|чата] - показывает либо возможный, либо текущий список настроек\n"
-                    . "/Неактив - выводит список неактивных пользователей\n"
-                    . "/Онлайн - выводит список пользователей онлайн\n"
                     . "/Лимит модераторов - выводит лимит для модераторов\n\n"
                     . "Модерация и Администрация:\n"
                     . "/Предупреждение|Пред {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Выдать предупреждение\n"
@@ -265,7 +263,7 @@ switch ($data->type) {
                             $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                             $res_mes = $res->fetch_assoc();
                             if(isset($res_mes["id"])){
-                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"];
+                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"] . "\nПоследняя активность: " . date("d.m.Y G:i", $res_mes["lastMes"]);
                             }
                     }
                         if(isset($res_user[0]->can_post)){
@@ -430,7 +428,7 @@ switch ($data->type) {
                             $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                             $res_mes = $res->fetch_assoc();
                             if(isset($res_mes["id"])){
-                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"];
+                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"] . "\nПоследняя активность: " . date("d.m.Y G:i", $res_mes["lastMes"]);
                             }
                         }
                         if(isset($res_grop[0]->description)) {
@@ -525,13 +523,17 @@ switch ($data->type) {
                     else $stat = 0;
                     try {
                         $res_url = $vk->utils()->getShortLink(USER_TOKEN, array("url" => $text[2], "private" => $stat));
-                    $request_params["message"] = "Ваша ссылка: " . $res_url["short_url"];
                     if($stat){
-                        $request_params["message"] .= " токен для статистики отправлен вам в личные сообщения";
-                        $vk->messages()->send(TOKEN_VK_BOT, $request_params);
                         $request_params["peer_id"] = $data->object->message->from_id;
-                        $request_params["message"] = "Ваш токен " . $res_url["access_key"] ." для просмотра статистики ссылки: " . $res_url["short_url"];
-                    }
+                        $request_params["message"] = "Ваш токен " . $res_url["access_key"] ." для просмотра статистики ссылки: " . $res_url["short_url"] . ", но учитывайте, что она обновляется каждые 10 минут!\nДля просмотра статистики напишите: /Получить статистику " . $res_url["short_url"] . " " . $res_url["short_url"];
+                        try {
+                            $vk->messages()->send(TOKEN_VK_BOT, $request_params);
+                            $request_params["message"] = "Ваша ссылка: " . $res_url["short_url"] . " токен для статистики отправлен вам в личные сообщения";
+                        }catch (\VK\Exceptions\VKApiException $e){
+                            $request_params["message"] = "Для просмотра статистики ссылки, мне нужно выслать вам в личные сообщение токен просмотра статистики. Пожалуйста разрешите отправку личных сообщений!";
+                        }
+                    }else
+                        $request_params["message"] = "Ваша ссылка: " . $res_url["short_url"];
                     } catch (\VK\Exceptions\VKApiException $e) {
                         $request_params["message"] = "Что-то не так с ссылкой!";
                     } catch (\VK\Exceptions\VKClientException $e) {
@@ -650,11 +652,11 @@ switch ($data->type) {
                             while($res_users = $res->fetch_assoc()){
                                 $empty_list = false;
                                 $res_ids[] = $res_users["id"];
-                                $res_fields[] = array($res_users["rang"],$res_users["pred"], $res_users["mes_count"]);
+                                $res_fields[] = array($res_users["rang"],$res_users["pred"], $res_users["mes_count"], $res_users["lastMes"]);
                             }
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
-                                    $request_params["message"] .= "\n" . $name . ", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2];
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]);
                                 }
                             }
                             
@@ -670,12 +672,12 @@ switch ($data->type) {
                                 $res_fields[] = $res_users["ban"];
                             }
                             if(!$empty_list){
-                                foreach (getName($vk, $res_ids, false) as $key => $name){
+                                foreach (getName($vk, $res_ids) as $key => $name){
                                     if($res_fields[$key][0] == 0)
                                         $type = " навсегда";
                                     else
                                         $type = " до " . date("d.m.Y G:i", $res_fields[$key]);
-                                    $request_params["message"] .= "\n" . $name . ", забанен" . $type;
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", забанен" . $type;
                                 }
                             }
                             break;
@@ -688,8 +690,8 @@ switch ($data->type) {
                                 $res_ids[] = $res_users["id"];
                             }
                             if(!$empty_list){
-                                foreach (getName($vk, $res_ids, false) as $key => $name){
-                                    $request_params["message"] .= "\n" . $name;
+                                foreach (getName($vk, $res_ids) as $key => $name){
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key];
                                 }
                             }
                             break;
@@ -708,14 +710,53 @@ switch ($data->type) {
                             if(!$empty_list){
                                 $res_rang = $mysqli->query(mb_substr($mysqli_query,0,-4));
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
-                                    $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users`");
                                     $res_rang_id = $res_rang->fetch_assoc();
-                                    $request_params["message"] .= "\n" . $name . ", ранг: " . getRang($res_rang_id["rang"]) . ", количество предупреждений: " . $res_rang_id["pred"] . ", количество выданных предупреждений: " . $res_fields[$key][0] . ", количество исключенных пользователей: " . $res_fields[$key][1] . ", количество временно забаненных пользователей: " . $res_fields[$key][2] . ", количество забанных пользователей: " . $res_fields[$key][3];
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_rang_id["rang"]) . ", количество предупреждений: " . $res_rang_id["pred"] . ", количество выданных предупреждений: " . $res_fields[$key][0] . ", количество исключенных пользователей: " . $res_fields[$key][1] . ", количество временно забаненных пользователей: " . $res_fields[$key][2] . ", количество забанных пользователей: " . $res_fields[$key][3];
+                                }
+                            }
+                            break;
+                        case "неактивных":
+                            $request_params["message"] = "Список неактивных больше недели пользователей в чате:";
+                            $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users`");
+                            $res_ids = array();
+                            $res_fields = array();
+                            while($res_users = $res->fetch_assoc()){
+                                $empty_list = false;
+                                $res_ids[] = $res_users["id"];
+                                $res_fields[] = array($res_users["rang"],$res_users["pred"], $res_users["mes_count"], $res_users["lastMes"]);
+                            }
+                            if(!$empty_list){
+                                foreach (getName($vk, $res_ids, false) as $key => $name){
+                                    if(time() - $res_fields[$key][3] > 604800) //604800 - одна неделя
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]);
+                                }
+                            }
+                            break;
+
+                        case "онлайна":
+                            $request_params["message"] = "Список онлайн пользователей в чате:";
+                            $res = $vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $data->object->message->peer_id, "fields" => "online"));
+                            $mysqli_query = "SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE ";
+                            for ($i = 0; isset($res["items"][$i]); $i++){
+                                if($res["profiles"][$i]["online"] == 1)
+                                    $mysqli_query .= "`id` = '". $res["profiles"][$i]["id"] ."' OR ";
+                            }
+                            $res = $mysqli->query(mb_substr($mysqli_query,0,-4));
+                            $res_ids = array();
+                            $res_fields = array();
+                            while($res_users = $res->fetch_assoc()){
+                                $empty_list = false;
+                                $res_ids[] = $res_users["id"];
+                                $res_fields[] = array($res_users["rang"],$res_users["pred"], $res_users["mes_count"], $res_users["lastMes"]);
+                            }
+                            if(!$empty_list){
+                                foreach (getName($vk, $res_ids, false) as $key => $name){
+                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]);
                                 }
                             }
                             break;
                         default:
-                            $request_params["message"] = "Не верно указан список! Возможные значения: пользователей, забаненных, вышедших, модераторов";
+                            $request_params["message"] = "Не верно указан список! Возможные значения: пользователей, забаненных, вышедших, модераторов, неактивных, онлайна";
                             $empty_list = false;
                             break;
                     }
@@ -723,6 +764,10 @@ switch ($data->type) {
                     if($empty_list)
                         $request_params["message"] = "Список пуст";
                 }else $request_params["message"] = "Вы не указали список!";
+            }elseif(strcasecmp($text[0], "/Неактив") == 0){
+
+            }elseif(strcasecmp($text[0], "/Онлайн") == 0 || strcasecmp($text[0], "/Online") == 0){
+
             }
 
 
@@ -736,13 +781,13 @@ switch ($data->type) {
 
             try {
                 $vk->messages()->send(TOKEN_VK_BOT, $request_params);
-            } catch (\VK\Exceptions\VKClientException $e) {
+            } catch (\VK\Exceptions\VKApiException $e) {
             }
 
             echo "ok";
 
             if($data->object->message->peer_id != $data->object->message->from_id) { //Если сообщение в беседе добавляем + 1 к количеству сообщений пользователя и бота
-                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1 WHERE `id` = '" . $data->object->message->from_id . "' OR `id` = '" . (int)("-" . $data->group_id) . "'");
+                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1, `lastMes` = ". time() ." WHERE `id` = '" . $data->object->message->from_id . "' OR `id` = '" . (int)("-" . $data->group_id) . "'");
             }
         break;
 
@@ -940,7 +985,7 @@ function getUrlParameters($url, $token){
 }
 
 function createTabs($chat_id, $mysqli, $vk){
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` TinyInt( 255 ) NOT NULL DEFAULT 0, `pred` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` TinyInt( 255 ) NOT NULL DEFAULT 0, `pred` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `lastMes` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL, `parametr` Int( 255 ) NOT NULL ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
@@ -948,10 +993,10 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL DEFAULT '', `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL, `lastRemovePred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
-    $res = json_decode(json_encode($vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id))));
-    for ($i = 0; isset($res->items[$i]); $i++){
+    $res = $vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id));
+    for ($i = 0; isset($res["items"][$i]); $i++){
         $rang = 0;
-        if($res->items[$i]->is_admin) $rang = 5;
+        if($res["items"][$i]["is_admin"]) $rang = 5;
         $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->items[$i]->member_id ."', ". $rang .")");
     }
 
