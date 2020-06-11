@@ -768,56 +768,68 @@ function getTime($time){
     $time_string = "";
     if ($time != 0) {
         $time = array(intdiv($time,60), $time%60);
-        if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
-            $time_string .= $time[1] ." секунд ";
-        elseif (endNumber((int)$time[1]) == 1)
-            $time_string .= $time[1] . " секунду ";
-        elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
-            $time_string .= $time[1] . " секунды ";
+        if((int)$time[1] != 0) {
+            if (((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                $time_string .= $time[1] . " секунд ";
+            elseif (endNumber((int)$time[1]) == 1)
+                $time_string .= $time[1] . " секунду ";
+            elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                $time_string .= $time[1] . " секунды ";
+        }
 
         if ($time[0] != 0){
             $time = array(intdiv($time[0],60), $time[0]%60);
-            if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
-                $time_string .= $time[1] ." минут ";
-            elseif (endNumber((int)$time[1]) == 1)
-                $time_string .= $time[1] . " минуту ";
-            elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
-                $time_string .= $time[1] . " минуты ";
+            if((int)$time[1] != 0) {
+                if (((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                    $time_string .= $time[1] . " минут ";
+                elseif (endNumber((int)$time[1]) == 1)
+                    $time_string .= $time[1] . " минуту ";
+                elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                    $time_string .= $time[1] . " минуты ";
+            }
 
             if ($time[0] != 0){
                 $time = array(intdiv($time[0],24), $time[0]%24);
-                if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
-                    $time_string .= $time[1] ." часов ";
-                elseif (endNumber((int)$time[1]) == 1)
-                    $time_string .= $time[1] . " час ";
-                elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
-                    $time_string .= $time[1] . " часа ";
+                if((int)$time[1] != 0) {
+                    if (((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                        $time_string .= $time[1] . " часов ";
+                    elseif (endNumber((int)$time[1]) == 1)
+                        $time_string .= $time[1] . " час ";
+                    elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                        $time_string .= $time[1] . " часа ";
+                }
 
                 if ($time[0] != 0){
                     $time = array(intdiv($time[0],31), $time[0]%31);
-                    if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
-                        $time_string .= $time[1] ." дней ";
-                    elseif (endNumber((int)$time[1]) == 1)
-                        $time_string .= $time[1] . " день ";
-                    elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
-                        $time_string .= $time[1] . " дня ";
+                    if((int)$time[1] != 0) {
+                        if (((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                            $time_string .= $time[1] . " дней ";
+                        elseif (endNumber((int)$time[1]) == 1)
+                            $time_string .= $time[1] . " день ";
+                        elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                            $time_string .= $time[1] . " дня ";
+                    }
 
                     if ($time[0] != 0){
                         $time = array(intdiv($time[0],12), $time[0]%12);
-                        if(((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
-                            $time_string .= $time[1] ." месяцев ";
-                        elseif (endNumber((int)$time[1]) == 1)
-                            $time_string .= $time[1] . " месяц ";
-                        elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
-                            $time_string .= $time[1] . " месяца ";
+                        if((int)$time[1] != 0) {
+                            if (((int)$time[1] >= 11 && (int)$time[1] <= 19) || (endNumber((int)$time[1]) >= 5 && endNumber((int)$time[1]) <= 9) || endNumber((int)$time[1]) == 0)
+                                $time_string .= $time[1] . " месяцев ";
+                            elseif (endNumber((int)$time[1]) == 1)
+                                $time_string .= $time[1] . " месяц ";
+                            elseif (endNumber((int)$time[1]) >= 2 && endNumber((int)$time[1]) <= 4)
+                                $time_string .= $time[1] . " месяца ";
+                        }
 
                         if ($time[0] != 0){
-                            if(((int)$time[0] >= 11 && (int)$time[0] <= 19) || (endNumber((int)$time[0]) >= 5 && endNumber((int)$time[0]) <= 9) || endNumber((int)$time[0]) == 0)
-                                $time_string .= $time[0] ." лет ";
-                            elseif (endNumber((int)$time[0]) == 1)
-                                $time_string .= $time[0] . " год ";
-                            elseif (endNumber((int)$time[0]) >= 2 && endNumber((int)$time[0]) <= 4)
-                                $time_string .= $time[0] . " года ";
+                            if((int)$time[1] != 0) {
+                                if (((int)$time[0] >= 11 && (int)$time[0] <= 19) || (endNumber((int)$time[0]) >= 5 && endNumber((int)$time[0]) <= 9) || endNumber((int)$time[0]) == 0)
+                                    $time_string .= $time[0] . " лет ";
+                                elseif (endNumber((int)$time[0]) == 1)
+                                    $time_string .= $time[0] . " год ";
+                                elseif (endNumber((int)$time[0]) >= 2 && endNumber((int)$time[0]) <= 4)
+                                    $time_string .= $time[0] . " года ";
+                            }
                         }
                     }
                 }
