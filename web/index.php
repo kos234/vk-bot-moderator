@@ -765,7 +765,7 @@ switch ($data->type) {
                         $request_params["message"] = "Список пуст";
                 }else $request_params["message"] = "Вы не указали список!";
             }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/Лимит модераторов") == 0){
-                for ($i = 0; $i < 4; $i++) {
+                for ($i = 1; $i < 4; $i++) {
                     $res = $mysqli->query("SELECT * FROM `" . $data->object->message->peer_id . "_moders_limit` WHERE `rang` = " . $i);
                     $res = $res->fetch_assoc();
                     $request_params["message"] .= "Для $i уровня: ";
