@@ -1118,47 +1118,46 @@ switch ($data->type) {
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
             }
 
-            $get_rang = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_bans` WHERE `id` = '" . $data->object->message->from_id . "'");
-            $get_rang = $get_rang->fetch_assoc();
-            error_log($get_rang);
-
             if(isset($data->object->message->action->type))//Инвайты
             if($data->object->message->action->type == "chat_invite_user" || $data->object->message->action->type == "chat_invite_user_by_link"){
                 if($data->object->message->action->member_id == (int)("-".$data->group_id))
                     $request_params["message"] = "Для моей работы мне необходимы права администратора. Выдайте права и напишите /начать";
 
-
-
-                $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_users` (`id`) VALUES ('". $data->object->message->action->member_id ."')");
-                $res = $mysqli->query("SELECT `greeting` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
-                $res = $res->fetch_assoc();
-                if($res["greeting"] != ""){
-                    $greeting = "";
-                    $greeting_temp = "";
-                    $greeting_temps = explode("{first_name}", $res["greeting"]);
-                    for ($i = 0; isset($greeting_temps[$i]); $i++){
-                        if (!isset($greeting_temps[$i + 1]))
-                            $greeting_temp .=  $greeting_temps[$i];
-                        else
-                            $greeting_temp .=  $greeting_temps[$i] . explode(" ", getName($vk, array($data->object->message->action->member_id))[0])[0] . "]";
-                    }
-                    $greeting_temps = explode("{last_name}", $greeting_temp);
-                    for ($i = 0; isset($greeting_temps[$i]); $i++){
-                        if (!isset($greeting_temps[$i + 1]))
-                            $greeting .=  $greeting_temps[$i];
-                        else {
-                            $temp = explode(" ", getName($vk, array($data->object->message->action->member_id))[0]);
-                            if(isset($temp[1])) {
-                                $var = explode("|", $temp[0]);
-
-                                $greeting .= $greeting_temps[$i] . $var[0] . "|" .$temp[1];
-                            }
-                            else $greeting .= $greeting_temps[$i] . $temp[0] . "]";
+                $get_ban = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_bans` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_ban = $get_rang->fetch_assoc();
+                if($get_ban != false){
+                    if ($get_ban["ban"] == 0 || $get_ban["ban"] - time() > 0)
+                        $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $data->object->message->action->member_id));
+                }else {
+                    $mysqli->query("INSERT INTO `" . $data->object->message->peer_id . "_users` (`id`) VALUES ('" . $data->object->message->action->member_id . "')");
+                    $res = $mysqli->query("SELECT `greeting` FROM `chats_settings` WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                    $res = $res->fetch_assoc();
+                    if ($res["greeting"] != "") {
+                        $greeting = "";
+                        $greeting_temp = "";
+                        $greeting_temps = explode("{first_name}", $res["greeting"]);
+                        for ($i = 0; isset($greeting_temps[$i]); $i++) {
+                            if (!isset($greeting_temps[$i + 1]))
+                                $greeting_temp .= $greeting_temps[$i];
+                            else
+                                $greeting_temp .= $greeting_temps[$i] . explode(" ", getName($vk, array($data->object->message->action->member_id))[0])[0] . "]";
                         }
-                    }
-                    $request_params["message"] = $greeting;
-                }
+                        $greeting_temps = explode("{last_name}", $greeting_temp);
+                        for ($i = 0; isset($greeting_temps[$i]); $i++) {
+                            if (!isset($greeting_temps[$i + 1]))
+                                $greeting .= $greeting_temps[$i];
+                            else {
+                                $temp = explode(" ", getName($vk, array($data->object->message->action->member_id))[0]);
+                                if (isset($temp[1])) {
+                                    $var = explode("|", $temp[0]);
 
+                                    $greeting .= $greeting_temps[$i] . $var[0] . "|" . $temp[1];
+                                } else $greeting .= $greeting_temps[$i] . $temp[0] . "]";
+                            }
+                        }
+                        $request_params["message"] = $greeting;
+                    }
+                }
 
             }elseif($data->object->message->action->type == "chat_kick_user"){//Ливы
                 if ($data->object->message->from_id == $data->object->message->action->member_id){//Если пользователь вышел сам
