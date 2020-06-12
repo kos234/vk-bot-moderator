@@ -940,9 +940,17 @@ switch ($data->type) {
                             $reason .= $text[$num_reason + $i] . " ";
                         }
                         $reason = mb_substr($reason, 0 , -1);
-
-                        $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000 , "member_id" => $id));
-
+                        try {
+                            $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $id));
+                            $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_users` WHERE `id` = '$id'");
+                            $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders` WHERE `id` = '$id'");
+                            $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `kick` = `kick` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
+                            $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'kick', '". $reason ."', '')");
+                            track($mysqli, $id, $data->object->message->from_id, "", $reason);
+                            $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был исключен из беседы!";
+                        }catch (\VK\Exceptions\Api\VKApiAccessException $e){
+                            $request_params["message"] = "Не возможно исключить этого пользователя!";
+                        }
                     }else $request_params["message"] = "Вы не указали айди пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
             }
