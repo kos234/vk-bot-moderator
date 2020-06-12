@@ -1090,21 +1090,27 @@ switch ($data->type) {
                         if (isset($text[$num_num])) {
                             if (mb_strcasecmp($text[$num_num], "0") == 0 || mb_strcasecmp($text[$num_num], "пользователь") == 0) {
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `rang`= 0 WHERE `id` = '" . $id . "'");
+                                $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_moders` (`id`) VALUES ('". $id ."')");
                                 $request_params["message"] = "Теперь " . getName($vk, array($id))[0] . " простой пользователь!";
                             } elseif (mb_strcasecmp($text[$num_num], "1") == 0 || mb_strcasecmp($text[$num_num], "модератор1") == 0) {
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `rang`= 1 WHERE `id` = '" . $id . "'");
+                                $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_moders` (`id`) VALUES ('". $id ."')");
                                 $request_params["message"] = "Теперь " . getName($vk, array($id))[0] . " модератор 1 уровня!";
                             } elseif (mb_strcasecmp($text[$num_num], "2") == 0 || mb_strcasecmp($text[$num_num], "модератор2") == 0) {
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `rang`= 2 WHERE `id` = '" . $id . "'");
+                                $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_moders` (`id`) VALUES ('". $id ."')");
                                 $request_params["message"] = "Теперь " . getName($vk, array($id))[0] . " модератор 2 уровня!";
                             } elseif (mb_strcasecmp($text[$num_num], "3") == 0 || mb_strcasecmp($text[$num_num], "модератор3") == 0) {
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `rang`= 3 WHERE `id` = '" . $id . "'");
+                                $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_moders` (`id`) VALUES ('". $id ."')");
                                 $request_params["message"] = "Теперь " . getName($vk, array($id))[0] . " модератор 3 уровня!";
                             } elseif (mb_strcasecmp($text[$num_num], "4") == 0 || mb_strcasecmp($text[$num_num], "модератор4") == 0) {
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `rang`= 4 WHERE `id` = '" . $id . "'");
+                                $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_moders` (`id`) VALUES ('". $id ."')");
                                 $request_params["message"] = "Теперь " . getName($vk, array($id))[0] . " модератор 4 уровня!";
                             } elseif (mb_strcasecmp($text[$num_num], "5") == 0 || mb_strcasecmp($text[$num_num], "администратор") == 0) {
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `rang`= 5 WHERE `id` = '" . $id . "'");
+                                $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_moders` (`id`) VALUES ('". $id ."')");
                                 $request_params["message"] = "Теперь " . getName($vk, array($id))[0] . " администратор!";
                             } else $request_params["message"] = "Неправильно указан ранг! Возможные значения: 0,1,2,3,4,5,пользователь,модератор1,модератор2,модератор3,модератор4,администратор";
                         }else $request_params["message"] = "Вы не указали ранг!";
