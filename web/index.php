@@ -1091,7 +1091,9 @@ function getName($vk, $ids, $notify = true){
     ob_end_clean();
     foreach ($user_ids as $key => $id) {
         if($key != 0) {
-            if (mb_strcasecmp($user_ids[$key], $user_ids[$key - 1]) != 0)
+            error_log(gettype($user_ids[$key]));
+            error_log(gettype($user_ids[$key-1]));
+            if ($user_ids[$key] != $user_ids[$key - 1])
                 $user_ids[$key] = $res_user[$ifor];
             else
                 $user_ids[$key] = $user_ids[$key - 1];
