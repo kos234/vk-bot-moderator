@@ -916,7 +916,7 @@ switch ($data->type) {
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` - ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'removepred', '". $reason ."', '". $num ."')");
                         track($mysqli, $id, $data->object->message->from_id, $num, $reason);
-                        $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
+                        $request_params["message"] = "У пользователю " . getName($vk, array($id))[0] . " удалено ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
                             $request_params["message"] .= $num . " предупреждений";
                         elseif (endNumber($num) == 1)
