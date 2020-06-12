@@ -813,20 +813,19 @@ switch ($data->type) {
                     $punishments[] = $temp;
                 }
                 if($count > count($punishments))
-                    $count = count($punishments) - 1;
+                    $count = count($punishments);
                 if (($count >= 11 && $count <= 19) || (endNumber($count) >= 5 && endNumber($count) <= 9) || endNumber($count) == 0)
                     $request_params["message"] = "Последние ". $count ." наказаний:";
                 elseif (endNumber($count) == 1)
                     $request_params["message"] = "Последнее ". $count ." наказание:";
                 elseif (endNumber($count) >= 2 && endNumber($count) <= 4)
                     $request_params["message"] = "Последние ". $count ." наказания:";
-                for ($i = 0; $i <= $count; $i++){
+                for ($i = 0; $i < $count; $i++){
                     $res = $punishments[count($punishments) - 1 - $i];
                     $names = getName($vk, array($res["id"], $res["id_moder"]));
-                    ob_start();
-                    var_dump($names);
-                    error_log(ob_get_contents());
-                    ob_end_clean();
+                    if(count($names) == 1){
+                        $names[1] = $names[0];
+                    }
                     $request_params["message"] .= "\n". $names[1];
                     switch ($res["type"]){
                         case "kick":
