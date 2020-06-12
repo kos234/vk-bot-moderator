@@ -808,8 +808,9 @@ switch ($data->type) {
 
                 $res_history = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_punishments`");
                 $punishments = array();
-                while ($punishments[] = $res_history->fetch_assoc()){
-
+                while ($temp = $res_history->fetch_assoc()){
+                    if($temp != null)
+                    $punishments[] = $temp;
                 }
                 if($count > count($punishments))
                     $count = count($punishments);
