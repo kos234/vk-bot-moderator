@@ -825,7 +825,7 @@ switch ($data->type) {
                 error_log(ob_get_contents());
                 ob_end_clean();
                 for ($i = 0; $i <= $count; $i++){
-                    $res = $punishments[count($punishments) - $i];
+                    $res = $punishments[count($punishments) - 1 - $i];
                     $names = getName($vk, array($res["id"], $res["id_moder"]));
                     ob_start();
                     var_dump($names);
