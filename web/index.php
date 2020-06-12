@@ -970,8 +970,8 @@ switch ($data->type) {
                         $reason = mb_substr($reason, 0 , -1);
                         try {
                             $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $id));
-                            $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_users` WHERE `id` = '$id'");
-                            $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders` WHERE `id` = '$id'");
+//                            $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_users` WHERE `id` = '$id'");
+//                            $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders` WHERE `id` = '$id'");
                             $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `tempbans` = `tempbans` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'tempban', '". $reason ."', '". $num ."')");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_bans` (`id`, `reason`,`ban`) VALUES ('". $id ."', '". $reason ."', ". $num .")");
@@ -1118,12 +1118,16 @@ switch ($data->type) {
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
             }
 
-
+            $get_rang = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_bans` WHERE `id` = '" . $data->object->message->from_id . "'");
+            error_log($get_rang);
+            $get_rang = $get_rang->fetch_assoc();
 
         if(isset($data->object->message->action->type))//Инвайты
             if($data->object->message->action->type == "chat_invite_user" || $data->object->message->action->type == "chat_invite_user_by_link"){
                 if($data->object->message->action->member_id == (int)("-".$data->group_id))
                     $request_params["message"] = "Для моей работы мне необходимы права администратора. Выдайте права и напишите /начать";
+
+
 
                 $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_users` (`id`) VALUES ('". $data->object->message->action->member_id ."')");
                 $res = $mysqli->query("SELECT `greeting` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
@@ -1155,6 +1159,23 @@ switch ($data->type) {
                     $request_params["message"] = $greeting;
                 }
 
+
+            }elseif($data->object->message->action->type == "chat_kick_user"){//Ливы
+                if ($data->object->message->from_id == $data->object->message->action->member_id){//Если пользователь вышел сам
+                    $res = $mysqli->query("SELECT `autokickLeave` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                    $res = $res->fetch_assoc();
+                    if ($res["autokickLeave"] == 1)
+                        $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $data->object->message->action->member_id));
+
+                }elseif($data->object->message->action->member_id == (int)("-".$data->group_id)){//если кикнули бота
+                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_users`");
+                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_punishments`");
+                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders`");
+                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_leave`");
+                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_bans`");
+                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders_limit`");
+                    $mysqli->query("DELETE FROM `chats_settings` WHERE `chat_id` = '" .$data->object->message->peer_id . "'");
+                }
 
             }
 
