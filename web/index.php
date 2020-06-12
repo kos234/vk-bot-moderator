@@ -941,7 +941,7 @@ switch ($data->type) {
                         }
                         $reason = mb_substr($reason, 0 , -1);
 
-                        $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id, "member_id" => $id));
+                        $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000 , "member_id" => $id));
 
                     }else $request_params["message"] = "Вы не указали айди пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
