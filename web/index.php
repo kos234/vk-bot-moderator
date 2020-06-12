@@ -819,20 +819,27 @@ switch ($data->type) {
                     $request_params["message"] = "Последнее ". $count ." наказание:";
                 elseif (endNumber($count) >= 2 && endNumber($count) <= 4)
                     $request_params["message"] = "Последние ". $count ." наказания:";
-
+                ob_start();
+                var_dump($punishments);
+                error_log(ob_get_contents());
+                ob_end_clean();
                 for ($i = 0; $i <= $count; $i++){
                     $res = $punishments[count($punishments) - $i];
                     $names = getName($vk, array($res["id"], $res["id_moder"]));
+                    ob_start();
+                    var_dump($names);
+                    error_log(ob_get_contents());
+                    ob_end_clean();
                     $request_params["message"] .= "\n". $names[1];
                     switch ($res["type"]){
                         case "kick":
-                            $request_params["message"] .= " исключил пользователя" . $names[0];
+                            $request_params["message"] .= " исключил пользователя " . $names[0];
                             break;
                         case "tempban":
-                            $request_params["message"] .= " забанил до " . date("d.m.Y G:i", $res["parametr"]) . "по UTC 0 пользователя" . $names[0];
+                            $request_params["message"] .= " забанил до " . date("d.m.Y G:i", $res["parametr"]) . "по UTC 0 пользователя " . $names[0];
                             break;
                         case "ban":
-                            $request_params["message"] .= " забанил ". $names[0];
+                            $request_params["message"] .= " забанил пользователя ". $names[0];
                             break;
                         case "pred":
                             $request_params["message"] .= " выдал ";
@@ -869,7 +876,7 @@ switch ($data->type) {
 
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` + ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `preds` = `preds` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
-                        $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'kick', '". $reason ."', '". $num ."')");
+                        $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'pred', '". $reason ."', '". $num ."')");
                         track($mysqli, $id, $data->object->message->from_id, $num, $reason);
                         $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
