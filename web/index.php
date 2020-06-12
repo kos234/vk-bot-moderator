@@ -1119,10 +1119,10 @@ switch ($data->type) {
             }
 
             $get_rang = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_bans` WHERE `id` = '" . $data->object->message->from_id . "'");
-            error_log($get_rang);
             $get_rang = $get_rang->fetch_assoc();
+            error_log($get_rang);
 
-        if(isset($data->object->message->action->type))//Инвайты
+            if(isset($data->object->message->action->type))//Инвайты
             if($data->object->message->action->type == "chat_invite_user" || $data->object->message->action->type == "chat_invite_user_by_link"){
                 if($data->object->message->action->member_id == (int)("-".$data->group_id))
                     $request_params["message"] = "Для моей работы мне необходимы права администратора. Выдайте права и напишите /начать";
