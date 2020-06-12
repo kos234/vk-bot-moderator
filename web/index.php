@@ -1074,10 +1074,6 @@ function getRang($id){
 }
 
 function getName($vk, $ids, $notify = true){
-    ob_start();
-    var_dump($ids);
-    error_log(ob_get_contents());
-    ob_end_clean();
     $user_ids = array(); $group_ids = array(); $names = array();
 
     foreach ($ids as $num => $id){
@@ -1089,7 +1085,10 @@ function getName($vk, $ids, $notify = true){
     $res_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => implode(",", $user_ids)));
     $res_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => implode(",", $group_ids)));
     $ifor = 0;
-
+    ob_start();
+    var_dump($user_ids);
+    error_log(ob_get_contents());
+    ob_end_clean();
     foreach ($user_ids as $key => $id) {
         if($key != 0) {
             if ($user_ids[$key] != $user_ids[$key - 1])
