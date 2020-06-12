@@ -823,7 +823,6 @@ switch ($data->type) {
                 for ($i = 0; $i < $count; $i++){
                     $res = $punishments[count($punishments) - 1 - $i];
                     $names = getName($vk, array($res["id"], $res["id_moder"]));
-
                     $request_params["message"] .= "\n". $names[1];
                     switch ($res["type"]){
                         case "kick":
@@ -1092,14 +1091,22 @@ function getName($vk, $ids, $notify = true){
     $ifor = 0;
 
     foreach ($user_ids as $key => $id) {
-        if($res_user[$ifor] != $res_user[$ifor + 1])
-        $user_ids[$key] = $res_user[$ifor];
+        if($key != 0) {
+            if ($user_ids[$key] != $user_ids[$key - 1])
+                $user_ids[$key] = $res_user[$ifor];
+            else
+                $user_ids[$key] = $user_ids[$key - 1];
+        }else $user_ids[$key] = $res_user[$ifor];
         $ifor++;
     }
     $ifor = 0;
     foreach ($group_ids as $key => $id) {
-        if($group_ids[$ifor] != $res_group[$ifor + 1])
-        $group_ids[$key] = $res_group[$ifor];
+        if($key != 0) {
+            if ($group_ids[$key] != $group_ids[$key - 1])
+                $group_ids[$key] = $res_group[$ifor];
+            else
+                $group_ids[$key] = $group_ids[$key - 1];
+        }else $group_ids[$key] = $res_group[$ifor];
         $ifor++;
     }
 
