@@ -820,10 +820,6 @@ switch ($data->type) {
                     $request_params["message"] = "Последнее ". $count ." наказание:";
                 elseif (endNumber($count) >= 2 && endNumber($count) <= 4)
                     $request_params["message"] = "Последние ". $count ." наказания:";
-                ob_start();
-                var_dump($punishments);
-                error_log(ob_get_contents());
-                ob_end_clean();
                 for ($i = 0; $i <= $count; $i++){
                     $res = $punishments[count($punishments) - 1 - $i];
                     $names = getName($vk, array($res["id"], $res["id_moder"]));
@@ -1082,12 +1078,18 @@ function getRang($id){
 }
 
 function getName($vk, $ids, $notify = true){
+    ob_start();
+    var_dump($ids);
+    error_log(ob_get_contents());
+    ob_end_clean();
     $user_ids = array(); $group_ids = array(); $names = array();
+
     foreach ($ids as $num => $id){
         if($id>0)
             $user_ids[$num] = $id;
-        else
-            $group_ids[$num] = $id;
+        else {
+            $group_ids[$num] = $id; error_log("ksdad");
+        }
     }
     $res_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => implode(",", $user_ids)));
     $res_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => implode(",", $group_ids)));
