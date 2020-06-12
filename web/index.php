@@ -823,9 +823,7 @@ switch ($data->type) {
                 for ($i = 0; $i < $count; $i++){
                     $res = $punishments[count($punishments) - 1 - $i];
                     $names = getName($vk, array($res["id"], $res["id_moder"]));
-                    if(count($names) == 1){
-                        $names[1] = $names[0];
-                    }
+
                     $request_params["message"] .= "\n". $names[1];
                     switch ($res["type"]){
                         case "kick":
