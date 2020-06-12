@@ -811,7 +811,8 @@ switch ($data->type) {
                 while ($punishments[] = $res_history->fetch_assoc()){
 
                 }
-
+                if($count > count($punishments))
+                    $count = count($punishments);
                 if (($count >= 11 && $count <= 19) || (endNumber($count) >= 5 && endNumber($count) <= 9) || endNumber($count) == 0)
                     $request_params["message"] = "Последние ". $count ." наказаний:";
                 elseif (endNumber($count) == 1)
