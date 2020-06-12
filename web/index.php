@@ -898,11 +898,11 @@ switch ($data->type) {
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 1){
-                    $id = getId($text[1],$data->object->message->reply_message->from_id);
+                    $id = getId($text[2],$data->object->message->reply_message->from_id);
                     if($id != 0){
-                        $num_num = 2;
+                        $num_num = 3;
                         if (isset($data->object->message->reply_message->from_id))
-                            $num_num = 1;
+                            $num_num = 2;
                         $get_pred =  $mysqli->query("SELECT `pred` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $id . "'");
                         $get_pred = $get_pred->fetch_assoc();
 
