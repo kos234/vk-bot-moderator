@@ -926,11 +926,24 @@ switch ($data->type) {
                         if($reason != "") $request_params["message"] .= ", по причине: " . $reason;
                     }else $request_params["message"] = "Вы не указали айди пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
-            }elseif(mb_strcasecmp($text[0], "/Онлайн") == 0 || mb_strcasecmp($text[0], "/Online") == 0){
+            }elseif(mb_strcasecmp($text[0], "/исключить") == 0 || mb_strcasecmp($text[0], "/кик") == 0){
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 1){
+                    $id = getId($text[1],$data->object->message->reply_message->from_id);
+                    if($id != 0){
+                        $num_reason = 2;
+                        if (isset($data->object->message->reply_message->from_id))
+                            $num_reason = 1;
+                        $reason = "";
+                        for ($i = 0; isset($text[$num_reason + $i]); $i++){
+                            $reason .= $text[$num_reason + $i] . " ";
+                        }
+                        $reason = mb_substr($reason, 0 , -1);
 
+                        $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id, "member_id" => $id));
+
+                    }else $request_params["message"] = "Вы не указали айди пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
             }
 
