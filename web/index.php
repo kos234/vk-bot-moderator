@@ -1074,7 +1074,7 @@ function getRang($id){
 }
 
 function getName($vk, $ids, $notify = true){
-    $user_ids = array(); $group_ids = array(); $names = array();
+    $user_ids = array(); $group_ids = array(); $names = array(); $user_names = array(); $group_names = array();
 
     foreach ($ids as $num => $id){
         if($id>0)
@@ -1091,37 +1091,35 @@ function getName($vk, $ids, $notify = true){
     ob_end_clean();
     foreach ($user_ids as $key => $id) {
         if($key != 0) {
-            error_log(gettype($user_ids[$key]));
-            error_log(gettype($user_ids[$key-1]));
             if ($user_ids[$key] != $user_ids[$key - 1])
-                $user_ids[$key] = $res_user[$ifor];
+                $user_names[$key] = $res_user[$ifor];
             else
-                $user_ids[$key] = $user_ids[$key - 1];
-        }else $user_ids[$key] = $res_user[$ifor];
+                $user_names[$key] = $user_names[$key - 1];
+        }else $user_names[$key] = $res_user[$ifor];
         $ifor++;
     }
     $ifor = 0;
     foreach ($group_ids as $key => $id) {
         if($key != 0) {
             if ($group_ids[$key] != $group_ids[$key - 1])
-                $group_ids[$key] = $res_group[$ifor];
+                $group_names[$key] = $res_group[$ifor];
             else
-                $group_ids[$key] = $group_ids[$key - 1];
-        }else $group_ids[$key] = $res_group[$ifor];
+                $group_names[$key] = $group_names[$key - 1];
+        }else $group_names[$key] = $res_group[$ifor];
         $ifor++;
     }
 
     for($i = 0; $i < count($ids); $i++){
         if(isset($user_ids[$i])){
             if ($notify)
-                $names[] = "[id" . $user_ids[$i]["id"] . "|" . $user_ids[$i]["first_name"] . " " . $user_ids[$i]["last_name"] . "]";
+                $names[] = "[id" . $user_names[$i]["id"] . "|" . $user_names[$i]["first_name"] . " " . $user_names[$i]["last_name"] . "]";
             else
-                $names[] = $user_ids[$i]["first_name"] . " " . $user_ids[$i]["last_name"];
+                $names[] = $user_names[$i]["first_name"] . " " . $user_names[$i]["last_name"];
         }else{
             if ($notify)
-                $names[] = "[club" . $group_ids[$i]["id"] . "|" . $group_ids[$i]["name"] . "]";
+                $names[] = "[club" . $group_names[$i]["id"] . "|" . $group_names[$i]["name"] . "]";
             else
-                $names[] = $group_ids[$i]["name"];
+                $names[] = $group_names[$i]["name"];
         }
     }
 
