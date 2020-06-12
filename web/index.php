@@ -813,7 +813,7 @@ switch ($data->type) {
                     $punishments[] = $temp;
                 }
                 if($count > count($punishments))
-                    $count = count($punishments);
+                    $count = count($punishments) - 1;
                 if (($count >= 11 && $count <= 19) || (endNumber($count) >= 5 && endNumber($count) <= 9) || endNumber($count) == 0)
                     $request_params["message"] = "Последние ". $count ." наказаний:";
                 elseif (endNumber($count) == 1)
