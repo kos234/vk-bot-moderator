@@ -266,7 +266,7 @@ switch ($data->type) {
                             $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                             $res_mes = $res->fetch_assoc();
                             if(isset($res_mes["id"])){
-                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"] . "\nПоследняя активность: " . date("d.m.Y G:i", $res_mes["lastMes"]) . "по UTC 0";
+                                $request_params["message"] .= "\nКоличество сообщений в беседе: " . $res_mes["mes_count"] . "\nПоследняя активность: " . date("d.m.Y G:i", $res_mes["lastMes"]) . " по UTC 0";
                             }
                     }
                         if(isset($res_user[0]->can_post)){
@@ -659,7 +659,7 @@ switch ($data->type) {
                             }
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
+                                    $request_params["message"] .= "\n\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
                                 }
                             }
                             
@@ -680,7 +680,7 @@ switch ($data->type) {
                                         $type = " навсегда";
                                     else
                                         $type = " до " . date("d.m.Y G:i", $res_fields[$key]) . "по UTC 0";
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", забанен" . $type;
+                                    $request_params["message"] .= "\n\n" . $name . ", айди: ". $res_ids[$key] .", забанен" . $type;
                                 }
                             }
                             break;
@@ -694,7 +694,7 @@ switch ($data->type) {
                             }
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids) as $key => $name){
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key];
+                                    $request_params["message"] .= "\n\n" . $name . ", айди: ". $res_ids[$key];
                                 }
                             }
                             break;
@@ -714,7 +714,7 @@ switch ($data->type) {
                                 $res_rang = $mysqli->query(mb_substr($mysqli_query,0,-4));
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
                                     $res_rang_id = $res_rang->fetch_assoc();
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_rang_id["rang"]) . ", количество предупреждений: " . $res_rang_id["pred"] . ", количество выданных предупреждений: " . $res_fields[$key][0] . ", количество исключенных пользователей: " . $res_fields[$key][1] . ", количество временно забаненных пользователей: " . $res_fields[$key][2] . ", количество забанных пользователей: " . $res_fields[$key][3];
+                                    $request_params["message"] .= "\n\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_rang_id["rang"]) . ", количество предупреждений: " . $res_rang_id["pred"] . ", количество выданных предупреждений: " . $res_fields[$key][0] . ", количество исключенных пользователей: " . $res_fields[$key][1] . ", количество временно забаненных пользователей: " . $res_fields[$key][2] . ", количество забанных пользователей: " . $res_fields[$key][3];
                                 }
                             }
                             break;
@@ -731,7 +731,7 @@ switch ($data->type) {
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
                                     if(time() - $res_fields[$key][3] > 604800) //604800 - одна неделя
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
+                                    $request_params["message"] .= "\n\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
                                 }
                             }
                             break;
@@ -754,7 +754,7 @@ switch ($data->type) {
                             }
                             if(!$empty_list){
                                 foreach (getName($vk, $res_ids, false) as $key => $name){
-                                    $request_params["message"] .= "\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
+                                    $request_params["message"] .= "\n\n" . $name . ", айди: ". $res_ids[$key] .", ранг: " . getRang($res_fields[$key][0]) . ", количество предупреждений: ". $res_fields[$key][1] .", количество сообщений в беседе: " . $res_fields[$key][2] . ", последняя активность: " . date("d.m.Y G:i", $res_fields[$key][3]) . "по UTC 0";
                                 }
                             }
                             break;
@@ -796,7 +796,7 @@ switch ($data->type) {
                             $request_params["message"] .= " ". $res["tempban"] . " временных блокировки,";
                     }
                     $request_params["message"] = mb_substr($request_params["message"], 0 ,-1);
-                    $request_params["message"] .= "\n";
+                    $request_params["message"] .= "\n\n";
                 }
             }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/История наказаний") == 0 || mb_strcasecmp($text[0] . " " . $text[1], "/History punishment") == 0){
                 if(isset($text[2]))
@@ -824,7 +824,7 @@ switch ($data->type) {
                 for ($i = 0; $i < $count; $i++){
                     $res = $punishments[count($punishments) - 1 - $i];
                     $names = getName($vk, array($res["id"], $res["id_moder"]));
-                    $request_params["message"] .= "\n". $names[1];
+                    $request_params["message"] .= "\n\n". $names[1];
                     switch ($res["type"]){
                         case "kick":
                             $request_params["message"] .= " исключил пользователя " . $names[0];
@@ -1394,7 +1394,7 @@ function getUrlParameters($url, $token){
 }
 
 function createTabs($chat_id, $mysqli, $vk){
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` TinyInt( 255 ) NOT NULL DEFAULT 0, `pred` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `lastMes` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` Int( 255 ) NOT NULL DEFAULT 0, `pred` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `lastMes` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`time` Int( 255 ) NOT NULL, `id` VarChar( 255 ) NOT NULL, `id_moder` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL DEFAULT '', `parametr` VarChar( 255 ) NOT NULL DEFAULT '', CONSTRAINT `unique_time` UNIQUE( `time` )) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`( `id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` )) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
