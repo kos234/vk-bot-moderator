@@ -1093,14 +1093,15 @@ function getName($vk, $ids, $notify = true){
     $res_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => implode(",", $user_ids)));
     $res_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => implode(",", $group_ids)));
     $ifor = 0;
-    error_log(count($user_ids));
-    error_log(count($res_user));
+
     foreach ($user_ids as $key => $id) {
+        if($res_user[$ifor] != $res_user[$ifor + 1])
         $user_ids[$key] = $res_user[$ifor];
         $ifor++;
     }
     $ifor = 0;
     foreach ($group_ids as $key => $id) {
+        if($group_ids[$ifor] != $res_group[$ifor + 1])
         $group_ids[$key] = $res_group[$ifor];
         $ifor++;
     }
