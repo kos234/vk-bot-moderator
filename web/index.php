@@ -797,6 +797,59 @@ switch ($data->type) {
                     $request_params["message"] = mb_substr($request_params["message"], 0 ,-1);
                     $request_params["message"] .= "\n";
                 }
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/История наказаний") == 0 || mb_strcasecmp($text[0] . " " . $text[1], "/History punishment") == 0){
+                if(isset($text[2]))
+                    if((int)$text[2] != 0)
+                        $count = (int)$text[2];
+                    else
+                        $count = 100;
+                else
+                    $count = 100;
+
+                $res_history = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_punishments`");
+                $punishments = array();
+                while ($punishments[] = $res_history->fetch_assoc()){
+
+                }
+
+                if (($count >= 11 && $count <= 19) || (endNumber($count) >= 5 && endNumber($count) <= 9) || endNumber($count) == 0)
+                    $request_params["message"] = "Последние ". $count ." наказаний:";
+                elseif (endNumber($count) == 1)
+                    $request_params["message"] = "Последнее ". $count ." наказание:";
+                elseif (endNumber($count) >= 2 && endNumber($count) <= 4)
+                    $request_params["message"] = "Последние ". $count ." наказания:";
+
+                for ($i = 0; $i <= $count; $i++){
+                    $res = $punishments[count($punishments) - $i];
+                    $names = getName($vk, array($res["id"], $res["id_moder"]));
+                    $request_params["message"] .= "\n". $names[1];
+                    switch ($res["type"]){
+                        case "kick":
+                            $request_params["message"] .= " исключил пользователя" . $names[0];
+                            break;
+                        case "tempban":
+                            $request_params["message"] .= " забанил до " . date("d.m.Y G:i", $res["parametr"]) . "по UTC 0 пользователя" . $names[0];
+                            break;
+                        case "ban":
+                            $request_params["message"] .= " забанил ". $names[0];
+                            break;
+                        case "pred":
+                            $request_params["message"] .= " выдал ";
+                            if (($res["parametr"] >= 11 && $res["parametr"] <= 19) || (endNumber($res["parametr"]) >= 5 && endNumber($res["parametr"]) <= 9) || endNumber($res["parametr"]) == 0)
+                                $request_params["message"] .= " ". $res["parametr"] . " предупреждений пользователю " . $names[0] ;
+                            elseif (endNumber($res["parametr"]) == 1)
+                                $request_params["message"] .= " ". $res["parametr"] . " предупреждение пользователю ". $names[0];
+                            elseif (endNumber($res["parametr"]) >= 2 && endNumber($res["parametr"]) <= 4)
+                                $request_params["message"] .= " ". $res["parametr"] . " предупреждения пользователю ". $names[0];
+                            break;
+                        default:
+                            $request_params["message"] .= " " . $res["type"] . " пользователя ". $names[0];
+                            break;
+                    }
+                    if ($res["text"] != "")
+                        $request_params["message"] .= ", причина: " . $res["text"];
+                }
+
             }elseif(mb_strcasecmp($text[0], "/Предупреждение") == 0 || mb_strcasecmp($text[0], "/пред") == 0){
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_rang = $get_rang->fetch_assoc();
@@ -815,7 +868,7 @@ switch ($data->type) {
 
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` + ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `preds` = `preds` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
-                        $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`id`,`id_moder`, `type`, `text`, `parametr`) VALUES ('". $id ."', '". $data->object->message->from_id ."', 'kick', '". $reason ."', '". $num ."')");
+                        $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'kick', '". $reason ."', '". $num ."')");
                         track($mysqli, $id, $data->object->message->from_id, $num, $reason);
                         $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
@@ -834,6 +887,7 @@ switch ($data->type) {
 
                 }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
             }
+
 
 
         if(isset($data->object->message->action->type))//Инвайты
@@ -1090,8 +1144,8 @@ function getUrlParameters($url, $token){
 
 function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` TinyInt( 255 ) NOT NULL DEFAULT 0, `pred` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `lastMes` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`id` VarChar( 255 ) NOT NULL, `id_moder` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL DEFAULT '', `parametr` VarChar( 255 ) NOT NULL DEFAULT '') ENGINE = InnoDB;");
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`(`id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`time` Int( 255 ) NOT NULL, `id` VarChar( 255 ) NOT NULL, `id_moder` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL DEFAULT '', `parametr` VarChar( 255 ) NOT NULL DEFAULT '', CONSTRAINT `unique_time` UNIQUE( `time` )) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`( `id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` )) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_bans`(`id` VarChar( 255 ) NOT NULL, `reason` VarChar( 255 ) NOT NULL DEFAULT '', `ban` Int( 255 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL DEFAULT '', `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL, `lastRemovePred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
