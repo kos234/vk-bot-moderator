@@ -67,10 +67,11 @@ switch ($data->type) {
                     . "/Пригласить {@Айди|@домен|Пересланое сообщение} [Сообщение] - отправляет приглашение пользователю в этот чат\n"
                     . "/Список {Пользователей|забаненных|вышедших|модераторов|неактивных|онлайна} - выводит указанный список пользователей\n"
                     . "/Settings|настройки [chat|беседы|чата] - показывает либо возможный, либо текущий список настроек\n"
+                    . "/History punishment|/История наказаний [число] - показывает историю последних наказаний, по умолчанию 100\n"
                     . "/Лимит модераторов - выводит лимит для модераторов\n\n"
                     . "Модерация и Администрация:\n"
                     . "/Предупреждение|Пред {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Выдать предупреждение, по умолчанию 1 предупреждение\n"
-                    . "/Удалить предупреждение|пред {@Айди|@домен|Пересланое сообщение} [Количество] - Удалить предупреждения, по умолчанию всё предупреждения\n"
+                    . "/Удалить предупреждение|пред {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Удалить предупреждения, по умолчанию всё предупреждения\n"
                     . "/Кик|Исключить {@Айди|@домен|Пересланое сообщение} [Причина] - Исключить пользователя из чата\n"
                     . "/Временный бан {@Айди|@домен|Пересланое сообщение} {Время SS:MM:HH:DDD:MM} [Причина] - Временно забанить пользователя в беседе\n"
                     . "/Бан {@Айди|@домен|Пересланое сообщение} [Причина] - Забанить пользователя\n"
@@ -828,6 +829,18 @@ switch ($data->type) {
                         case "kick":
                             $request_params["message"] .= " исключил пользователя " . $names[0];
                             break;
+                        case "removeban":
+                            $request_params["message"] .= " разбанил пользователя " . $names[0];
+                            break;
+                        case "removepred":
+                            $request_params["message"] .= " удалил ";
+                            if (($res["parametr"] >= 11 && $res["parametr"] <= 19) || (endNumber($res["parametr"]) >= 5 && endNumber($res["parametr"]) <= 9) || endNumber($res["parametr"]) == 0)
+                                $request_params["message"] .= " ". $res["parametr"] . " предупреждений у пользователя " . $names[0] ;
+                            elseif (endNumber($res["parametr"]) == 1)
+                                $request_params["message"] .= " ". $res["parametr"] . " предупреждение у пользователя ". $names[0];
+                            elseif (endNumber($res["parametr"]) >= 2 && endNumber($res["parametr"]) <= 4)
+                                $request_params["message"] .= " ". $res["parametr"] . " предупреждения у пользователя ". $names[0];
+                            break;
                         case "tempban":
                             $request_params["message"] .= " забанил до " . date("d.m.Y G:i", $res["parametr"]) . "по UTC 0 пользователя " . $names[0];
                             break;
@@ -870,6 +883,38 @@ switch ($data->type) {
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` + ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `preds` = `preds` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                         $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'pred', '". $reason ."', '". $num ."')");
+                        track($mysqli, $id, $data->object->message->from_id, $num, $reason);
+                        $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
+                        if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
+                            $request_params["message"] .= $num . " предупреждений";
+                        elseif (endNumber($num) == 1)
+                            $request_params["message"] .= $num . " предупреждение";
+                        elseif (endNumber($num) >= 2 && endNumber($num) <= 4)
+                            $request_params["message"] .= $num . " предупреждения";
+                        if($reason != "") $request_params["message"] .= ", по причине: " . $reason;
+                    }else $request_params["message"] = "Вы не указали айди пользователя!";
+                }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/Удалить предупреждение") == 0 || mb_strcasecmp($text[0] . " " . $text[1], "/Удалить пред") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 1){
+                    $id = getId($text[1],$data->object->message->reply_message->from_id);
+                    if($id != 0){
+                        $num_num = 2;
+                        if (isset($data->object->message->reply_message->from_id))
+                            $num_num = 1;
+                        $get_pred =  $mysqli->query("SELECT `pred` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $id . "'");
+                        $get_pred = $get_pred->fetch_assoc();
+
+                        if (isset($text[$num_num])) if((int)$text[$num_num] > $get_pred["pred"]) $num = $get_pred["pred"]; else $num = (int)$text[$num_num]; else $num = $get_pred["pred"];
+                        $reason = "";
+                        for ($i = 1; isset($text[$num_num + $i]); $i++){
+                            $reason .= $text[$num_num + $i] . " ";
+                        }
+                        $reason = mb_substr($reason, 0 , -1);
+
+                        $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` - ". $num ." WHERE `id` = '" . $id . "'");
+                        $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'removepred', '". $reason ."', '". $num ."')");
                         track($mysqli, $id, $data->object->message->from_id, $num, $reason);
                         $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
