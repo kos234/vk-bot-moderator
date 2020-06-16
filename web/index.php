@@ -77,10 +77,9 @@ switch ($data->type) {
                     . "/Бан|Разбанить|Ban {@Айди|@домен|Пересланое сообщение} [Причина] - Забанить пользователя\n"
                     . "/Разбанить|Пардон|Unban {@Айди|@домен|Пересланое сообщение} [Причина] - Разбанить пользователя\n"
                     . "/Мега кик|мега исключение {Неактивных|вышедших|пользователей} - исключает пользователей из определённой группы\n"
-                    . "/Назначит ранг|Сет ранг {@Айди|@домен|Пересланое сообщение} {0|1|2|3|4|5|Модератор 1 - 4|пользователь|администратор} - Разбанить пользователя\n\n"
+                    . "/Назначит ранг|Сет ранг {@Айди|@домен|Пересланое сообщение} {0|1|2|3|4|5|Модератор1 - Модератор4|пользователь|администратор} - Выдать ранг пользователю\n\n"
                     . "&#9881;Настройки:\n"
-                    . "/Выдать ранг|Назначит ранг|rang set {0|1|2|3|4|5|пользователь|модератор1|модератор2|модератор3|модератор4|администратор} {@Айди|@домен|Пересланое сообщение} - Выдать предупреждение\n"
-                    . "/Лимит повышение рангов {Уровень 1 - 5} {Количество предупреждений} {Количество киков} {Количество временных баннов} - устанавливает лимит повышение рангов модераторам\n"
+                    . "/Лимит повышение рангов {Уровень: 1 - 5} {Количество предупреждений] {Количество киков] {Количество временных баннов] - устанавливает лимит повышение рангов модераторам\n"
                     . "/Наказания за предупреждения {Тип: кик, временный бан, бан} {Количество} {Время, если тип: временный бан] - Установить наказание за достижение определенного количества предупреждений\n"
                     . "/Очистить таблицу {Пользователей|забаненных|вышедших|модераторов|наказаний|лимит|настроек|всё} - очищает указанную таблицу\n"
                     . "/Авто очистка предупреждений {Время SS:MM:HH:DDD:MM:YY} - сбрасывает всё предупреждения через указанное время\n"
@@ -1122,6 +1121,10 @@ switch ($data->type) {
             if($data->object->message->action->type == "chat_invite_user" || $data->object->message->action->type == "chat_invite_user_by_link"){
                 if($data->object->message->action->member_id == (int)("-".$data->group_id))
                     $request_params["message"] = "Для моей работы мне необходимы права администратора. Выдайте права и напишите /начать";
+                $get_ban = $mysqli->query("SELECT `autokickBot` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                $get_ban = $get_rang->fetch_assoc();
+                if($data->object->message->action->member_id < 0 && $get_ban["autokickBot"] == 1)
+                    $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $data->object->message->action->member_id));
 
                 $get_ban = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_bans` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_ban = $get_rang->fetch_assoc();
@@ -1133,29 +1136,10 @@ switch ($data->type) {
                     $res = $mysqli->query("SELECT `greeting` FROM `chats_settings` WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                     $res = $res->fetch_assoc();
                     if ($res["greeting"] != "") {
-                        $greeting = "";
-                        $greeting_temp = "";
-                        $greeting_temps = explode("{first_name}", $res["greeting"]);
-                        for ($i = 0; isset($greeting_temps[$i]); $i++) {
-                            if (!isset($greeting_temps[$i + 1]))
-                                $greeting_temp .= $greeting_temps[$i];
-                            else
-                                $greeting_temp .= $greeting_temps[$i] . explode(" ", getName($vk, array($data->object->message->action->member_id))[0])[0] . "]";
-                        }
-                        $greeting_temps = explode("{last_name}", $greeting_temp);
-                        for ($i = 0; isset($greeting_temps[$i]); $i++) {
-                            if (!isset($greeting_temps[$i + 1]))
-                                $greeting .= $greeting_temps[$i];
-                            else {
-                                $temp = explode(" ", getName($vk, array($data->object->message->action->member_id))[0]);
-                                if (isset($temp[1])) {
-                                    $var = explode("|", $temp[0]);
-
-                                    $greeting .= $greeting_temps[$i] . $var[0] . "|" . $temp[1];
-                                } else $greeting .= $greeting_temps[$i] . $temp[0] . "]";
-                            }
-                        }
-                        $request_params["message"] = $greeting;
+                        $name = getName($vk, array($data->object->message->action->member_id), true, true);
+                        $request_params["message"] = str_replace("{first_name}", $name[0], $request_params["message"]);
+                        if(count($name) > 1)
+                        $request_params["message"] = str_replace("{last_name}", $name[1], $request_params["message"]);
                     }
                 }
 
@@ -1328,7 +1312,7 @@ function getRang($id){
     }
 }
 
-function getName($vk, $ids, $notify = true){
+function getName($vk, $ids, $notify = true, $explode_names = false){
     $user_ids = array(); $group_ids = array(); $names = array(); $user_names = array(); $group_names = array();
 
     foreach ($ids as $num => $id){
@@ -1366,15 +1350,24 @@ function getName($vk, $ids, $notify = true){
 
     for($i = 0; $i < count($ids); $i++){
         if(isset($user_ids[$i])){
-            if ($notify)
-                $names[] = "[id" . $user_names[$i]["id"] . "|" . $user_names[$i]["first_name"] . " " . $user_names[$i]["last_name"] . "]";
-            else
-                $names[] = $user_names[$i]["first_name"] . " " . $user_names[$i]["last_name"];
+            if($explode_names) {
+                if ($notify) {
+                    $names[$i][0] = "[id" . $user_names[$i]["id"] . "|" . $user_names[$i]["first_name"] . "]";
+                    $names[$i][1] = "[id" . $user_names[$i]["id"] . "|" . $user_names[$i]["last_name"] . "]";
+                } else {
+                    $names[$i][0] = $user_names[$i]["first_name"];
+                    $names[$i][1] = $user_names[$i]["last_name"];
+                }
+            }else
+                if ($notify)
+                    $names[$i] = "[id" . $user_names[$i]["id"] . "|" . $user_names[$i]["first_name"] . " " . $user_names[$i]["last_name"] . "]";
+                else
+                    $names[$i] = $user_names[$i]["first_name"] . " " . $user_names[$i]["last_name"];
         }else{
             if ($notify)
-                $names[] = "[club" . $group_names[$i]["id"] . "|" . $group_names[$i]["name"] . "]";
+                $names[$i] = "[club" . $group_names[$i]["id"] . "|" . $group_names[$i]["name"] . "]";
             else
-                $names[] = $group_names[$i]["name"];
+                $names[$i] = $group_names[$i]["name"];
         }
     }
 
