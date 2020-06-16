@@ -1237,6 +1237,10 @@ function updateRang($id, $rang, $mysqli, $peer_id){
     $res_limit = array();
     while ($temp = $res->fetch_assoc() != null){
         $res_limit[] = $temp;
+        ob_start();
+        var_dump($temp);
+        error_log(ob_get_contents());
+        ob_end_clean();
     }
     $res = $mysqli->query("SELECT * FROM `". $peer_id."_moders` WHERE `id` = '". $id ."'");
     $res_moder = $res->fetch_assoc();
