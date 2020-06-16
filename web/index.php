@@ -1214,6 +1214,7 @@ switch ($data->type) {
                     $get_rang = $get_rang->fetch_assoc();
                     $new_rang = updateRang($data->object->message->from_id, $get_rang["rang"], $mysqli, $data->object->message->peer_id);
                     $request_params["message"] = "Модератор " . getName($vk, array($data->object->message->from_id))[0] . " повышен до " . getRang($get_rang["rang"], true). "!";
+                    $vk->messages()->send(TOKEN_VK_BOT, $request_params);
                 }
             } catch (\VK\Exceptions\VKApiException $e) {
             }
