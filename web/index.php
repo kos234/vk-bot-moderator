@@ -1049,9 +1049,11 @@ switch ($data->type) {
                                 $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users`");
                                 $res_ids = array();
                                 while($res_users = $res->fetch_assoc()){
-                                    $empty_list = false;
-                                    $res_ids[] = $res_users["id"];
-                                    $res_fields[] = array($res_users["lastMes"]);
+                                    if($temp != null) {
+                                        $empty_list = false;
+                                        $res_ids[] = $res_users["id"];
+                                        $res_fields[] = array($res_users["lastMes"]);
+                                    }
                                 }
                                 if(!$empty_list){
                                     foreach (getName($vk, $res_ids, false) as $key => $name){
@@ -1063,6 +1065,7 @@ switch ($data->type) {
                             case "вышедших":
                                 $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_leave`");
                                 while($res_users = $res->fetch_assoc()){
+                                    if($temp != null)
                                     $ids[] = $res_users["id"];
                                 }
                                 break;
@@ -1070,6 +1073,7 @@ switch ($data->type) {
                                 if($get_rang["rang"] >= 5){
                                     $res = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_users`");
                                     while($res_users = $res->fetch_assoc()){
+                                        if($temp != null)
                                         $ids[] = $res_users["id"];
                                     }
                                 }else $request_params["message"] = "Для исключения пользователей вы должны быть администратором!";
@@ -1235,16 +1239,12 @@ switch ($data->type) {
 function updateRang($id, $rang, $mysqli, $peer_id){
     $res = $mysqli->query("SELECT * FROM `". $peer_id."_moders_limit`");
     $res_limit = array();
-    while ($temp = $res->fetch_assoc() != null){
-        $res_limit[] = $temp;
-        error_log($temp["rang"]);
+    while ($temp = $res->fetch_assoc()){
+        if($temp != null)
+            $res_limit[] = $temp;
     }
     $res = $mysqli->query("SELECT * FROM `". $peer_id."_moders` WHERE `id` = '". $id ."'");
     $res_moder = $res->fetch_assoc();
-    ob_start();
-    var_dump($res_limit);
-    error_log(ob_get_contents());
-    ob_end_clean();
     switch ($rang){
         case 1:
             if($res_limit[0]["pred"] <= $res_moder["preds"] && $res_limit[0]["tempban"] <= $res_moder["tempbans"] && $res_limit[0]["kick"] <= $res_moder["kicks"])
