@@ -882,7 +882,7 @@ switch ($data->type) {
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` + ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `preds` = `preds` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                         $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'pred', '". $reason ."', '". $num ."')");
-                        track($mysqli, $id, $data->object->message->from_id, $num, $reason, "pred");
+                        track($mysqli, $id, $data->object->message->from_id, $num, $reason, "pred", $data->object->message->peer_id, $get_rang["rang"]);
                         $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
                             $request_params["message"] .= $num . " предупреждений";
@@ -914,7 +914,7 @@ switch ($data->type) {
 
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` - ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'removepred', '". $reason ."', '". $num ."')");
-                        track($mysqli, $id, $data->object->message->from_id, $num, $reason, "removepred");
+                        track($mysqli, $id, $data->object->message->from_id, $num, $reason, "removepred", $data->object->message->peer_id, $get_rang["rang"]);
                         $request_params["message"] = "У пользователю " . getName($vk, array($id))[0] . " удалено ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
                             $request_params["message"] .= $num . " предупреждений";
@@ -945,7 +945,7 @@ switch ($data->type) {
                             $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders` WHERE `id` = '$id'");
                             $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `kicks` = `kicks` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'kick', '". $reason ."', '')");
-                            track($mysqli, $id, $data->object->message->from_id, "", $reason, "kick");
+                            track($mysqli, $id, $data->object->message->from_id, "", $reason, "kick", $data->object->message->peer_id, $get_rang["rang"]);
                             $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был исключен из беседы!";
                         }catch (\VK\Exceptions\Api\VKApiAccessException $e){
                             $request_params["message"] = "Не возможно исключить этого пользователя!";
@@ -974,7 +974,7 @@ switch ($data->type) {
                             $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `tempbans` = `tempbans` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'tempban', '". $reason ."', '". $num ."')");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_bans` (`id`, `reason`,`ban`) VALUES ('". $id ."', '". $reason ."', ". $num .")");
-                            track($mysqli, $id, $data->object->message->from_id, date("d.m.Y G:i",$num) . " по UTC 0", $reason, "tempban");
+                            track($mysqli, $id, $data->object->message->from_id, date("d.m.Y G:i",$num) . " по UTC 0", $reason, "tempban", $data->object->message->peer_id, $get_rang["rang"]);
                             $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был забанен до " . date("d.m.Y G:i",$num) . " по UTC 0!";
                         }catch (\VK\Exceptions\Api\VKApiAccessException $e){
                             $request_params["message"] = "Не возможно забанить этого пользователя!";
@@ -1002,7 +1002,7 @@ switch ($data->type) {
                             $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `bans` = `bans` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'ban', '". $reason ."', '')");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_bans` (`id`, `reason`,`ban`) VALUES ('". $id ."', '". $reason ."', '')");
-                            track($mysqli, $id, $data->object->message->from_id, "", $reason, "ban");
+                            track($mysqli, $id, $data->object->message->from_id, "", $reason, "ban", $data->object->message->peer_id, $get_rang["rang"]);
                             $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был забанен навсегда!";
                         }catch (\VK\Exceptions\Api\VKApiAccessException $e){
                             $request_params["message"] = "Не возможно забанить этого пользователя!";
@@ -1026,7 +1026,7 @@ switch ($data->type) {
 
                         $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_bans` WHERE `id` = '$id'");
                         $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'removeban', '". $reason ."', '')");
-                        track($mysqli, $id, $data->object->message->from_id, "", $reason, "removeban");
+                        track($mysqli, $id, $data->object->message->from_id, "", $reason, "removeban", $data->object->message->peer_id, $get_rang["rang"], $data->object->message->peer_id, $get_rang["rang"]);
                         $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был разбанен!";
                     }else $request_params["message"] = "Вы не указали айди пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 3 уровня или выше!";
@@ -1213,8 +1213,39 @@ switch ($data->type) {
         break;
 
 }
-function track($mysqli, $id_warn, $id_moder, $num, $reason, $type){
+function updateRang($id, $rang, $mysqli, $peer_id){
+    $res = $mysqli->query("SELECT * FROM `". $peer_id."_moders_limit`");
+    $res_limit = array();
+    while ($temp = $res->fetch_assoc() != null){
+        $res_limit[] = $temp;
+    }
+    $res = $mysqli->query("SELECT * FROM `". $peer_id."_moders` WHERE `id` = '". $id ."'");
+    $res_moder = $res->fetch_assoc();
 
+    switch ($rang){
+        case 1:
+            if($res_limit[0]["pred"] <= $res_moder["preds"] && $res_limit[0]["tempban"] <= $res_moder["tempbans"] && $res_limit[0]["kick"] <= $res_moder["kicks"])
+                return 2;
+            else return false;
+            break;
+        case 2:
+            if($res_limit[1]["pred"] <= ($res_moder["preds"] + $res_limit[0]["pred"]) && $res_limit[1]["tempban"] <= ($res_moder["tempbans"] + $res_limit[0]["tempban"]) && $res_limit[1]["kick"] <= ($res_moder["kicks"] + $res_limit[0]["kick"]))
+                return 3;
+            else return false;
+            break;
+        case 3:
+            if($res_limit[2]["pred"] <= ($res_moder["preds"] + $res_limit[0]["pred"] + $res_limit[1]["pred"]) && $res_limit[2]["tempban"] <= ($res_moder["tempbans"] + $res_limit[0]["tempban"] + $res_limit[1]["tempban"]) && $res_limit[2]["kick"] <= ($res_moder["kicks"] + $res_limit[0]["kick"] + $res_limit[1]["kick"]))
+                return 4;
+            else return false;
+            break;
+        default:
+            return false;
+        break;
+    }
+}
+
+function track($mysqli, $id_warn, $id_moder, $num, $reason, $type, $peer_id, $rang){
+    updateRang($id_moder, $rang, $mysqli, $peer_id);
 }
 
 function mb_strcasecmp($str1, $str2, $encoding = null) { //https://www.php.net/manual/en/function.strcasecmp.php#107016 взято от сюда
