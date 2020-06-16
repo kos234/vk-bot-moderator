@@ -1122,12 +1122,12 @@ switch ($data->type) {
                 if($data->object->message->action->member_id == (int)("-".$data->group_id))
                     $request_params["message"] = "Для моей работы мне необходимы права администратора. Выдайте права и напишите /начать";
                 $get_ban = $mysqli->query("SELECT `autokickBot` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
-                $get_ban = $get_rang->fetch_assoc();
+                $get_ban = $get_ban->fetch_assoc();
                 if($data->object->message->action->member_id < 0 && $get_ban["autokickBot"] == 1)
                     $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $data->object->message->action->member_id));
 
                 $get_ban = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_bans` WHERE `id` = '" . $data->object->message->from_id . "'");
-                $get_ban = $get_rang->fetch_assoc();
+                $get_ban = $get_ban->fetch_assoc();
                 if($get_ban != false){
                     if ($get_ban["ban"] == 0 || $get_ban["ban"] - time() > 0)
                         $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $data->object->message->action->member_id));
