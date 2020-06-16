@@ -79,7 +79,7 @@ switch ($data->type) {
                     . "/Мега кик|мега исключение {Неактивных|вышедших|пользователей} - исключает пользователей из определённой группы\n"
                     . "/Назначит ранг|Сет ранг {@Айди|@домен|Пересланое сообщение} {0|1|2|3|4|5|Модератор1 - Модератор4|пользователь|администратор} - Выдать ранг пользователю\n\n"
                     . "&#9881;Настройки:\n"
-                    . "/Лимит повышение рангов {Уровень: 1 - 5} {Количество предупреждений] {Количество киков] {Количество временных баннов] - устанавливает лимит повышение рангов модераторам\n"
+                    . "/Лимит повышение рангов {Уровень: 1 - 3} {Количество предупреждений] {Количество киков] {Количество временных баннов] - Устанавливает лимит повышение рангов модераторам, если указан только уровень, лимит для него сбрасывается\n"
                     . "/Наказания за предупреждения {Тип: кик, временный бан, бан} {Количество} {Время, если тип: временный бан] - Установить наказание за достижение определенного количества предупреждений\n"
                     . "/Очистить таблицу {Пользователей|забаненных|вышедших|модераторов|наказаний|лимит|настроек|всё} - очищает указанную таблицу\n"
                     . "/Авто очистка предупреждений {Время SS:MM:HH:DDD:MM:YY} - сбрасывает всё предупреждения через указанное время\n"
@@ -1115,6 +1115,40 @@ switch ($data->type) {
                         }else $request_params["message"] = "Вы не указали ранг!";
                     }else $request_params["message"] = "Вы не указали айди пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1] . " " . $text[2], "/Лимит повышение рангов") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 5){
+                    if(isset($text[3])){
+                        if((int)$text[3] > 0 && (int)$text[3] < 4){
+                            if (!isset($text[4]) && !isset($text[5]) && !isset($text[6]))
+                                switch ((int)$text[3]){
+                                    case 1:
+                                        $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 5, `kick` = 0, `tempban` = 0 WHERE `rang` = '1'");
+                                        break;
+                                    case 2:
+                                        $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 8, `kick` = 2, `tempban` = 0 WHERE `rang` = '2'");
+                                        break;
+                                    case 3:
+                                        $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 10, `kick` = 4, `tempban` = 2 WHERE `rang` = '3'");
+                                        break;
+                                }
+                            else{
+                                if(isset($text[4])) $pred = (int)$text[4]; else $pred = 0;
+                                if(isset($text[5])) $kick = (int)$text[5]; else $kick = 0;
+                                if(isset($text[6])) $tempban = (int)$text[6]; else $tempban = 0;
+                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= ". $text[4] .", `kick` = ". $text[5] .", `tempban` = ". $text[6] ." WHERE `rang` = '" . $text[3] ."'");
+                            }
+
+                        }else $request_params["message"] = "Не верно указан уровень! Возможные значения: 1 - 3";
+                    }else $request_params["message"] = "Вы не указали уровень!";
+                }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1] . " " . $text[2], "/Лимит повышение рангов") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 5){
+
+                }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
             }
 
             if(isset($data->object->message->action->type))//Инвайты
@@ -1423,7 +1457,7 @@ function createTabs($chat_id, $mysqli, $vk){
     }
 
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
-    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 6, 2, 0)");
+    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 8, 2, 0)");
     $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
     $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (". $chat_id .",". 2678400 . "," . time() .")");
 }
