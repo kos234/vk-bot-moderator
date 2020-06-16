@@ -1240,7 +1240,10 @@ function updateRang($id, $rang, $mysqli, $peer_id){
     }
     $res = $mysqli->query("SELECT * FROM `". $peer_id."_moders` WHERE `id` = '". $id ."'");
     $res_moder = $res->fetch_assoc();
-
+    ob_start();
+    var_dump($res_limit);
+    error_log(ob_get_contents());
+    ob_end_clean();
     switch ($rang){
         case 1:
             if($res_limit[0]["pred"] <= $res_moder["preds"] && $res_limit[0]["tempban"] <= $res_moder["tempbans"] && $res_limit[0]["kick"] <= $res_moder["kicks"])
