@@ -1140,7 +1140,7 @@ switch ($data->type) {
                                 if(isset($text[4])) $pred = (int)$text[4]; else $pred = 0;
                                 if(isset($text[5])) $kick = (int)$text[5]; else $kick = 0;
                                 if(isset($text[6])) $tempban = (int)$text[6]; else $tempban = 0;
-                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= ". $text[4] .", `kick` = ". $text[5] .", `tempban` = ". $text[6] ." WHERE `rang` = '" . $text[3] ."'");
+                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= ". $pred .", `kick` = ". $kick .", `tempban` = ". $tempban ." WHERE `rang` = '" . $text[3] ."'");
                                 $request_params["message"] = "Лимит успешно установлен!";
                             }
 
