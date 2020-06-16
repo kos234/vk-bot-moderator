@@ -1213,6 +1213,7 @@ switch ($data->type) {
                     $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                     $get_rang = $get_rang->fetch_assoc();
                     $new_rang = updateRang($data->object->message->from_id, $get_rang["rang"], $mysqli, $data->object->message->peer_id);
+                    error_log("pizda");
                     if($new_rang != false) {
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `rang` =  '". $new_rang ."' WHERE `id` = '" . $data->object->message->from_id . "'");
                         $request_params["message"] = "Модератор " . getName($vk, array($data->object->message->from_id))[0] . " повышен до " . getRang($new_rang, true) . "!";
