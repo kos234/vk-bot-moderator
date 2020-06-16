@@ -71,9 +71,9 @@ switch ($data->type) {
                     . "/History punishment|/История наказаний [число] - показывает историю последних наказаний, по умолчанию 100\n"
                     . "/Лимит модераторов - выводит лимит для модераторов\n\n"
                     . "Модерация и Администрация:\n"
-                    . "/Предупреждение|Пред {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Выдать предупреждение, по умолчанию 1 предупреждение\n"
+                    . "/Предупреждение|Пред|Pred {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Выдать предупреждение, по умолчанию 1 предупреждение\n"
                     . "/Удалить предупреждение|пред {@Айди|@домен|Пересланое сообщение} [Количество] [Причина] - Удалить предупреждения, по умолчанию всё предупреждения\n"
-                    . "/Кик|Исключить {@Айди|@домен|Пересланое сообщение} [Причина] - Исключить пользователя из чата\n"
+                    . "/Кик|Исключить|Kick {@Айди|@домен|Пересланое сообщение} [Причина] - Исключить пользователя из чата\n"
                     . "/Временно забанить|temp ban {@Айди|@домен|Пересланое сообщение} {Время SS:MM:HH:DDD:MM:YY} [Причина] - Временно забанить пользователя в беседе\n"
                     . "/Бан|Разбанить|Ban {@Айди|@домен|Пересланое сообщение} [Причина] - Забанить пользователя\n"
                     . "/Разбанить|Пардон|Unban {@Айди|@домен|Пересланое сообщение} [Причина] - Разбанить пользователя\n"
@@ -864,7 +864,7 @@ switch ($data->type) {
                         $request_params["message"] .= ", причина: " . $res["text"];
                 }
 
-            }elseif(mb_strcasecmp($text[0], "/Предупреждение") == 0 || mb_strcasecmp($text[0], "/пред") == 0){
+            }elseif(mb_strcasecmp($text[0], "/Предупреждение") == 0 || mb_strcasecmp($text[0], "/пред") == 0 || mb_strcasecmp($text[0], "/kick") == 0){
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 1){
@@ -928,7 +928,7 @@ switch ($data->type) {
                         if($reason != "") $request_params["message"] .= ", по причине: " . $reason;
                     }else $request_params["message"] = "Вы не указали айди пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 1 уровня или выше!";
-            }elseif(mb_strcasecmp($text[0], "/исключить") == 0 || mb_strcasecmp($text[0], "/кик") == 0){
+            }elseif(mb_strcasecmp($text[0], "/исключить") == 0 || mb_strcasecmp($text[0], "/кик") == 0 || mb_strcasecmp($text[0], "/kick") == 0){
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 2){
@@ -1217,9 +1217,7 @@ switch ($data->type) {
                     $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                     $get_rang = $get_rang->fetch_assoc();
                     $new_rang = updateRang($data->object->message->from_id, $get_rang["rang"], $mysqli, $data->object->message->peer_id);
-                    error_log("pizda");
                     if($new_rang != false) {
-                        error_log("jopa");
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `rang` =  '". $new_rang ."' WHERE `id` = '" . $data->object->message->from_id . "'");
                         $request_params["message"] = "Модератор " . getName($vk, array($data->object->message->from_id))[0] . " повышен до " . getRang($new_rang, true) . "!";
                         $vk->messages()->send(TOKEN_VK_BOT, $request_params);
@@ -1267,7 +1265,65 @@ function updateRang($id, $rang, $mysqli, $peer_id){
     }
 }
 
-function track($mysqli, $id_warn, $id_moder, $num, $reason, $type, $peer_id){
+function track($mysqli, $id_warn, $id_moder, $num, $reason, $type, $peer_id, $vk){
+    $request_params = array(
+        'message' => "" , //сообщение
+        'access_token' => TOKEN_VK_BOT, //токен для отправки от имени сообщества
+        'peer_id' => "", //айди чата
+        'random_id' => 0, //0 - не рассылка
+        'read_state' => 1,
+        'user_ids' => 0, // Нет конкретного пользователя кому адресованно сообщение
+        //'reply_to' => $data->object->message->conversation_message_id, //Надеюсь что когда-то это будет работать
+        'attachment' => '' //Вложение
+    );
+    $res = $mysqli->query("SELECT `tracking` FROM `chats_settings` WHERE `chat_id` = '". $peer_id ."'");
+    $res = $res->fetch_assoc();
+    $ids = explode(",", $res["tracking"]);
+    $res_title = $vk->messages()->getConversationsById(TOKEN_VK_BOT, array("peer_ids" => $peer_id));
+    $names = getName($vk, array($id_warn, $id_moder));
+    foreach ($ids as $key => $id){
+        $request_params["peer_id"] = $id;
+        $request_params["message"] = "В сообществе \"" . $res_title["items"][0]["chat_settings"]["title"] . "\" модератор: " . $names[1];
+        switch ($type){
+            case "kick":
+                $request_params["message"] .= " исключил пользователя " . $names[0];
+                break;
+            case "removeban":
+                $request_params["message"] .= " разбанил пользователя " . $names[0];
+                break;
+            case "removepred":
+                $request_params["message"] .= " удалил ";
+                if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
+                    $request_params["message"] .= " ". $num . " предупреждений у пользователя " . $names[0] ;
+                elseif (endNumber($num) == 1)
+                    $request_params["message"] .= " ". $num . " предупреждение у пользователя ". $names[0];
+                elseif (endNumber($num) >= 2 && endNumber($num) <= 4)
+                    $request_params["message"] .= " ". $num . " предупреждения у пользователя ". $names[0];
+                break;
+            case "tempban":
+                $request_params["message"] .= " забанил до " . date("d.m.Y G:i", $num) . "по UTC 0 пользователя " . $names[0];
+                break;
+            case "ban":
+                $request_params["message"] .= " забанил пользователя ". $names[0];
+                break;
+            case "pred":
+                $request_params["message"] .= " выдал ";
+                if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
+                    $request_params["message"] .= " ". $num . " предупреждений пользователю " . $names[0] ;
+                elseif (endNumber($num) == 1)
+                    $request_params["message"] .= " ". $num . " предупреждение пользователю ". $names[0];
+                elseif (endNumber($num) >= 2 && endNumber($num) <= 4)
+                    $request_params["message"] .= " ". $num . " предупреждения пользователю ". $names[0];
+                break;
+            default:
+                $request_params["message"] .= " " . $res["type"] . " пользователя ". $names[0];
+                break;
+        }
+
+        if($reason != "")
+            $request_params["message"] .= "по причине: " . $reason;
+        else $request_params["message"] .= "без причины";
+    }
 }
 
 function mb_strcasecmp($str1, $str2, $encoding = null) { //https://www.php.net/manual/en/function.strcasecmp.php#107016 взято от сюда
