@@ -1125,12 +1125,15 @@ switch ($data->type) {
                                 switch ((int)$text[3]){
                                     case 1:
                                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 5, `kick` = 0, `tempban` = 0 WHERE `rang` = '1'");
+                                        $request_params["message"] = "Лимит сброшен до 5 предупреждений!";
                                         break;
                                     case 2:
                                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 8, `kick` = 2, `tempban` = 0 WHERE `rang` = '2'");
+                                        $request_params["message"] = "Лимит сброшен до 8 предупреждений и 2 исключений из беседы!";
                                         break;
                                     case 3:
                                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 10, `kick` = 4, `tempban` = 2 WHERE `rang` = '3'");
+                                        $request_params["message"] = "Лимит сброшен до 10 предупреждений, 4 исключений из бесседы и 2 временных банов!";
                                         break;
                                 }
                             else{
@@ -1138,6 +1141,7 @@ switch ($data->type) {
                                 if(isset($text[5])) $kick = (int)$text[5]; else $kick = 0;
                                 if(isset($text[6])) $tempban = (int)$text[6]; else $tempban = 0;
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= ". $text[4] .", `kick` = ". $text[5] .", `tempban` = ". $text[6] ." WHERE `rang` = '" . $text[3] ."'");
+                                $request_params["message"] = "Лимит успешно установлен!";
                             }
 
                         }else $request_params["message"] = "Не верно указан уровень! Возможные значения: 1 - 3";
