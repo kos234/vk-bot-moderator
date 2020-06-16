@@ -44,6 +44,7 @@ switch ($data->type) {
         case 'message_new':
             $vk = new VK\Client\VKApiClient();
             $text = explode(' ', $data->object->message->text);
+            $is_varn = false;
 
             $request_params = array(
                 'message' => "" , //сообщение
@@ -882,7 +883,8 @@ switch ($data->type) {
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` + ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `preds` = `preds` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                         $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'pred', '". $reason ."', '". $num ."')");
-                        track($mysqli, $id, $data->object->message->from_id, $num, $reason, "pred", $data->object->message->peer_id, $get_rang["rang"]);
+                        track($mysqli, $id, $data->object->message->from_id, $num, $reason, "pred", $data->object->message->peer_id);
+                        $is_varn = true;
                         $request_params["message"] = "Пользователю " . getName($vk, array($id))[0] . " выдано ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
                             $request_params["message"] .= $num . " предупреждений";
@@ -914,7 +916,8 @@ switch ($data->type) {
 
                         $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `pred` = `pred` - ". $num ." WHERE `id` = '" . $id . "'");
                         $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'removepred', '". $reason ."', '". $num ."')");
-                        track($mysqli, $id, $data->object->message->from_id, $num, $reason, "removepred", $data->object->message->peer_id, $get_rang["rang"]);
+                        track($mysqli, $id, $data->object->message->from_id, $num, $reason, "removepred", $data->object->message->peer_id);
+                        $is_varn = true;
                         $request_params["message"] = "У пользователю " . getName($vk, array($id))[0] . " удалено ";
                         if (($num >= 11 && $num <= 19) || (endNumber($num) >= 5 && endNumber($num) <= 9) || endNumber($num) == 0)
                             $request_params["message"] .= $num . " предупреждений";
@@ -945,7 +948,8 @@ switch ($data->type) {
                             $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders` WHERE `id` = '$id'");
                             $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `kicks` = `kicks` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'kick', '". $reason ."', '')");
-                            track($mysqli, $id, $data->object->message->from_id, "", $reason, "kick", $data->object->message->peer_id, $get_rang["rang"]);
+                            track($mysqli, $id, $data->object->message->from_id, "", $reason, "kick", $data->object->message->peer_id);
+                            $is_varn = true;
                             $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был исключен из беседы!";
                         }catch (\VK\Exceptions\Api\VKApiAccessException $e){
                             $request_params["message"] = "Не возможно исключить этого пользователя!";
@@ -974,7 +978,8 @@ switch ($data->type) {
                             $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `tempbans` = `tempbans` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'tempban', '". $reason ."', '". $num ."')");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_bans` (`id`, `reason`,`ban`) VALUES ('". $id ."', '". $reason ."', ". $num .")");
-                            track($mysqli, $id, $data->object->message->from_id, date("d.m.Y G:i",$num) . " по UTC 0", $reason, "tempban", $data->object->message->peer_id, $get_rang["rang"]);
+                            track($mysqli, $id, $data->object->message->from_id, date("d.m.Y G:i",$num) . " по UTC 0", $reason, "tempban", $data->object->message->peer_id);
+                            $is_varn = true;
                             $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был забанен до " . date("d.m.Y G:i",$num) . " по UTC 0!";
                         }catch (\VK\Exceptions\Api\VKApiAccessException $e){
                             $request_params["message"] = "Не возможно забанить этого пользователя!";
@@ -1002,7 +1007,8 @@ switch ($data->type) {
                             $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders` SET `bans` = `bans` + 1 WHERE `id` = '" . $data->object->message->from_id . "'");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'ban', '". $reason ."', '')");
                             $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_bans` (`id`, `reason`,`ban`) VALUES ('". $id ."', '". $reason ."', '')");
-                            track($mysqli, $id, $data->object->message->from_id, "", $reason, "ban", $data->object->message->peer_id, $get_rang["rang"]);
+                            track($mysqli, $id, $data->object->message->from_id, "", $reason, "ban", $data->object->message->peer_id);
+                            $is_varn = true;
                             $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был забанен навсегда!";
                         }catch (\VK\Exceptions\Api\VKApiAccessException $e){
                             $request_params["message"] = "Не возможно забанить этого пользователя!";
@@ -1026,7 +1032,8 @@ switch ($data->type) {
 
                         $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_bans` WHERE `id` = '$id'");
                         $mysqli->query("INSERT INTO `". $data->object->message->peer_id ."_punishments` (`time`, `id`,`id_moder`, `type`, `text`, `parametr`) VALUES ( " . time() .", '". $id ."', '". $data->object->message->from_id ."', 'removeban', '". $reason ."', '')");
-                        track($mysqli, $id, $data->object->message->from_id, "", $reason, "removeban", $data->object->message->peer_id, $get_rang["rang"], $data->object->message->peer_id, $get_rang["rang"]);
+                        track($mysqli, $id, $data->object->message->from_id, "", $reason, "removeban", $data->object->message->peer_id);
+                        $is_varn = true;
                         $request_params["message"] = "Пользователь " . getName($vk, array($id))[0] . " был разбанен!";
                     }else $request_params["message"] = "Вы не указали айди пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть модератором 3 уровня или выше!";
@@ -1202,6 +1209,12 @@ switch ($data->type) {
 
             try {
                 $vk->messages()->send(TOKEN_VK_BOT, $request_params);
+                if($is_varn){
+                    $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                    $get_rang = $get_rang->fetch_assoc();
+                    $new_rang = updateRang($data->object->message->from_id, $get_rang["rang"], $mysqli, $data->object->message->peer_id);
+                    $request_params["message"] = "Модератор " . getName($vk, array($data->object->message->from_id))[0] . " повышен до " . getRang($get_rang["rang"], true). "!";
+                }
             } catch (\VK\Exceptions\VKApiException $e) {
             }
 
@@ -1244,8 +1257,7 @@ function updateRang($id, $rang, $mysqli, $peer_id){
     }
 }
 
-function track($mysqli, $id_warn, $id_moder, $num, $reason, $type, $peer_id, $rang){
-    updateRang($id_moder, $rang, $mysqli, $peer_id);
+function track($mysqli, $id_warn, $id_moder, $num, $reason, $type, $peer_id){
 }
 
 function mb_strcasecmp($str1, $str2, $encoding = null) { //https://www.php.net/manual/en/function.strcasecmp.php#107016 взято от сюда
@@ -1355,28 +1367,49 @@ function endNumber($number){
     return round(($number/10 - intdiv($number, 10)) * 10);
 }
 
-function getRang($id){
+function getRang($id, $update = false){
     switch ($id){
         case 0:
-            return "пользователь";
+            if($update)
+                return "пользователя";
+            else
+                return "пользователь";
             break;
         case 1:
-            return "модератор 1 уровня";
+            if($update)
+                return "модератора 1 уровня";
+            else
+                return "модератор 1 уровня";
             break;
         case 2:
-            return "модератор 2 уровня";
+            if($update)
+                return "модератора 2 уровня";
+            else
+                return "модератор 2 уровня";
             break;
         case 3:
-            return "модератор 3 уровня";
+            if($update)
+                return "модератора 3 уровня";
+            else
+                return "модератор 3 уровня";
             break;
         case 4:
-            return "модератор 4 уровня";
+            if($update)
+                return "модератора 4 уровня";
+            else
+                return "модератор 4 уровня";
             break;
         case 5:
-            return "администратор";
+            if($update)
+                return "администратора";
+            else
+                return "администратор";
             break;
         default:
-            return "Неизвестный ранг";
+            if($update)
+                return "Неизвестного ранга";
+            else
+                return "Неизвестный ранг";
             break;
     }
 }
