@@ -1256,7 +1256,7 @@ switch ($data->type) {
                     if(isset($text[3])) {
                         $mysqli->query("UPDATE `chats_settings` SET `autoremovepred`= " . convertMicroTime($text[3]) . " WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                         $request_params["message"] = "Теперь предупрежденния будут очищаться";
-                        $time = getTime(($text[3]));
+                        $time = getTime($text[3]);
                         if(substr($time, 0, 1) == "1")
                             $request_params["message"] .= "каждую " . $time;
                         else $request_params["message"] .= "каждые " . $time;
