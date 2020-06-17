@@ -1688,7 +1688,7 @@ function getName($vk, $ids, $notify = true, $explode_names = false){
         if($id>0)
             $user_ids[$num] = $id;
         else
-            $group_ids[$num] = $id;
+            $group_ids[$num] = mb_substr($id, 1);
     }
     $res_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => implode(",", $user_ids)));
     $res_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => implode(",", $group_ids)));
