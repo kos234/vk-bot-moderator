@@ -1299,15 +1299,16 @@ switch ($data->type) {
                         $ids = ""; $ids_user = ""; $ids_group = "";
                         for ($i = 3; isset($text[$i]); $i++) {
                             foreach (explode(",", $text[$i]) as $id) {
-                                if ($id != "") {
+                                error_log($id);
+                                $id = getId($id);
+                                error_log($id);
+                                if ($id != 0) {
                                     error_log($id);
-                                    $id = getId($id);
-                                    error_log($id);
-                                    if ($id != 0) {
-                                        $ids .= $id . ",";
-                                        if ($id > 0) $ids_user = $id . ",";
-                                        else $ids_group = $id . ",";
-                                    }
+                                    $ids .= $id . ",";
+                                    error_log($ids);
+
+                                    if ($id > 0) $ids_user = $id . ",";
+                                    else $ids_group = $id . ",";
                                 }
                             }
                         }
