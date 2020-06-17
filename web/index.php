@@ -1315,7 +1315,7 @@ switch ($data->type) {
                         $mysqli->query("UPDATE `chats_settings` SET `tracking`= '". mb_substr($ids,0,-1) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                         $request_params["message"] = "Новые контролирующие успешно назначены!";
                         $res_mes_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $ids_user, "fields" => "can_write_private_message"));
-                        error_log($ids_user);
+                        error_log($ids_group);
                         $res_mes_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => $ids_group, "fields" => "can_message"));
                         ob_start();
                         var_dump($res_mes_group);
@@ -1328,14 +1328,14 @@ switch ($data->type) {
                             error_log(ob_get_contents());
                             ob_end_clean();
                             if($res["can_write_private_message"] == 0)
-                                $names .= "[" . $res["id"] . "|" . $res["first_name"] . " " . $res["last_name"] . "], ";
+                                $names .= "[id" . $res["id"] . "|" . $res["first_name"] . " " . $res["last_name"] . "], ";
                         }
                         if($names != "")
                             $names = mb_substr($names, 0,-2);
                         if($ids_group != "") {
                             foreach ($res_mes_group as $res) {
                                 if ($res["can_message"] == 0)
-                                    $names .= "[" . $res["id"] . "|" . $res["name"] . "], ";
+                                    $names .= "[club" . $res["id"] . "|" . $res["name"] . "], ";
                             }
                             if ($names != "") {
                                 $names = mb_substr($names, 0, -2);
