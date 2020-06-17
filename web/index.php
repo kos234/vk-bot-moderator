@@ -1296,14 +1296,14 @@ switch ($data->type) {
 
                     $id = getId(explode(",", $text[3])[0],$data->object->message->reply_message->from_id);
                     if($id != 0){
-                        $ids_user = ""; $ids_group = "";
+                        $ids = ""; $ids_user = ""; $ids_group = "";
                         for ($i = 3; isset($text[$i]); $i++){
                             foreach (explode(",", $text[$i]) as $id){
                                 error_log($id);
                                 $id = getId($id);
                                 error_log($id);
                                 if($id != 0) {
-                                    $ids .= "," . $id;
+                                    $ids .= $id . ",";
                                     if($id > 0) $ids_user = $id . ",";
                                     else $ids_group = $id . ",";
                                 }
@@ -1312,7 +1312,7 @@ switch ($data->type) {
                         $mysqli->query("UPDATE `chats_settings` SET `tracking`= '". mb_substr($ids,0,-1) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                         $request_params["message"] = "Новые контролирующие успешно назначены!";
                         $res_mes_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $ids_user, "fields" => "can_write_private_message"));
-                        error_log($ids_group);
+                        error_log($ids_user);
                         $res_mes_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => $ids_group, "fields" => "can_message"));
                         ob_start();
                         var_dump($res_mes_group);
