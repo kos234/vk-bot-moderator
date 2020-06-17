@@ -1169,7 +1169,10 @@ switch ($data->type) {
                             elseif (mb_strcasecmp($text[4], "кик") == 0 || mb_strcasecmp($text[4], "kick") == 0) $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'kick:" . (int)$text[3] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                             else $request_params["message"] = "Не верно указан тип! Возможные значения: кик, бан, временный бан, kick, ban, temp ban";
                         } else $request_params["message"] = "Вы не указали тип!";
-                    } else $request_params["message"] = "Вы не указали от какого количества предупреждений будет наказание!";
+                    } else {
+                        $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= '' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Вы не указали от какого количества предупреждений будет наказание, поэтому авто наказания были отключены!";
+                    }
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
 
             }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/Очистить таблицу") == 0){
