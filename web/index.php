@@ -1255,12 +1255,11 @@ switch ($data->type) {
                 if($get_rang["rang"] >= 5){
                     if(isset($text[3])) {
                         $mysqli->query("UPDATE `chats_settings` SET `autoremovepred`= " . convertMicroTime($text[3]) . " WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
-                        $request_params["message"] = "Теперь предупрежденния будут очищаться";
-                        $time = getTime(convertMicroTime($text[3]));
-                        if(substr($time, 0, 1) == "1")
-                            $request_params["message"] .= "каждую " . $time;
-                        else $request_params["message"] .= "каждые " . $time;
-                    }else $request_params["message"] = "Вы не указали время!";
+                        $request_params["message"] = "Теперь предупреждение будут очищаться каждые " .  getTime(convertMicroTime($text[3]));
+                    }else {
+                        $mysqli->query("UPDATE `chats_settings` SET `autoremovepred`= 0 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Вы не указали время, поэтому авто очищение предупреждений отключено!";
+                    }
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
             }elseif(mb_strcasecmp($text[0], "/Приветствие") == 0){
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
