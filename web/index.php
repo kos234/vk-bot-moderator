@@ -1313,9 +1313,18 @@ switch ($data->type) {
                         $mysqli->query("UPDATE `chats_settings` SET `tracking`= '". $ids ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                         $request_params["message"] = "Новые контролирующие успешно назначены!";
                         $res_mes_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $ids_user, "fields" => "can_write_private_message"));
+                        error_log($ids_group);
                         $res_mes_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => $ids_group, "fields" => "can_message"));
+                        ob_start();
+                        var_dump($res_mes_group);
+                        error_log(ob_get_contents());
+                        ob_end_clean();
                         $names = "";
                         foreach ($res_mes_user as $res){
+                            ob_start();
+                            var_dump($res);
+                            error_log(ob_get_contents());
+                            ob_end_clean();
                             if($res["can_write_private_message"] == 0)
                                 $names .= "[" . $res["id"] . "|" . $res["first_name"] . " " . $res["last_name"] . "], ";
                         }
