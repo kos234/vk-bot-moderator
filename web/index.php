@@ -523,7 +523,8 @@ switch ($data->type) {
             }elseif (mb_strcasecmp($text[0] . " " .$text[1], "/Сократить ссылку") == 0){
                 if(isset($text[2])){
                     if(mb_strcasecmp($text[3], "on") == 0 || mb_strcasecmp($text[3], "включить") == 0) $stat = 1;
-                    elseif(mb_strcasecmp($text[3], "off") == 0 || mb_strcasecmp($text[3], "выключить") == 0) $stat = 0;
+                    else $stat = 0;
+
                     try {
                         $res_url = $vk->utils()->getShortLink(USER_TOKEN, array("url" => $text[2], "private" => $stat));
                     if($stat){
