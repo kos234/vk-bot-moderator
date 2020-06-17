@@ -1300,7 +1300,9 @@ switch ($data->type) {
                         $ids_user = ""; $ids_group = "";
                         for ($i = 3; isset($text[$i]); $i++){
                             foreach (explode(",", $text[$i]) as $id){
+                                error_log($id);
                                 $id = getId($id);
+                                error_log($id);
                                 if($id != 0) {
                                     $ids .= "," . $id;
                                     if($id > 0) $ids_user = $id . ",";
