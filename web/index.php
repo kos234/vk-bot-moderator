@@ -1308,7 +1308,7 @@ switch ($data->type) {
                                     error_log($ids);
 
                                     if ($id > 0) $ids_user .= $id . ",";
-                                    else $ids_group .= $id . ",";
+                                    else $ids_group .= mb_substr($id, 1) . ",";
                                 }
                             }
                         }
@@ -1331,14 +1331,14 @@ switch ($data->type) {
                                 $names .= "[id" . $res["id"] . "|" . $res["first_name"] . " " . $res["last_name"] . "], ";
                         }
                         if($names != "")
-                            $names = mb_substr($names, 0,-2);
+                            $names = mb_substr($names, 0,-2) . " ";
                         if($ids_group != "") {
                             foreach ($res_mes_group as $res) {
                                 if ($res["can_message"] == 0)
                                     $names .= "[club" . $res["id"] . "|" . $res["name"] . "], ";
                             }
                             if ($names != "") {
-                                $names = mb_substr($names, 0, -2);
+                                $names = mb_substr($names, 0, -2) . " ";
                             }
                         }
                         if ($names != "") {
