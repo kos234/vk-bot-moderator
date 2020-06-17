@@ -1298,7 +1298,7 @@ switch ($data->type) {
                     if($id != 0){
                         $ids = $id;
                         $ids_user = ""; $ids_group = "";
-                        for ($i = 3; isset($text[$i]); $i++){
+                        for ($i = 4; isset($text[$i]); $i++){
                             foreach (explode(",", $text[$i]) as $id){
                                 error_log($id);
                                 $id = getId($id);
@@ -1320,13 +1320,13 @@ switch ($data->type) {
                                 $names .= "[" . $res["id"] . "|" . $res["first_name"] . " " . $res["last_name"] . "], ";
                         }
                         if($names != "")
-                            $names = substr($names, 0,-2);
+                            $names = mb_substr($names, 0,-2);
                         foreach ($res_mes_group as $res){
                             if($res["can_message"] == 0)
                                 $names .= "[" . $res["id"] . "|" . $res["name"] . "], ";
                         }
                         if($names != "") {
-                            $names = substr($names, 0, -2);
+                            $names = mb_substr($names, 0, -2);
                             $request_params["message"] .= "\n" . $names . " вы были назначены контролирующими модераторов, пожалуйста разрешите мне отправку личных сообщений, для отправки отчетов!";
                         }
                     }else {
