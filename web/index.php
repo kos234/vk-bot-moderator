@@ -1341,8 +1341,9 @@ switch ($data->type) {
                                 $names = mb_substr($names, 0, -2);
                             }
                         }
-                        $request_params["message"] .= "\n" . $names . " вы были назначены контролирующими модераторов, пожалуйста разрешите мне отправку личных сообщений, для отправки отчетов!";
-
+                        if ($names != "") {
+                            $request_params["message"] .= "\n" . $names . " вы были назначены контролирующими модераторов, пожалуйста разрешите мне отправку личных сообщений, для отправки отчетов!";
+                        }
                     }else {
                         $mysqli->query("UPDATE `chats_settings` SET `tracking`= '' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                         $request_params["message"] = "Вы не указали айди, поэтому список контролирующий был очистен!";
