@@ -1173,7 +1173,7 @@ switch ($data->type) {
                                 elseif (endNumber((int)$text[3]) >= 2 && endNumber((int)$text[3]) <= 4)
                                     $request_params["message"] .= $text[3] . " предупреждений пользователь будет забанен";
                             }
-                            elseif (mb_strcasecmp($text[4] . " " . $text[5], "временный бан") == 0 || mb_strcasecmp($text[4] . " " . $text[5], "temp ban") == 0) if (isset($text[6])){ $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'ban:" . (int)$text[3] . ":". convertMicroTime((int)$text[6]) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                            elseif (mb_strcasecmp($text[4] . " " . $text[5], "временный бан") == 0 || mb_strcasecmp($text[4] . " " . $text[5], "temp ban") == 0) if (isset($text[6])){ $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'ban:" . (int)$text[3] . ":". convertMicroTime($text[6]) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                                 $request_params["message"] = "Теперь после ";
                                 if (((int)$text[3] >= 11 && (int)$text[3] <= 19) || (endNumber((int)$text[3]) >= 5 && endNumber((int)$text[3]) <= 9) || endNumber((int)$text[3]) == 0)
                                     $request_params["message"].= $text[3] . " предупреждений пользователь будет временно забанен";
@@ -1192,8 +1192,7 @@ switch ($data->type) {
                                     $request_params["message"] .= $text[3] . " предупреждения пользователь будет исключен из беседы";
                                 elseif (endNumber((int)$text[3]) >= 2 && endNumber((int)$text[3]) <= 4)
                                     $request_params["message"] .= $text[3] . " предупреждений пользователь будет исключен из беседы";
-                            }
-                            else $request_params["message"] = "Не верно указан тип! Возможные значения: кик, бан, временный бан, kick, ban, temp ban";
+                            } else $request_params["message"] = "Не верно указан тип! Возможные значения: кик, бан, временный бан, kick, ban, temp ban";
                         } else $request_params["message"] = "Вы не указали тип!";
                     } else {
                         $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= '' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
@@ -1242,7 +1241,7 @@ switch ($data->type) {
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 5, `kick` = 0, `tempban` = 0 WHERE `rang` = '1'");
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 8, `kick` = 2, `tempban` = 0 WHERE `rang` = '2'");
                                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 10, `kick` = 4, `tempban` = 2 WHERE `rang` = '3'");
-                                $request_params["message"] = "Таблица успешно очищена!";
+                                $request_params["message"] = "Все таблицы успешно очищены!";
                                 break;
                             default:
                                 $request_params["message"] = "Не верно указана таблица! Возможные значения: пользователя, забаненных, вышедших, модераторов, настроек, все";
@@ -1255,7 +1254,12 @@ switch ($data->type) {
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 5){
                     if(isset($text[3])) {
-                        $mysqli->query("UPDATE `chats_settings` SET `autoremovepred`= " . convertMicroTime((int)$text[3]) . " WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $mysqli->query("UPDATE `chats_settings` SET `autoremovepred`= " . convertMicroTime($text[3]) . " WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Теперь предупрежденния будут очищаться";
+                        $time = getTime(($text[3]));
+                        if(substr($time, 0, 1) == "1")
+                            $request_params["message"] .= "каждую " . $time;
+                        else $request_params["message"] .= "каждые " . $time;
                     }else $request_params["message"] = "Вы не указали время!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
             }elseif(mb_strcasecmp($text[0], "/Приветствие") == 0){
