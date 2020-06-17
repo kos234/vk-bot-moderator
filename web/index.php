@@ -1266,7 +1266,11 @@ switch ($data->type) {
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 5){
                     if(isset($text[1])) {
-                        $mysqli->query("UPDATE `chats_settings` SET `greeting`= '" . $text[1] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $greeting = $text[1];
+                        for ($i = 2; isset($text[$i]); $i++){
+                            $greeting .= " " . $text[$i];
+                        }
+                        $mysqli->query("UPDATE `chats_settings` SET `greeting`= '" . $greeting . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                         $request_params["message"] = "Новое приветствие было успешно установлено!";
                     }else {
                         $mysqli->query("UPDATE `chats_settings` SET `greeting`= '' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
