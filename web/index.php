@@ -1182,7 +1182,7 @@ switch ($data->type) {
                                 elseif (endNumber((int)$text[3]) >= 2 && endNumber((int)$text[3]) <= 4)
                                     $request_params["message"] .= $text[3] . " предупреждений пользователь будет временно забанен";
 
-                                $request_params["message"] .= " на " . getTime($text[6]);
+                                $request_params["message"] .= " на " . getTime(convertMicroTime($text[6]));
                             } else $request_params["message"] = "Вы не указали время!";
                             elseif (mb_strcasecmp($text[4], "кик") == 0 || mb_strcasecmp($text[4], "kick") == 0){ $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'kick:" . (int)$text[3] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                                 $request_params["message"] = "Теперь после ";
@@ -1256,7 +1256,7 @@ switch ($data->type) {
                     if(isset($text[3])) {
                         $mysqli->query("UPDATE `chats_settings` SET `autoremovepred`= " . convertMicroTime($text[3]) . " WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                         $request_params["message"] = "Теперь предупрежденния будут очищаться";
-                        $time = getTime($text[3]);
+                        $time = getTime(convertMicroTime($text[3]));
                         if(substr($time, 0, 1) == "1")
                             $request_params["message"] .= "каждую " . $time;
                         else $request_params["message"] .= "каждые " . $time;
