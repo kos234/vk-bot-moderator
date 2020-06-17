@@ -1737,7 +1737,7 @@ if(isset($text) || isset($reply_to) || $reply_to != '' || $text != ''){
         if(substr($text,0,5) == "[club")
             return (int)("-".substr(explode("|", $text)[0], 5));
         elseif(substr($text,0,3) == "[id") return (int)substr(explode("|",$text)[0], 3);
-        else return 0;
+        else return 99999999;
 
 }else return 0;
 }
