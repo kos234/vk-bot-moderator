@@ -1164,9 +1164,35 @@ switch ($data->type) {
                 if($get_rang["rang"] >= 5){
                     if(isset($text[3])) {
                         if (isset($text[4])) {
-                            if (mb_strcasecmp($text[4], "бан") == 0 || mb_strcasecmp($text[4], "ban") == 0) $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'ban:" . (int)$text[3] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
-                            elseif (mb_strcasecmp($text[4] . " " . $text[5], "временный бан") == 0 || mb_strcasecmp($text[4] . " " . $text[5], "temp ban") == 0) if (isset($text[6])) $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'ban:" . (int)$text[3] . ":". convertMicroTime((int)$text[6]) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'"); else $request_params["message"] = "Вы не указали время!";
-                            elseif (mb_strcasecmp($text[4], "кик") == 0 || mb_strcasecmp($text[4], "kick") == 0) $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'kick:" . (int)$text[3] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                            if (mb_strcasecmp($text[4], "бан") == 0 || mb_strcasecmp($text[4], "ban") == 0){ $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'ban:" . (int)$text[3] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                            $request_params["message"] = "Теперь после ";
+                                if (((int)$text[3] >= 11 && (int)$text[3] <= 19) || (endNumber((int)$text[3]) >= 5 && endNumber((int)$text[3]) <= 9) || endNumber((int)$text[3]) == 0)
+                                    $request_params["message"].= $text[3] . " предупреждений пользователь будет забанен";
+                                elseif (endNumber((int)$text[3]) == 1)
+                                    $request_params["message"] .= $text[3] . " предупреждения пользователь будет забанен";
+                                elseif (endNumber((int)$text[3]) >= 2 && endNumber((int)$text[3]) <= 4)
+                                    $request_params["message"] .= $text[3] . " предупреждений пользователь будет забанен";
+                            }
+                            elseif (mb_strcasecmp($text[4] . " " . $text[5], "временный бан") == 0 || mb_strcasecmp($text[4] . " " . $text[5], "temp ban") == 0) if (isset($text[6])){ $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'ban:" . (int)$text[3] . ":". convertMicroTime((int)$text[6]) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                                $request_params["message"] = "Теперь после ";
+                                if (((int)$text[3] >= 11 && (int)$text[3] <= 19) || (endNumber((int)$text[3]) >= 5 && endNumber((int)$text[3]) <= 9) || endNumber((int)$text[3]) == 0)
+                                    $request_params["message"].= $text[3] . " предупреждений пользователь будет временно забанен";
+                                elseif (endNumber((int)$text[3]) == 1)
+                                    $request_params["message"] .= $text[3] . " предупреждения пользователь будет временно забанен";
+                                elseif (endNumber((int)$text[3]) >= 2 && endNumber((int)$text[3]) <= 4)
+                                    $request_params["message"] .= $text[3] . " предупреждений пользователь будет временно забанен";
+
+                                $request_params["message"] .= " на " . getTime($text[6]);
+                            } else $request_params["message"] = "Вы не указали время!";
+                            elseif (mb_strcasecmp($text[4], "кик") == 0 || mb_strcasecmp($text[4], "kick") == 0){ $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'kick:" . (int)$text[3] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                                $request_params["message"] = "Теперь после ";
+                                if (((int)$text[3] >= 11 && (int)$text[3] <= 19) || (endNumber((int)$text[3]) >= 5 && endNumber((int)$text[3]) <= 9) || endNumber((int)$text[3]) == 0)
+                                    $request_params["message"].= $text[3] . " предупреждений пользователь будет исключен из беседы";
+                                elseif (endNumber((int)$text[3]) == 1)
+                                    $request_params["message"] .= $text[3] . " предупреждения пользователь будет исключен из беседы";
+                                elseif (endNumber((int)$text[3]) >= 2 && endNumber((int)$text[3]) <= 4)
+                                    $request_params["message"] .= $text[3] . " предупреждений пользователь будет исключен из беседы";
+                            }
                             else $request_params["message"] = "Не верно указан тип! Возможные значения: кик, бан, временный бан, kick, ban, temp ban";
                         } else $request_params["message"] = "Вы не указали тип!";
                     } else {
