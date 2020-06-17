@@ -523,7 +523,7 @@ switch ($data->type) {
             }elseif (mb_strcasecmp($text[0] . " " .$text[1], "/Сократить ссылку") == 0){
                 if(isset($text[2])){
                     if(mb_strcasecmp($text[3], "on") == 0 || mb_strcasecmp($text[3], "включить") == 0) $stat = 1;
-                    else $stat = 0;
+                    elseif(mb_strcasecmp($text[3], "off") == 0 || mb_strcasecmp($text[3], "выключить") == 0) $stat = 0;
                     try {
                         $res_url = $vk->utils()->getShortLink(USER_TOKEN, array("url" => $text[2], "private" => $stat));
                     if($stat){
@@ -1349,11 +1349,35 @@ switch ($data->type) {
                         $request_params["message"] = "Вы не указали айди, поэтому список контролирующий был очистен!";
                     }
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
-            }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/Очистить таблицу") == 0){
+            }elseif(mb_strcasecmp($text[0], "/Автокик") == 0 || mb_strcasecmp($text[0], "/автоисключение ") == 0){
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 5){
-                    if(isset($text[2])) {
+                    if(isset($text[1])) {
+                        switch ($text[1]){
+                            case "вышедших":
+                                if(mb_strcasecmp($text[1], "on") == 0 || mb_strcasecmp($text[1], "включить") == 0) {
+                                    $mysqli->query("UPDATE `chats_settings` SET `autokickLeave`= 1 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                                    $request_params["message"] = "Теперь вышедшие пользователи будут автоматически исключаться из беседы!";
+                                }elseif(mb_strcasecmp($text[1], "off") == 0 || mb_strcasecmp($text[1], "выключить") == 0){
+                                    $mysqli->query("UPDATE `chats_settings` SET `autokickLeave`= 0 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                                    $request_params["message"] = "Теперь вышедшие пользователи не будут автоматически исключаться из беседы!";
+                                }
+                                break;
+                            case "ботов":
+                                if(mb_strcasecmp($text[1], "on") == 0 || mb_strcasecmp($text[1], "включить") == 0){
+                                    $mysqli->query("UPDATE `chats_settings` SET `autokickBot`= 1 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                                    $request_params["message"] = "Теперь новые боты будут автоматически исключаться из беседы!";
+                                }elseif(mb_strcasecmp($text[1], "off") == 0 || mb_strcasecmp($text[1], "выключить") == 0){
+                                    $mysqli->query("UPDATE `chats_settings` SET `autokickBot`= 0 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                                    $request_params["message"] = "Теперь новые боты не будут автоматически исключаться из беседы!";
+                                }
+                                break;
+
+                            default:
+                                $request_params["message"] = "Не верно указан топ пользователей! Возможные значения: вышедших, ботов";
+                                break;
+                        }
 
                     }else $request_params["message"] = "Вы не указали таблицу!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
