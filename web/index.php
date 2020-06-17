@@ -1296,20 +1296,22 @@ switch ($data->type) {
 
                     $id = getId(explode(",", $text[3])[0],$data->object->message->reply_message->from_id);
                     if($id != 0){
-                        $ids_all = ""; $ids_user = ""; $ids_group = "";
-                        for ($i = 3; isset($text[$i]); $i++){
-                            foreach (explode(",", $text[$i]) as $id){
-                                error_log($id);
-                                $id = getId($id);
-                                error_log($id);
-                                if($id != 0) {
-                                    $ids_all .= $id . ",";
-                                    if($id > 0) $ids_user = $id . ",";
-                                    else $ids_group = $id . ",";
+                        $ids = ""; $ids_user = ""; $ids_group = "";
+                        for ($i = 3; isset($text[$i]); $i++) {
+                            foreach (explode(",", $text[$i]) as $id) {
+                                if ($id != "") {
+                                    error_log($id);
+                                    $id = getId($id);
+                                    error_log($id);
+                                    if ($id != 0) {
+                                        $ids .= $id . ",";
+                                        if ($id > 0) $ids_user = $id . ",";
+                                        else $ids_group = $id . ",";
+                                    }
                                 }
                             }
                         }
-                        $mysqli->query("UPDATE `chats_settings` SET `tracking`= '". mb_substr($ids_all,0,-1) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $mysqli->query("UPDATE `chats_settings` SET `tracking`= '". mb_substr($ids,0,-1) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                         $request_params["message"] = "Новые контролирующие успешно назначены!";
                         $res_mes_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $ids_user, "fields" => "can_write_private_message"));
                         error_log($ids_user);
