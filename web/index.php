@@ -1307,8 +1307,8 @@ switch ($data->type) {
                                     $ids .= $id . ",";
                                     error_log($ids);
 
-                                    if ($id > 0) $ids_user = $id . ",";
-                                    else $ids_group = $id . ",";
+                                    if ($id > 0) $ids_user .= $id . ",";
+                                    else $ids_group .= $id . ",";
                                 }
                             }
                         }
