@@ -1730,14 +1730,14 @@ function getName($vk, $ids, $notify = true, $explode_names = false){
 }
 
 function getId($text = '', $reply_to = ''){
-if(isset($text) || isset($reply_to) || $reply_to != '' || $text != ''){
-    if(isset($reply_to) || $reply_to != ''){
+if($reply_to != '' || $text != ''){
+    if($reply_to != ''){
         return (int)$reply_to;
     }else
         if(substr($text,0,5) == "[club")
             return (int)("-".substr(explode("|", $text)[0], 5));
         elseif(substr($text,0,3) == "[id") return (int)substr(explode("|",$text)[0], 3);
-        else return 99999999;
+        else return 0;
 
 }else return 0;
 }
