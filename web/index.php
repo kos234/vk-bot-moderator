@@ -1356,22 +1356,22 @@ switch ($data->type) {
                     if(isset($text[1])) {
                         switch ($text[1]){
                             case "вышедших":
-                                if(mb_strcasecmp($text[1], "on") == 0 || mb_strcasecmp($text[1], "включить") == 0) {
+                                if(mb_strcasecmp($text[2], "on") == 0 || mb_strcasecmp($text[2], "включить") == 0) {
                                     $mysqli->query("UPDATE `chats_settings` SET `autokickLeave`= 1 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                                     $request_params["message"] = "Теперь вышедшие пользователи будут автоматически исключаться из беседы!";
-                                }elseif(mb_strcasecmp($text[1], "off") == 0 || mb_strcasecmp($text[1], "выключить") == 0){
+                                }elseif(mb_strcasecmp($text[2], "off") == 0 || mb_strcasecmp($text[2], "выключить") == 0){
                                     $mysqli->query("UPDATE `chats_settings` SET `autokickLeave`= 0 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                                     $request_params["message"] = "Теперь вышедшие пользователи не будут автоматически исключаться из беседы!";
-                                }
+                                }else $request_params["message"] = "Не верное действие! Возможные значения: on, off, включить, выключить";
                                 break;
                             case "ботов":
-                                if(mb_strcasecmp($text[1], "on") == 0 || mb_strcasecmp($text[1], "включить") == 0){
+                                if(mb_strcasecmp($text[2], "on") == 0 || mb_strcasecmp($text[2], "включить") == 0){
                                     $mysqli->query("UPDATE `chats_settings` SET `autokickBot`= 1 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                                     $request_params["message"] = "Теперь новые боты будут автоматически исключаться из беседы!";
-                                }elseif(mb_strcasecmp($text[1], "off") == 0 || mb_strcasecmp($text[1], "выключить") == 0){
+                                }elseif(mb_strcasecmp($text[2], "off") == 0 || mb_strcasecmp($text[2], "выключить") == 0){
                                     $mysqli->query("UPDATE `chats_settings` SET `autokickBot`= 0 WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                                     $request_params["message"] = "Теперь новые боты не будут автоматически исключаться из беседы!";
-                                }
+                                }else $request_params["message"] = "Не верное действие! Возможные значения: on, off, включить, выключить";
                                 break;
 
                             default:
