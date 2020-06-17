@@ -1349,7 +1349,7 @@ switch ($data->type) {
                         $request_params["message"] = "Вы не указали айди, поэтому список контролирующий был очистен!";
                     }
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
-            }elseif(mb_strcasecmp($text[0], "/Автокик") == 0 || mb_strcasecmp($text[0], "/автоисключение ") == 0){
+            }elseif(mb_strcasecmp($text[0], "/Автокик") == 0 || mb_strcasecmp($text[0], "/автоисключение") == 0){
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 5){
@@ -1379,7 +1379,7 @@ switch ($data->type) {
                                 break;
                         }
 
-                    }else $request_params["message"] = "Вы не указали таблицу!";
+                    }else $request_params["message"] = "Вы не указали тип пользователя!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
             }
 
