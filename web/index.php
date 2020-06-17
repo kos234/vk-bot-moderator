@@ -81,12 +81,12 @@ switch ($data->type) {
                     . "/Назначит ранг|Сет ранг {@Айди|@домен|Пересланое сообщение} {0|1|2|3|4|5|Модератор1 - Модератор4|пользователь|администратор} - Выдать ранг пользователю\n\n"
                     . "&#9881;Настройки:\n"
                     . "/Лимит повышения рангов {Уровень: 1 - 3} {Количество предупреждений] {Количество киков] {Количество временных баннов] - Устанавливает лимит повышение рангов модераторам, если указан только уровень, лимит для него сбрасывается\n"
-                    . "/Наказания за предупреждения {Тип: кик, временный бан, бан} {Количество} {Время, если тип: временный бан] - Установить наказание за достижение определенного количества предупреждений\n"
-                    . "/Очистить таблицу {Пользователей|забаненных|вышедших|модераторов|наказаний|лимит|настроек|всё} - очищает указанную таблицу\n"
+                    . "/Наказание за предупреждения {От какого количества} {Тип: кик, временный бан, бан} {Время SS:MM:HH:DDD:MM:YY, если тип: временный бан] - Установить наказание за достижение определенного количества предупреждений\n"
+                    . "/Очистить таблицу {пользователей|забаненных|вышедших|модераторов|наказаний|лимита|настроек|всё} - очищает указанную таблицу\n"
                     . "/Авто очистка предупреждений {Время SS:MM:HH:DDD:MM:YY} - сбрасывает всё предупреждения через указанное время\n"
-                    . "/Приветствие {Текст {first_name} {last_name}} - Устанавливает приветствие для новых пользователей, {first_name} - чтобы указать имя, {last_name} - чтобы указать фамилию\n"
-                    . "/Установить инвайт ссылку {Текст} - Устанавливает ссылку для подключение к беседе\n"
-                    . "/Сообщать о наказаниях {@Айди|@домен|Пересланое сообщение} - люди, которым приходят уведомления о выдачи наказаний(если людей несколько, указывать через запятую без пробелов)\n"
+                    . "/Приветствие {Текст} - Устанавливает приветствие для новых пользователей, можете написать в сообщение {first_name} - чтобы указать имя, {last_name} - чтобы указать фамилию. Если текст был не указан, приветствие будет отключено\n"
+                    . "/Установить инвайт ссылку {Ссылка} - Устанавливает ссылку для подключение к беседе\n"
+                    . "/Сообщать о наказаниях {@Айди|@домен|Пересланое сообщение} - люди, которым приходят уведомления о выдачи наказаний(если людей несколько, указывать через запятую, либо через пробел)\n"
                     . "/Автокик|автоисключение {Вышедших|ботов} {Включить|выключить|on|off} - Автоисключение вышедших пользователей или новых ботов\n"
                     . "{} - обязательный параметр, [] - необязательный параметр, {] - тип зависит от задачи\n\n"
                     . "&#128214;Информация о проекте:\n"
@@ -1158,11 +1158,151 @@ switch ($data->type) {
                         }else $request_params["message"] = "Не верно указан уровень! Возможные значения: 1 - 3";
                     }else $request_params["message"] = "Вы не указали уровень!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
-            }elseif(mb_strcasecmp($text[0] . " " . $text[1] . " " . $text[2], "/Лимит повышения рангов") == 0){
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1] . " " . $text[2], "/Наказание за предупреждения") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 5){
+                    if(isset($text[3])) {
+                        if (isset($text[4])) {
+                            if (mb_strcasecmp($text[4], "бан") == 0 || mb_strcasecmp($text[4], "ban") == 0) $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'ban:" . (int)$text[3] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                            elseif (mb_strcasecmp($text[4] . " " . $text[5], "временный бан") == 0 || mb_strcasecmp($text[4] . " " . $text[5], "temp ban") == 0) if (isset($text[6])) $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'ban:" . (int)$text[3] . ":". convertMicroTime((int)$text[6]) ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'"); else $request_params["message"] = "Вы не указали время!";
+                            elseif (mb_strcasecmp($text[4], "кик") == 0 || mb_strcasecmp($text[4], "kick") == 0) $mysqli->query("UPDATE `chats_settings` SET `predsvarn`= 'kick:" . (int)$text[3] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                            else $request_params["message"] = "Не верно указан тип! Возможные значения: кик, бан, временный бан, kick, ban, temp ban";
+                        } else $request_params["message"] = "Вы не указали тип!";
+                    } else $request_params["message"] = "Вы не указали от какого количества предупреждений будет наказание!";
+                }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
+
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/Очистить таблицу") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 5){
+                    if(isset($text[2])) {
+                        switch (mb_strtolower($text[2])){
+                            case "пользователей":
+                                $mysqli->query("DELETE FROM `". $data->object->message->peer_id ."_users`");
+                                $request_params["message"] = "Таблица успешно очищена!";
+                                break;
+                            case "забаненных":
+                                $mysqli->query("DELETE FROM `". $data->object->message->peer_id ."_bans`");
+                                $request_params["message"] = "Таблица успешно очищена!";
+                                break;
+                            case "вышедших":
+                                $mysqli->query("DELETE FROM `". $data->object->message->peer_id ."_leave`");
+                                $request_params["message"] = "Таблица успешно очищена!";
+                                break;
+                            case "модераторов":
+                                $mysqli->query("DELETE FROM `". $data->object->message->peer_id ."_moders`");
+                                $request_params["message"] = "Таблица успешно очищена!";
+                                break;
+                            case "лимита":
+                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 5, `kick` = 0, `tempban` = 0 WHERE `rang` = '1'");
+                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 8, `kick` = 2, `tempban` = 0 WHERE `rang` = '2'");
+                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 10, `kick` = 4, `tempban` = 2 WHERE `rang` = '3'");
+                                $request_params["message"] = "Таблица успешно очищена!";
+                                break;
+                            case "настроек":
+                                $mysqli->query("DELETE FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                                $request_params["message"] = "Таблица успешно очищена!";
+                                break;
+                            case "все":
+                                $mysqli->query("DELETE FROM `". $data->object->message->peer_id ."_users`");
+                                $mysqli->query("DELETE FROM `". $data->object->message->peer_id ."_bans`");
+                                $mysqli->query("DELETE FROM `". $data->object->message->peer_id ."_leave`");
+                                $mysqli->query("DELETE FROM `". $data->object->message->peer_id ."_moders`");
+                                $mysqli->query("DELETE FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
+                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 5, `kick` = 0, `tempban` = 0 WHERE `rang` = '1'");
+                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 8, `kick` = 2, `tempban` = 0 WHERE `rang` = '2'");
+                                $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_moders_limit` SET `pred`= 10, `kick` = 4, `tempban` = 2 WHERE `rang` = '3'");
+                                $request_params["message"] = "Таблица успешно очищена!";
+                                break;
+                            default:
+                                $request_params["message"] = "Не верно указана таблица! Возможные значения: пользователя, забаненных, вышедших, модераторов, настроек, все";
+                                break;
+                        }
+                    }else $request_params["message"] = "Вы не указали таблицу!";
+                }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1] . " " . $text[2], "/Авто очистка предупреждений") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 5){
+                    if(isset($text[3])) {
+                        $mysqli->query("UPDATE `chats_settings` SET `autoremovepred`= " . convertMicroTime((int)$text[3]) . " WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                    }else $request_params["message"] = "Вы не указали время!";
+                }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
+            }elseif(mb_strcasecmp($text[0], "/Приветствие") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 5){
+                    if(isset($text[1])) {
+                        $mysqli->query("UPDATE `chats_settings` SET `greeting`= '" . $text[1] . "' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Новое приветствие было успешно установлено!";
+                    }else {
+                        $mysqli->query("UPDATE `chats_settings` SET `greeting`= '' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Вы не указали текст, поэтому приветствие было очищено!";
+                    }
+                }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1] . " " . $text[2], "/Установить инвайт ссылку") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 5){
+                    if(isset($text[3])) {
+                        $mysqli->query("UPDATE `chats_settings` SET `invite_link`= '". $text[3] ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Инвайт ссылка была успешно установлена!";
+                    }else{
+                        $mysqli->query("UPDATE `chats_settings` SET `invite_link`= '' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Вы не указали ссылку, поэтому ссылка была удалена!";
+                    }
+                }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1] . " " . $text[2], "/Сообщать о наказаниях") == 0){
                 $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
                 $get_rang = $get_rang->fetch_assoc();
                 if($get_rang["rang"] >= 5){
 
+                    $id = getId(explode(",", $text[3])[0],$data->object->message->reply_message->from_id);
+                    if($id != 0){
+                        $ids = $id;
+                        $ids_user = ""; $ids_group = "";
+                        for ($i = 3; isset($text[$i]); $i++){
+                            foreach (explode(",", $text[$i]) as $id){
+                                $id = getId($id);
+                                if($id != 0) {
+                                    $ids .= "," . $id;
+                                    if($id > 0) $ids_user = $id . ",";
+                                    else $ids_group = $id . ",";
+                                }
+                            }
+                        }
+                        $mysqli->query("UPDATE `chats_settings` SET `tracking`= '". $ids ."' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Новые контролирующие успешно назначены!";
+                        $res_mes_user = $vk->users()->get(TOKEN_VK_BOT, array("user_ids" => $ids_user, "fields" => "can_write_private_message"));
+                        $res_mes_group = $vk->groups()->getById(TOKEN_VK_BOT, array("group_ids" => $ids_group, "fields" => "can_message"));
+                        $names = "";
+                        foreach ($res_mes_user as $res){
+                            if($res["can_write_private_message"] == 0)
+                                $names .= "[" . $res["id"] . "|" . $res["first_name"] . " " . $res["last_name"] . "], ";
+                        }
+                        if($names != "")
+                            $names = substr($names, 0,-2);
+                        foreach ($res_mes_group as $res){
+                            if($res["can_message"] == 0)
+                                $names .= "[" . $res["id"] . "|" . $res["name"] . "], ";
+                        }
+                        if($names != "") {
+                            $names = substr($names, 0, -2);
+                            $request_params["message"] .= "\n" . $names . " вы были назначены контролирующими модераторов, пожалуйста разрешите мне отправку личных сообщений, для отправки отчетов!";
+                        }
+                    }else {
+                        $mysqli->query("UPDATE `chats_settings` SET `tracking`= '' WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
+                        $request_params["message"] = "Вы не указали айди, поэтому список контролирующий был очистен!";
+                    }
+                }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
+            }elseif(mb_strcasecmp($text[0] . " " . $text[1], "/Очистить таблицу") == 0){
+                $get_rang = $mysqli->query("SELECT `rang` FROM `". $data->object->message->peer_id ."_users` WHERE `id` = '" . $data->object->message->from_id . "'");
+                $get_rang = $get_rang->fetch_assoc();
+                if($get_rang["rang"] >= 5){
+                    if(isset($text[2])) {
+
+                    }else $request_params["message"] = "Вы не указали таблицу!";
                 }else $request_params["message"] = "Для использования этой команды вы должны быть администратором!";
             }
 
@@ -1200,12 +1340,12 @@ switch ($data->type) {
                         $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $data->object->message->action->member_id));
 
                 }elseif($data->object->message->action->member_id == (int)("-".$data->group_id)){//если кикнули бота
-                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_users`");
-                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_punishments`");
-                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders`");
-                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_leave`");
-                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_bans`");
-                    $mysqli->query("DELETE FROM `" . $data->object->message->peer_id . "_moders_limit`");
+                    $mysqli->query("DROP TABLE `" . $data->object->message->peer_id . "_users`");
+                    $mysqli->query("DROP TABLE `" . $data->object->message->peer_id . "_punishments`");
+                    $mysqli->query("DROP TABLE `" . $data->object->message->peer_id . "_moders`");
+                    $mysqli->query("DROP TABLE `" . $data->object->message->peer_id . "_leave`");
+                    $mysqli->query("DROP TABLE `" . $data->object->message->peer_id . "_bans`");
+                    $mysqli->query("DROP TABLE `" . $data->object->message->peer_id . "_moders_limit`");
                     $mysqli->query("DELETE FROM `chats_settings` WHERE `chat_id` = '" .$data->object->message->peer_id . "'");
                 }
 
@@ -1283,7 +1423,7 @@ function track($mysqli, $id_warn, $id_moder, $num, $reason, $type, $peer_id, $vk
     $names = getName($vk, array($id_warn, $id_moder));
     foreach ($ids as $key => $id){
         $request_params["peer_id"] = $id;
-        $request_params["message"] = "В сообществе \"" . $res_title["items"][0]["chat_settings"]["title"] . "\" модератор: " . $names[1];
+        $request_params["message"] = "В беседе \"" . $res_title["items"][0]["chat_settings"]["title"] . "\" модератор: " . $names[1];
         switch ($type){
             case "kick":
                 $request_params["message"] .= " исключил пользователя " . $names[0];
@@ -1321,8 +1461,8 @@ function track($mysqli, $id_warn, $id_moder, $num, $reason, $type, $peer_id, $vk
         }
 
         if($reason != "")
-            $request_params["message"] .= "по причине: " . $reason;
-        else $request_params["message"] .= "без причины";
+            $request_params["message"] .= " по причине: " . $reason;
+        else $request_params["message"] .= " без причины";
 
         try {
             $vk->messages()->send(TOKEN_VK_BOT, $request_params);
@@ -1345,7 +1485,7 @@ function convertTime($times){
     return mktime((int)$curr_times[2] + (int)$times[2],(int)$curr_times[1] + (int)$times[1],(int)$curr_times[0] + (int)$times[0],(int)$curr_times[4] + (int)$times[4],(int)$curr_times[3] + (int)$times[3],(int)$curr_times[5] + (int)$times[5]);
 }
 
-/*function convertTime($times){
+function convertMicroTime($times){
     $time_return = 0;
     $times = explode(":", $times);
     if(isset($times[0]))
@@ -1360,7 +1500,7 @@ function convertTime($times){
         $time_return += (int)$times[4] * 31 * 24 * 60 * 60;
 
     return $time_return;
-} */
+}
 
 function getTime($time){
     $time_string = "";
@@ -1552,13 +1692,14 @@ function getName($vk, $ids, $notify = true, $explode_names = false){
 }
 
 function getId($text = '', $reply_to = ''){
-if(isset($text) || isset($reply_to)){
-    if(isset($reply_to)){
+if(isset($text) || isset($reply_to) || $reply_to != '' || $text != ''){
+    if(isset($reply_to) || $reply_to != ''){
         return (int)$reply_to;
     }else
         if(substr($text,0,5) == "[club")
             return (int)("-".substr(explode("|", $text)[0], 5));
-        else return (int)substr(explode("|",$text)[0], 3);
+        elseif(substr($text,0,3) == "[id") return (int)substr(explode("|",$text)[0], 3);
+        else return 0;
 
 }else return 0;
 }
@@ -1598,9 +1739,9 @@ function createTabs($chat_id, $mysqli, $vk){
         $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->items[$i]->member_id ."', ". $rang .")");
     }
 
-    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
-    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 8, 2, 0)");
-    $mysqli->query("INSERT INTO `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
+    $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
+    $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 8, 2, 0)");
+    $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
     $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (". $chat_id .",". 2678400 . "," . time() .")");
 }
 ?>
