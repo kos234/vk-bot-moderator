@@ -5,11 +5,11 @@ define("CONFIRMATION_TOKEN_VK_BOT", getenv("CONFIRMATION_TOKEN_VK_BOT")); //по
 define("TOKEN_VK_BOT", getenv("TOKEN_VK_BOT")); //Ключ доступа сообщества
 define("SECRET_KEY_VK_BOT", getenv("SECRET_KEY_VK_BOT")); //Secret key
 define("USER_TOKEN", getenv("USER_TOKEN")); /*Токен пользователя нужен для показа полной информации о группах и людях,
- при желании его можно не указывать, а на 319 строке передать не токен пользователя а токен группы*/
+ если не хотите его указывать, вызовите getenv("TOKEN_VK_BOT")*/
 define("SERVICE_KEY", getenv("SERVICE_KEY")); //Сервисный ключ
 
 
-ini_set('max_execution_time', 900);
+ini_set('max_execution_time', 0);
 
 if (!isset($_REQUEST)) //проверяем получили ли мы запрос
     return;
@@ -1522,7 +1522,7 @@ function track($mysqli, $id_warn, $id_moder, $num, $reason, $type, $peer_id, $vk
     $names = getName($vk, array($id_warn, $id_moder));
     foreach ($ids as $key => $id){
         $request_params["peer_id"] = $id;
-        $request_params["message"] = "В беседе \"" . $res_title["items"][0]["chat_settings"]["title"] . "\" модератор: " . $names[1];
+        $request_params["message"] = "&#128110;В беседе \"" . $res_title["items"][0]["chat_settings"]["title"] . "\" модератор: " . $names[1];
         switch ($type){
             case "kick":
                 $request_params["message"] .= " исключил пользователя " . $names[0];
