@@ -51,8 +51,8 @@ switch ($data->type) {
                 $mysqli->query("UPDATE `" . $data->object->message->peer_id . "_users` SET `mes_count`= `mes_count` + 1, `lastMes` = ". time() ." WHERE `id` = '" . $data->object->message->from_id . "' OR `id` = '" . (int)("-" . $data->group_id) . "'");
                 //Очищаем преды
                 $res = $mysqli->query("SELECT `lastRemovePred`, `autoremovepred` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
-                $res = $res->fetch_assoc();
                 if($res != false){
+                    $res = $res->fetch_assoc();
                     if($res["lastRemovePred"] + $res["autoremovepred"] <= time()){
                         $mysqli->query("UPDATE `". $data->object->message->peer_id ."_users` SET `pred` = 0");
                         $mysqli->query("UPDATE `chats_settings` SET `lastRemovePred` = " . time() . " WHERE `chat_id` = '". $data->object->message->peer_id ."'");
@@ -1419,8 +1419,8 @@ switch ($data->type) {
                     $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $data->object->message->action->member_id));
 
                 $get_ban = $mysqli->query("SELECT * FROM `". $data->object->message->peer_id ."_bans` WHERE `id` = '" . $data->object->message->from_id . "'");
-                $get_ban = $get_ban->fetch_assoc();
                 if($get_ban != false){
+                    $get_ban = $get_ban->fetch_assoc();
                     if ($get_ban["ban"] == 0 || $get_ban["ban"] - time() > 0)
                         $vk->messages()->removeChatUser(TOKEN_VK_BOT, array("chat_id" => $data->object->message->peer_id - 2000000000, "member_id" => $data->object->message->action->member_id));
                 }else {
@@ -1830,8 +1830,10 @@ function createTabs($chat_id, $mysqli, $vk){
     $res = $vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id));
     for ($i = 0; isset($res["items"][$i]); $i++){
         $rang = 0;
-        if($res["items"][$i]["is_admin"]) $rang = 5;
-        $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res->items[$i]->member_id ."', ". $rang .")");
+        if (isset($res["items"][$i]["is_admin"])){ $rang = 5;
+            $mysqli->query("INSERT INTO `". $chat_id ."_moders` (`id`) VALUES ('". $res["items"][$i]["member_id"] ."')");
+        }
+        $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res["items"][$i]["member_id"] ."', ". $rang .")");
     }
 
     $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
