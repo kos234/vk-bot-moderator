@@ -106,7 +106,7 @@ switch ($data->type) {
                     . "&#128214;Информация о проекте:\n"
                     . "&#128100;Создатель: https://vk.com/i_love_python\n"
                     . "&#128064;Исходные код проекта и гайд по подключению: https://github.com/kos234/Vk-bot-moderator\n";
-            } elseif (mb_strcasecmp($text[0], "/начать") == 0 || mb_strcasecmp($text[0], "/start") == 0){
+            }elseif (mb_strcasecmp($text[0], "/начать") == 0 || mb_strcasecmp($text[0], "/start") == 0){
                 if($is_chat) {
                     if(createTabs($data->object->message->peer_id, $mysqli, $vk))
                         $request_params["message"] = "&#10004;Бот успешно добавлен! Чтобы посмотреть список моих команд и возможных настроек напишите \"/\"";
@@ -114,7 +114,7 @@ switch ($data->type) {
                         $request_params["message"] = "&#10060;Вы не выдали мне права администратора!";
 
                 }else $request_params["message"] = "&#10060;Эта команда не для личных сообщений!";
-            }elseif (mb_strcasecmp($text[0], "/настройки беседы") == 0 || mb_strcasecmp($text[0], "/настройки чата") == 0 || mb_strcasecmp($text[0], "/chat settings") == 0 || mb_strcasecmp($text[0], "/settings chat") == 0){
+            }elseif (mb_strcasecmp($text[0] . " " . $text[1], "/настройки беседы") == 0 || mb_strcasecmp($text[0] . " " . $text[1], "/настройки чата") == 0 || mb_strcasecmp($text[0] . " " . $text[1], "/chat settings") == 0 || mb_strcasecmp($text[0] . " " . $text[1], "/settings chat") == 0){
                 if($is_chat) {
                     $res = $mysqli->query("SELECT * FROM `chats_settings` WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
                     $res = $res->fetch_assoc();
@@ -1833,7 +1833,7 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_bans`(`id` VarChar( 255 ) NOT NULL, `reason` VarChar( 255 ) NOT NULL DEFAULT '', `ban` Int( 255 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL DEFAULT '', `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL, `lastRemovePred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NOT NULL DEFAULT '', `tempban` Int( 255 ) NOT NULL DEFAULT '', CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
     try {
         $res = $vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id));
