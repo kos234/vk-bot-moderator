@@ -127,9 +127,9 @@ switch ($data->type) {
                     $request_params["message"] .= "\nСледящие за выдачей наказаний: ";
                     if ($res["tracking"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= implode(", ", getName($vk, explode(",", $res["tracking"])));
                     $request_params["message"] .= "\nСсылка для приглашения в чат: ";
-                    if ($res["invite_link"] == "") $request_params["message"] .= "отсутствуют"; else $request_params["message"] .= $res["invite_link"];
+                    if ($res["invite_link"] == "") $request_params["message"] .= "отсутствует"; else $request_params["message"] .= $res["invite_link"];
                     $request_params["message"] .= "\nНаказание за какое-то количество предупреждений: ";
-                    if ($res["predsvarn"] == "") $request_params["message"] .= "отсутствуют"; else {
+                    if ($res["predsvarn"] == "") $request_params["message"] .= "отсутствует"; else {
                         $fields = explode(":", $res["predsvarn"]);
                         $request_params["message"] .= "за " . $fields[1];
                         if (($fields[1] >= 11 && $fields[1] <= 19) || (endNumber($fields[1]) >= 5 && endNumber($fields[1]) <= 9) || endNumber($fields[1]) == 0)
@@ -1832,7 +1832,7 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders`( `id` VarChar( 255 ) NOT NULL, `bans` Int( 255 ) NOT NULL DEFAULT 0, `kicks` Int( 255 ) NOT NULL DEFAULT 0, `tempbans` Int( 255 ) NOT NULL DEFAULT 0, `preds` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` )) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_leave`(`id` VarChar( 255 ) NOT NULL, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_bans`(`id` VarChar( 255 ) NOT NULL, `reason` VarChar( 255 ) NOT NULL DEFAULT '', `ban` Int( 255 ) NOT NULL DEFAULT 0 ) ENGINE = InnoDB;");
-    $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL DEFAULT '', `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL, `lastRemovePred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL DEFAULT '', `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL DEFAULT 2678400 , `lastRemovePred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NOT NULL DEFAULT '', `tempban` Int( 255 ) NOT NULL DEFAULT '', CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
     try {
@@ -1851,7 +1851,7 @@ function createTabs($chat_id, $mysqli, $vk){
             $mysqli->query("INSERT INTO IF NOT EXISTS `" . $chat_id . "_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
             $mysqli->query("INSERT INTO IF NOT EXISTS `" . $chat_id . "_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 8, 2, 0)");
             $mysqli->query("INSERT INTO IF NOT EXISTS `" . $chat_id . "_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
-            $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (" . $chat_id . "," . 2678400 . "," . time() . ")");
+            $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `lastRemovePred`) VALUES (" . $chat_id . "," . time() . ")");
             return true;
         } else return false;
     }catch (VK\Exceptions\VKApiException $e){
