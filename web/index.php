@@ -1835,21 +1835,27 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `chats_settings`(`chat_id` VarChar( 255 ) NOT NULL, `invite_link` VarChar( 255 ) NOT NULL DEFAULT '',`autokickBot` TinyInt( 1 ) NOT NULL DEFAULT 1, `autokickLeave` TinyInt( 1 ) NOT NULL DEFAULT 0, `greeting` VarChar( 255 ) NULL DEFAULT '', `tracking` VarChar( 255 ) NULL DEFAULT '', `predsvarn` VarChar( 255 ) NOT NULL DEFAULT 'kick:10', `autoremovepred` Int( 255 ) NOT NULL, `lastRemovePred` Int( 255 ) NOT NULL,CONSTRAINT `unique_chat_id` UNIQUE( `chat_id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
-    $res = $vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id));
-    if (count($res["items"]) != 0){
-        for ($i = 0; isset($res["items"][$i]); $i++){
-            $rang = 0;
-            if (isset($res["items"][$i]["is_admin"])){ $rang = 5;
-                $mysqli->query("INSERT INTO `". $chat_id ."_moders` (`id`) VALUES ('". $res["items"][$i]["member_id"] ."')");
-            }
-            $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res["items"][$i]["member_id"] ."', ". $rang .")");
-        }
+    try {
+        $res = $vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id));
 
-        $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
-        $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 8, 2, 0)");
-        $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
-        $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (". $chat_id .",". 2678400 . "," . time() .")");
-        return true;
-    }else return false;
+        if (count($res["items"]) != 0) {
+            for ($i = 0; isset($res["items"][$i]); $i++) {
+                $rang = 0;
+                if (isset($res["items"][$i]["is_admin"])) {
+                    $rang = 5;
+                    $mysqli->query("INSERT INTO `" . $chat_id . "_moders` (`id`) VALUES ('" . $res["items"][$i]["member_id"] . "')");
+                }
+                $mysqli->query("INSERT INTO `" . $chat_id . "_users` (`id`, `rang`) VALUES ('" . $res["items"][$i]["member_id"] . "', " . $rang . ")");
+            }
+
+            $mysqli->query("INSERT INTO IF NOT EXISTS `" . $chat_id . "_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
+            $mysqli->query("INSERT INTO IF NOT EXISTS `" . $chat_id . "_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 8, 2, 0)");
+            $mysqli->query("INSERT INTO IF NOT EXISTS `" . $chat_id . "_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
+            $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (" . $chat_id . "," . 2678400 . "," . time() . ")");
+            return true;
+        } else return false;
+    }catch (VK\Exceptions\VKApiException $e){
+        return false;
+    }
 }
 ?>
