@@ -106,6 +106,14 @@ switch ($data->type) {
                     . "&#128214;Информация о проекте:\n"
                     . "&#128100;Создатель: https://vk.com/i_love_python\n"
                     . "&#128064;Исходные код проекта и гайд по подключению: https://github.com/kos234/Vk-bot-moderator\n";
+            } elseif (mb_strcasecmp($text[0], "/начать") == 0 || mb_strcasecmp($text[0], "/start") == 0){
+                if($is_chat) {
+                    if(createTabs($data->object->message->peer_id, $mysqli, $vk))
+                        $request_params["message"] = "&#10004;Бот успешно добавлен! Чтобы посмотреть список моих команд и возможных настроек напишите \"/\"";
+                    else
+                        $request_params["message"] = "&#10060;Вы не выдали мне права администратора!";
+
+                }else $request_params["message"] = "&#10060;Эта команда не для личных сообщений!";
             }elseif (mb_strcasecmp($text[0], "/настройки беседы") == 0 || mb_strcasecmp($text[0], "/настройки чата") == 0 || mb_strcasecmp($text[0], "/chat settings") == 0 || mb_strcasecmp($text[0], "/settings chat") == 0){
                 if($is_chat) {
                     $res = $mysqli->query("SELECT * FROM `chats_settings` WHERE `chat_id` = '" . $data->object->message->peer_id . "'");
@@ -1410,8 +1418,7 @@ switch ($data->type) {
             if(isset($data->object->message->action->type))//Инвайты
             if($data->object->message->action->type == "chat_invite_user" || $data->object->message->action->type == "chat_invite_user_by_link"){
                 if($data->object->message->action->member_id == (int)("-".$data->group_id)) {
-                    $request_params["message"] = "&#9995;Здравствуйте! Почти всё готово, осталось только выдать права администратора, для моей корректной работы";
-                    createTabs($data->object->message->peer_id, $mysqli, $vk);
+                    $request_params["message"] = "Привет&#9995; Для моей работы мне необходимы права администратора, выдайте их и напишите /начать";
                 }
                 $get_ban = $mysqli->query("SELECT `autokickBot` FROM `chats_settings` WHERE `chat_id` = '". $data->object->message->peer_id ."'");
                 $get_ban = $get_ban->fetch_assoc();
@@ -1818,6 +1825,7 @@ function getUrlParameters($url, $token){
     return array("access_key" => $token, "key" => $key, "source" => $domain, "interval" => "forever", "extended" => 1);
 }
 
+
 function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_users`(`id` VarChar( 255 ) NOT NULL, `rang` Int( 255 ) NOT NULL DEFAULT 0, `pred` TinyInt( 255 ) NOT NULL DEFAULT 0, `mes_count` Int( 255 ) NOT NULL DEFAULT 0, `lastMes` Int( 255 ) NOT NULL DEFAULT 0, CONSTRAINT `unique_id` UNIQUE( `id` ) ) ENGINE = InnoDB;");
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_punishments`(`time` Int( 255 ) NOT NULL, `id` VarChar( 255 ) NOT NULL, `id_moder` VarChar( 255 ) NOT NULL, `type` VarChar( 255 ) NOT NULL, `text` VarChar( 255 ) NOT NULL DEFAULT '', `parametr` VarChar( 255 ) NOT NULL DEFAULT '', CONSTRAINT `unique_time` UNIQUE( `time` )) ENGINE = InnoDB;");
@@ -1828,17 +1836,20 @@ function createTabs($chat_id, $mysqli, $vk){
     $mysqli->query("CREATE TABLE IF NOT EXISTS `". $chat_id ."_moders_limit`(`rang` VarChar( 255 ) NOT NULL, `pred` Int( 255 ) NULL, `kick` Int( 255 ) NULL, `tempban` Int( 255 ) NULL, CONSTRAINT `unique_rang` UNIQUE( `rang` )) ENGINE = InnoDB;");
 
     $res = $vk->messages()->getConversationMembers(TOKEN_VK_BOT, array("peer_id" => $chat_id));
-    for ($i = 0; isset($res["items"][$i]); $i++){
-        $rang = 0;
-        if (isset($res["items"][$i]["is_admin"])){ $rang = 5;
-            $mysqli->query("INSERT INTO `". $chat_id ."_moders` (`id`) VALUES ('". $res["items"][$i]["member_id"] ."')");
+    if (count($res["items"]) != 0){
+        for ($i = 0; isset($res["items"][$i]); $i++){
+            $rang = 0;
+            if (isset($res["items"][$i]["is_admin"])){ $rang = 5;
+                $mysqli->query("INSERT INTO `". $chat_id ."_moders` (`id`) VALUES ('". $res["items"][$i]["member_id"] ."')");
+            }
+            $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res["items"][$i]["member_id"] ."', ". $rang .")");
         }
-        $mysqli->query("INSERT INTO `". $chat_id ."_users` (`id`, `rang`) VALUES ('". $res["items"][$i]["member_id"] ."', ". $rang .")");
-    }
 
-    $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
-    $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 8, 2, 0)");
-    $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
-    $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (". $chat_id .",". 2678400 . "," . time() .")");
+        $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (1, 5, 0, 0)");
+        $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (2, 8, 2, 0)");
+        $mysqli->query("INSERT INTO IF NOT EXISTS `". $chat_id ."_moders_limit` (`rang`, `pred`, `kick`, `tempban`) VALUES (3, 10, 4, 2)");
+        $mysqli->query("INSERT INTO `chats_settings` (`chat_id`, `autoremovepred`, `lastRemovePred`) VALUES (". $chat_id .",". 2678400 . "," . time() .")");
+        return true;
+    }else return false;
 }
 ?>
