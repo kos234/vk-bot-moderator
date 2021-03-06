@@ -157,7 +157,7 @@ switch ($data->type) {
                 }else $request_params["message"] = "&#10060;Эта команда не для личных сообщений!";
             }elseif (mb_strcasecmp($text[0] . " " .$text[1], "/user info") == 0 || mb_strcasecmp($text[0] . " " .$text[1], "/Информация пользователя") == 0){
                 $id = getId($text[2],$data->object->message->reply_message->from_id);
-
+                error_log($id);
                 if($id != 0){
                     $type = "";
                     if($id > 0){
