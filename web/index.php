@@ -538,7 +538,12 @@ switch ($data->type) {
                     }else
                         $request_params["message"] = "&#128279;Ваша ссылка: " . $res_url["short_url"];
                     } catch (\VK\Exceptions\VKApiException $e) {
-                        $request_params["message"] = "&#10060;Что-то не так с ссылкой!";
+                        if($stat){
+                            $request_params["message"] = "&#10060;Сервис статистики недоступен. Ошибка пользовательского токена";
+                        }else {
+                            $res_url = $vk->utils()->getShortLink(TOKEN_VK_BOT, array("url" => $text[2]));
+                            $request_params["message"] = "&#128279;Ваша ссылка: " . $res_url["short_url"];
+                        }
                     } catch (\VK\Exceptions\VKClientException $e) {
                         $request_params["message"] = "&#10060;Что-то не так с ссылкой!";
                     }
